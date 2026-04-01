@@ -2,7 +2,7 @@
 
 class DerivWebSocket {
     constructor() {
-        this.APP_ID = 1089; // Default demo app_id - REPLACE with yours
+        this.APP_ID = 110143; // Default demo app_id - REPLACE with yours
         this.WS_URL = `wss://ws.derivws.com/websockets/v3?app_id=${this.APP_ID}`;
         this.ws = null;
         this.reqId = 0;
