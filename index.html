@@ -1,4 +1,3 @@
-<!-- index.html - Save this as your main file -->
 <!DOCTYPE html>
 <html lang="en">
 
@@ -9,1496 +8,56 @@
     <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300;400;500;600;700&display=swap"
         rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-
-    <style>
-        /* ============ RESET ============ */
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        :root {
-            --primary: #ff444f;
-            --primary-hover: #e8363f;
-            --primary-light: rgba(255, 68, 79, 0.1);
-            --green: #0dc49a;
-            --green-hover: #0bae89;
-            --green-bg: rgba(13, 196, 154, 0.1);
-            --red: #ff444f;
-            --red-bg: rgba(255, 68, 79, 0.1);
-            --blue: #377cfc;
-            --yellow: #ffad3a;
-
-            --bg-primary: #0e0e0e;
-            --bg-secondary: #151717;
-            --bg-tertiary: #1d1f1f;
-            --bg-card: #1a1c1c;
-            --bg-hover: #242626;
-            --bg-input: #242626;
-
-            --text-primary: #ffffff;
-            --text-secondary: #c2c7c7;
-            --text-muted: #6e7575;
-            --text-placeholder: #4a5050;
-
-            --border: #2a2d2d;
-            --border-light: #333636;
-
-            --shadow: 0 4px 24px rgba(0, 0, 0, 0.4);
-            --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.3);
-
-            --radius: 8px;
-            --radius-sm: 4px;
-            --radius-lg: 12px;
-            --radius-xl: 16px;
-
-            --header-height: 56px;
-            --sidebar-width: 260px;
-            --trade-panel-width: 320px;
-        }
-
-        html,
-        body {
-            height: 100%;
-            font-family: 'IBM Plex Sans', -apple-system, BlinkMacSystemFont, sans-serif;
-            background: var(--bg-primary);
-            color: var(--text-primary);
-            overflow: hidden;
-            -webkit-font-smoothing: antialiased;
-        }
-
-        /* ============ HEADER ============ */
-        .header {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: var(--header-height);
-            background: var(--bg-secondary);
-            border-bottom: 1px solid var(--border);
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 0 16px;
-            z-index: 1000;
-        }
-
-        .header-left {
-            display: flex;
-            align-items: center;
-            gap: 32px;
-        }
-
-        .header-right {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-
-        /* Logo */
-        .logo {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            cursor: pointer;
-            text-decoration: none;
-        }
-
-        .logo-icon {
-            width: 32px;
-            height: 32px;
-            background: var(--primary);
-            border-radius: 6px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: #fff;
-            font-size: 14px;
-            font-weight: 700;
-        }
-
-        .logo-text {
-            font-size: 17px;
-            font-weight: 700;
-            color: var(--text-primary);
-            letter-spacing: -0.3px;
-        }
-
-        /* Nav */
-        .nav {
-            display: flex;
-            gap: 2px;
-        }
-
-        .nav-link {
-            padding: 8px 16px;
-            color: var(--text-secondary);
-            text-decoration: none;
-            font-size: 14px;
-            font-weight: 500;
-            border-radius: var(--radius);
-            transition: all 0.15s ease;
-            cursor: pointer;
-        }
-
-        .nav-link:hover {
-            background: var(--bg-hover);
-            color: var(--text-primary);
-        }
-
-        .nav-link.active {
-            background: var(--primary-light);
-            color: var(--primary);
-        }
-
-        /* Account Badge */
-        .account-badge {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            padding: 6px 14px;
-            background: var(--bg-tertiary);
-            border: 1px solid var(--border);
-            border-radius: var(--radius);
-            cursor: pointer;
-            transition: all 0.15s ease;
-        }
-
-        .account-badge:hover {
-            border-color: var(--text-muted);
-        }
-
-        .acc-type-badge {
-            font-size: 10px;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            background: var(--green);
-            color: #fff;
-            padding: 2px 8px;
-            border-radius: 4px;
-        }
-
-        .acc-balance {
-            font-size: 14px;
-            font-weight: 600;
-            color: var(--text-primary);
-        }
-
-        .acc-chevron {
-            color: var(--text-muted);
-            font-size: 11px;
-        }
-
-        /* Icon Buttons */
-        .icon-btn {
-            width: 36px;
-            height: 36px;
-            background: transparent;
-            border: none;
-            color: var(--text-secondary);
-            border-radius: var(--radius);
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 15px;
-            transition: all 0.15s ease;
-            position: relative;
-        }
-
-        .icon-btn:hover {
-            background: var(--bg-hover);
-            color: var(--text-primary);
-        }
-
-        .notif-badge {
-            position: absolute;
-            top: 5px;
-            right: 5px;
-            width: 16px;
-            height: 16px;
-            background: var(--primary);
-            color: #fff;
-            font-size: 9px;
-            font-weight: 700;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .user-avatar {
-            width: 34px;
-            height: 34px;
-            background: var(--bg-tertiary);
-            border: 2px solid var(--border);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            color: var(--text-muted);
-            font-size: 14px;
-            transition: all 0.15s ease;
-        }
-
-        .user-avatar:hover {
-            border-color: var(--primary);
-            color: var(--primary);
-        }
-
-        /* ============ LOGIN SCREEN ============ */
-        .login-screen {
-            position: fixed;
-            inset: 0;
-            background: var(--bg-primary);
-            z-index: 2000;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
-        }
-
-        .login-screen.hidden {
-            display: none;
-        }
-
-        .login-box {
-            display: flex;
-            width: 880px;
-            max-width: 100%;
-            background: var(--bg-card);
-            border-radius: var(--radius-xl);
-            overflow: hidden;
-            box-shadow: var(--shadow);
-            border: 1px solid var(--border);
-            min-height: 520px;
-        }
-
-        /* Left Panel */
-        .login-hero {
-            width: 400px;
-            background: linear-gradient(145deg, #ff444f 0%, #c4232d 100%);
-            padding: 48px 40px;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            color: #fff;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .login-hero::before {
-            content: '';
-            position: absolute;
-            top: -50%;
-            right: -50%;
-            width: 100%;
-            height: 100%;
-            background: radial-gradient(circle, rgba(255, 255, 255, 0.08) 0%, transparent 70%);
-            border-radius: 50%;
-        }
-
-        .login-hero::after {
-            content: '';
-            position: absolute;
-            bottom: -30%;
-            left: -30%;
-            width: 80%;
-            height: 80%;
-            background: radial-gradient(circle, rgba(0, 0, 0, 0.15) 0%, transparent 70%);
-            border-radius: 50%;
-        }
-
-        .hero-content {
-            position: relative;
-            z-index: 1;
-        }
-
-        .hero-logo {
-            width: 48px;
-            height: 48px;
-            background: rgba(255, 255, 255, 0.2);
-            backdrop-filter: blur(10px);
-            border-radius: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 22px;
-            margin-bottom: 24px;
-        }
-
-        .hero-content h1 {
-            font-size: 28px;
-            font-weight: 700;
-            margin-bottom: 8px;
-            letter-spacing: -0.5px;
-        }
-
-        .hero-content p {
-            font-size: 14px;
-            line-height: 1.7;
-            opacity: 0.9;
-        }
-
-        .hero-features {
-            margin-top: 40px;
-            display: flex;
-            flex-direction: column;
-            gap: 14px;
-        }
-
-        .hero-feature {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            font-size: 14px;
-            font-weight: 500;
-        }
-
-        .hero-feature-icon {
-            width: 32px;
-            height: 32px;
-            background: rgba(255, 255, 255, 0.15);
-            border-radius: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 13px;
-            flex-shrink: 0;
-        }
-
-        /* Right Panel - Form */
-        .login-form-panel {
-            flex: 1;
-            padding: 48px 40px;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-        }
-
-        .login-form-panel h2 {
-            font-size: 24px;
-            font-weight: 700;
-            margin-bottom: 4px;
-        }
-
-        .login-subtitle {
-            font-size: 14px;
-            color: var(--text-muted);
-            margin-bottom: 28px;
-        }
-
-        /* Form Elements */
-        .form-group {
-            margin-bottom: 18px;
-        }
-
-        .form-label {
-            display: block;
-            font-size: 13px;
-            font-weight: 600;
-            color: var(--text-secondary);
-            margin-bottom: 6px;
-        }
-
-        .input-box {
-            display: flex;
-            align-items: center;
-            background: var(--bg-input);
-            border: 1.5px solid var(--border);
-            border-radius: var(--radius);
-            padding: 0 14px;
-            transition: all 0.15s ease;
-            height: 44px;
-        }
-
-        .input-box:focus-within {
-            border-color: var(--primary);
-            box-shadow: 0 0 0 3px var(--primary-light);
-        }
-
-        .input-box i {
-            color: var(--text-muted);
-            font-size: 14px;
-            width: 20px;
-            text-align: center;
-            flex-shrink: 0;
-        }
-
-        .input-box input {
-            flex: 1;
-            background: transparent;
-            border: none;
-            outline: none;
-            padding: 0 10px;
-            font-size: 14px;
-            color: var(--text-primary);
-            font-family: inherit;
-            height: 100%;
-        }
-
-        .input-box input::placeholder {
-            color: var(--text-placeholder);
-        }
-
-        .toggle-pass {
-            background: none;
-            border: none;
-            color: var(--text-muted);
-            cursor: pointer;
-            padding: 4px;
-            font-size: 14px;
-            display: flex;
-            align-items: center;
-        }
-
-        .toggle-pass:hover {
-            color: var(--text-secondary);
-        }
-
-        /* Form Options */
-        .form-options {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 24px;
-        }
-
-        .checkbox-label {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            font-size: 13px;
-            color: var(--text-secondary);
-            cursor: pointer;
-        }
-
-        .checkbox-label input[type="checkbox"] {
-            width: 16px;
-            height: 16px;
-            accent-color: var(--primary);
-            cursor: pointer;
-        }
-
-        .forgot-link {
-            font-size: 13px;
-            color: var(--primary);
-            text-decoration: none;
-            font-weight: 500;
-        }
-
-        .forgot-link:hover {
-            text-decoration: underline;
-        }
-
-        /* Buttons */
-        .btn {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-            width: 100%;
-            height: 46px;
-            border: none;
-            border-radius: var(--radius);
-            font-size: 14px;
-            font-weight: 600;
-            font-family: inherit;
-            cursor: pointer;
-            transition: all 0.15s ease;
-        }
-
-        .btn-primary {
-            background: var(--primary);
-            color: #fff;
-        }
-
-        .btn-primary:hover {
-            background: var(--primary-hover);
-            transform: translateY(-1px);
-            box-shadow: 0 4px 12px rgba(255, 68, 79, 0.3);
-        }
-
-        .btn-primary:active {
-            transform: translateY(0);
-        }
-
-        .btn-outline {
-            background: transparent;
-            border: 1.5px solid var(--border);
-            color: var(--text-primary);
-        }
-
-        .btn-outline:hover {
-            border-color: var(--primary);
-            color: var(--primary);
-            background: var(--primary-light);
-        }
-
-        .divider {
-            display: flex;
-            align-items: center;
-            margin: 22px 0;
-            color: var(--text-muted);
-            font-size: 13px;
-        }
-
-        .divider::before,
-        .divider::after {
-            content: '';
-            flex: 1;
-            height: 1px;
-            background: var(--border);
-        }
-
-        .divider span {
-            padding: 0 16px;
-        }
-
-        .signup-text {
-            text-align: center;
-            font-size: 13px;
-            color: var(--text-muted);
-            margin-top: 24px;
-        }
-
-        .signup-text a {
-            color: var(--primary);
-            text-decoration: none;
-            font-weight: 600;
-        }
-
-        .signup-text a:hover {
-            text-decoration: underline;
-        }
-
-        /* ============ MAIN CONTENT ============ */
-        .main {
-            margin-top: var(--header-height);
-            height: calc(100vh - var(--header-height));
-            overflow: hidden;
-            display: none;
-        }
-
-        .main.visible {
-            display: block;
-        }
-
-        /* Pages */
-        .page {
-            display: none;
-            height: 100%;
-        }
-
-        .page.active {
-            display: flex;
-        }
-
-        /* ============ DASHBOARD ============ */
-        .dashboard {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 16px;
-            padding: 20px;
-            overflow-y: auto;
-            height: 100%;
-        }
-
-        .card {
-            background: var(--bg-card);
-            border: 1px solid var(--border);
-            border-radius: var(--radius-lg);
-            padding: 20px;
-        }
-
-        .card-head {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 16px;
-        }
-
-        .card-head h3 {
-            font-size: 15px;
-            font-weight: 600;
-        }
-
-        .card-head a {
-            font-size: 13px;
-            color: var(--primary);
-            text-decoration: none;
-        }
-
-        /* Portfolio Stats */
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 12px;
-        }
-
-        .stat-box {
-            background: var(--bg-tertiary);
-            border-radius: var(--radius);
-            padding: 16px;
-            text-align: center;
-        }
-
-        .stat-label {
-            font-size: 11px;
-            color: var(--text-muted);
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            margin-bottom: 6px;
-        }
-
-        .stat-val {
-            font-size: 20px;
-            font-weight: 700;
-        }
-
-        .stat-val.green {
-            color: var(--green);
-        }
-
-        .stat-val.red {
-            color: var(--red);
-        }
-
-        /* Market List Items */
-        .market-row {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 12px 14px;
-            background: var(--bg-tertiary);
-            border-radius: var(--radius);
-            margin-bottom: 8px;
-            cursor: pointer;
-            transition: all 0.15s ease;
-        }
-
-        .market-row:hover {
-            background: var(--bg-hover);
-            transform: translateX(3px);
-        }
-
-        .market-row:last-child {
-            margin-bottom: 0;
-        }
-
-        .mkt-name {
-            font-size: 14px;
-            font-weight: 500;
-        }
-
-        .mkt-price {
-            font-size: 13px;
-            color: var(--text-secondary);
-            margin-top: 2px;
-            font-variant-numeric: tabular-nums;
-        }
-
-        .mkt-change {
-            font-size: 12px;
-            font-weight: 600;
-            padding: 4px 10px;
-            border-radius: var(--radius-sm);
-            display: flex;
-            align-items: center;
-            gap: 4px;
-        }
-
-        .mkt-change.up {
-            color: var(--green);
-            background: var(--green-bg);
-        }
-
-        .mkt-change.down {
-            color: var(--red);
-            background: var(--red-bg);
-        }
-
-        /* Table */
-        .tbl-head {
-            display: grid;
-            grid-template-columns: 2fr 1fr 1fr 1fr 1fr 1fr;
-            gap: 8px;
-            padding: 8px 14px;
-            font-size: 11px;
-            color: var(--text-muted);
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            font-weight: 600;
-            border-bottom: 1px solid var(--border);
-        }
-
-        .empty-msg {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            padding: 40px 20px;
-            color: var(--text-muted);
-            gap: 8px;
-        }
-
-        .empty-msg i {
-            font-size: 28px;
-            opacity: 0.5;
-        }
-
-        .empty-msg p {
-            font-size: 14px;
-        }
-
-        /* ============ TRADING PAGE ============ */
-        .trading-layout {
-            display: flex;
-            height: 100%;
-            overflow: hidden;
-        }
-
-        /* Market Sidebar */
-        .sidebar {
-            width: var(--sidebar-width);
-            background: var(--bg-secondary);
-            border-right: 1px solid var(--border);
-            display: flex;
-            flex-direction: column;
-            flex-shrink: 0;
-        }
-
-        .sidebar-search {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            padding: 12px 14px;
-            border-bottom: 1px solid var(--border);
-        }
-
-        .sidebar-search i {
-            color: var(--text-muted);
-            font-size: 13px;
-        }
-
-        .sidebar-search input {
-            flex: 1;
-            background: transparent;
-            border: none;
-            outline: none;
-            color: var(--text-primary);
-            font-size: 13px;
-            font-family: inherit;
-        }
-
-        .sidebar-search input::placeholder {
-            color: var(--text-placeholder);
-        }
-
-        .sidebar-tabs {
-            display: flex;
-            padding: 8px;
-            gap: 4px;
-            border-bottom: 1px solid var(--border);
-        }
-
-        .sidebar-tab {
-            flex: 1;
-            padding: 6px;
-            background: transparent;
-            border: none;
-            color: var(--text-muted);
-            font-size: 11px;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.3px;
-            border-radius: var(--radius-sm);
-            cursor: pointer;
-            transition: all 0.15s ease;
-            font-family: inherit;
-        }
-
-        .sidebar-tab.active {
-            background: var(--primary-light);
-            color: var(--primary);
-        }
-
-        .sidebar-tab:hover:not(.active) {
-            background: var(--bg-hover);
-            color: var(--text-secondary);
-        }
-
-        .sidebar-list {
-            flex: 1;
-            overflow-y: auto;
-            padding: 6px;
-        }
-
-        .sidebar-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 9px 12px;
-            border-radius: var(--radius);
-            cursor: pointer;
-            transition: all 0.12s ease;
-        }
-
-        .sidebar-item:hover {
-            background: var(--bg-hover);
-        }
-
-        .sidebar-item.active {
-            background: var(--primary-light);
-        }
-
-        .si-name {
-            font-size: 13px;
-            font-weight: 500;
-        }
-
-        .si-price {
-            font-size: 12px;
-            color: var(--text-muted);
-            font-variant-numeric: tabular-nums;
-        }
-
-        /* Chart Area */
-        .chart-area {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            min-width: 0;
-            overflow: hidden;
-        }
-
-        .chart-toolbar {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 10px 16px;
-            background: var(--bg-secondary);
-            border-bottom: 1px solid var(--border);
-            flex-shrink: 0;
-        }
-
-        .chart-info {
-            display: flex;
-            align-items: center;
-            gap: 14px;
-        }
-
-        .chart-info h2 {
-            font-size: 15px;
-            font-weight: 600;
-        }
-
-        .chart-live-price {
-            font-size: 18px;
-            font-weight: 700;
-            font-variant-numeric: tabular-nums;
-        }
-
-        .chart-pct {
-            font-size: 12px;
-            font-weight: 600;
-            padding: 3px 8px;
-            border-radius: var(--radius-sm);
-        }
-
-        .chart-pct.up {
-            color: var(--green);
-            background: var(--green-bg);
-        }
-
-        .chart-pct.down {
-            color: var(--red);
-            background: var(--red-bg);
-        }
-
-        .chart-ctrls {
-            display: flex;
-            gap: 12px;
-        }
-
-        .tf-group,
-        .ct-group {
-            display: flex;
-            gap: 2px;
-            background: var(--bg-tertiary);
-            border-radius: var(--radius);
-            padding: 3px;
-        }
-
-        .tf-btn,
-        .ct-btn {
-            padding: 5px 10px;
-            background: transparent;
-            border: none;
-            color: var(--text-muted);
-            font-size: 12px;
-            font-weight: 600;
-            border-radius: 5px;
-            cursor: pointer;
-            transition: all 0.12s ease;
-            font-family: inherit;
-        }
-
-        .tf-btn.active,
-        .ct-btn.active {
-            background: var(--bg-card);
-            color: var(--text-primary);
-            box-shadow: var(--shadow-sm);
-        }
-
-        .tf-btn:hover:not(.active),
-        .ct-btn:hover:not(.active) {
-            color: var(--text-secondary);
-        }
-
-        .chart-box {
-            flex: 1;
-            background: var(--bg-primary);
-            position: relative;
-            min-height: 0;
-        }
-
-        /* ============ TRADE PANEL ============ */
-        .trade-panel {
-            width: var(--trade-panel-width);
-            background: var(--bg-secondary);
-            border-left: 1px solid var(--border);
-            display: flex;
-            flex-direction: column;
-            flex-shrink: 0;
-            overflow-y: auto;
-        }
-
-        .tp-tabs {
-            display: flex;
-            border-bottom: 1px solid var(--border);
-        }
-
-        .tp-tab {
-            flex: 1;
-            padding: 12px 4px;
-            background: transparent;
-            border: none;
-            border-bottom: 2px solid transparent;
-            color: var(--text-muted);
-            font-size: 11px;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.3px;
-            cursor: pointer;
-            transition: all 0.12s ease;
-            font-family: inherit;
-        }
-
-        .tp-tab.active {
-            color: var(--primary);
-            border-bottom-color: var(--primary);
-        }
-
-        .tp-tab:hover:not(.active) {
-            color: var(--text-secondary);
-        }
-
-        .tp-body {
-            padding: 16px;
-            flex: 1;
-        }
-
-        .tp-section {
-            margin-bottom: 18px;
-        }
-
-        .tp-section-label {
-            font-size: 12px;
-            font-weight: 600;
-            color: var(--text-muted);
-            text-transform: uppercase;
-            letter-spacing: 0.3px;
-            margin-bottom: 8px;
-        }
-
-        /* Duration */
-        .dur-row {
-            display: flex;
-            gap: 8px;
-        }
-
-        .dur-select {
-            width: 90px;
-            padding: 10px 8px;
-            background: var(--bg-input);
-            border: 1px solid var(--border);
-            border-radius: var(--radius);
-            color: var(--text-primary);
-            font-size: 13px;
-            font-family: inherit;
-            cursor: pointer;
-            outline: none;
-        }
-
-        .dur-select:focus {
-            border-color: var(--primary);
-        }
-
-        .dur-spinner {
-            flex: 1;
-            display: flex;
-            align-items: center;
-            background: var(--bg-input);
-            border: 1px solid var(--border);
-            border-radius: var(--radius);
-            overflow: hidden;
-        }
-
-        .dur-spinner button {
-            width: 36px;
-            height: 100%;
-            background: transparent;
-            border: none;
-            color: var(--text-secondary);
-            font-size: 16px;
-            cursor: pointer;
-            transition: all 0.1s ease;
-            font-weight: 600;
-        }
-
-        .dur-spinner button:hover {
-            background: var(--bg-hover);
-            color: var(--text-primary);
-        }
-
-        .dur-spinner input {
-            flex: 1;
-            text-align: center;
-            background: transparent;
-            border: none;
-            outline: none;
-            color: var(--text-primary);
-            font-size: 15px;
-            font-weight: 600;
-            font-family: inherit;
-        }
-
-        /* Stake */
-        .stake-box {
-            display: flex;
-            align-items: center;
-            background: var(--bg-input);
-            border: 1.5px solid var(--border);
-            border-radius: var(--radius);
-            padding: 0 14px;
-            height: 46px;
-            transition: all 0.15s ease;
-        }
-
-        .stake-box:focus-within {
-            border-color: var(--primary);
-            box-shadow: 0 0 0 3px var(--primary-light);
-        }
-
-        .stake-cur {
-            font-size: 13px;
-            font-weight: 600;
-            color: var(--text-muted);
-            margin-right: 8px;
-        }
-
-        .stake-box input {
-            flex: 1;
-            background: transparent;
-            border: none;
-            outline: none;
-            font-size: 16px;
-            font-weight: 600;
-            color: var(--text-primary);
-            font-family: inherit;
-        }
-
-        .quick-amounts {
-            display: flex;
-            gap: 4px;
-            margin-top: 8px;
-        }
-
-        .quick-amt {
-            flex: 1;
-            padding: 6px;
-            background: var(--bg-tertiary);
-            border: 1px solid var(--border);
-            border-radius: var(--radius-sm);
-            color: var(--text-muted);
-            font-size: 12px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.1s ease;
-            font-family: inherit;
-            text-align: center;
-        }
-
-        .quick-amt:hover,
-        .quick-amt.active {
-            border-color: var(--primary);
-            color: var(--primary);
-            background: var(--primary-light);
-        }
-
-        /* Payout */
-        .payout-box {
-            background: var(--bg-tertiary);
-            border-radius: var(--radius);
-            padding: 12px 14px;
-            margin-bottom: 16px;
-        }
-
-        .payout-row {
-            display: flex;
-            justify-content: space-between;
-            padding: 3px 0;
-            font-size: 13px;
-        }
-
-        .payout-row span:first-child {
-            color: var(--text-muted);
-        }
-
-        .payout-val {
-            font-weight: 600;
-        }
-
-        .payout-val.green {
-            color: var(--green);
-        }
-
-        /* Trade Buttons */
-        .trade-btns {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 8px;
-        }
-
-        .trade-btn {
-            padding: 18px 12px;
-            border: none;
-            border-radius: var(--radius);
-            cursor: pointer;
-            transition: all 0.15s ease;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 4px;
-        }
-
-        .trade-btn:hover {
-            transform: translateY(-2px);
-        }
-
-        .trade-btn:active {
-            transform: translateY(0);
-        }
-
-        .rise-btn {
-            background: var(--green);
-            color: #fff;
-        }
-
-        .rise-btn:hover {
-            box-shadow: 0 6px 20px rgba(13, 196, 154, 0.35);
-        }
-
-        .fall-btn {
-            background: var(--red);
-            color: #fff;
-        }
-
-        .fall-btn:hover {
-            box-shadow: 0 6px 20px rgba(255, 68, 79, 0.35);
-        }
-
-        .tb-icon {
-            font-size: 18px;
-        }
-
-        .tb-label {
-            font-size: 14px;
-            font-weight: 700;
-        }
-
-        .tb-payout {
-            font-size: 12px;
-            opacity: 0.85;
-        }
-
-        /* Active Contracts Section */
-        .contracts-section {
-            border-top: 1px solid var(--border);
-            padding: 16px;
-        }
-
-        .contracts-section h4 {
-            font-size: 13px;
-            font-weight: 600;
-            margin-bottom: 10px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .contract-count {
-            background: var(--primary);
-            color: #fff;
-            font-size: 10px;
-            font-weight: 700;
-            padding: 1px 7px;
-            border-radius: 10px;
-        }
-
-        .contract-card {
-            background: var(--bg-tertiary);
-            border-radius: var(--radius);
-            padding: 10px 12px;
-            margin-bottom: 6px;
-            border-left: 3px solid var(--green);
-        }
-
-        .contract-card.loss {
-            border-left-color: var(--red);
-        }
-
-        .cc-top {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 4px;
-        }
-
-        .cc-type {
-            font-size: 12px;
-            font-weight: 600;
-        }
-
-        .cc-pnl {
-            font-size: 13px;
-            font-weight: 700;
-        }
-
-        .cc-pnl.green {
-            color: var(--green);
-        }
-
-        .cc-pnl.red {
-            color: var(--red);
-        }
-
-        .cc-bottom {
-            display: flex;
-            justify-content: space-between;
-            font-size: 11px;
-            color: var(--text-muted);
-        }
-
-        /* ============ TOASTS ============ */
-        .toast-wrap {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            z-index: 9999;
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-        }
-
-        .toast {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            padding: 12px 16px;
-            background: var(--bg-card);
-            border: 1px solid var(--border);
-            border-radius: var(--radius);
-            box-shadow: var(--shadow);
-            min-width: 280px;
-            animation: toastIn 0.3s ease;
-        }
-
-        .toast.success {
-            border-left: 4px solid var(--green);
-        }
-
-        .toast.error {
-            border-left: 4px solid var(--red);
-        }
-
-        .toast.info {
-            border-left: 4px solid var(--blue);
-        }
-
-        .toast-icon {
-            font-size: 16px;
-        }
-
-        .toast.success .toast-icon {
-            color: var(--green);
-        }
-
-        .toast.error .toast-icon {
-            color: var(--red);
-        }
-
-        .toast.info .toast-icon {
-            color: var(--blue);
-        }
-
-        .toast-msg {
-            flex: 1;
-            font-size: 13px;
-        }
-
-        .toast-x {
-            background: none;
-            border: none;
-            color: var(--text-muted);
-            cursor: pointer;
-            font-size: 14px;
-            padding: 2px;
-        }
-
-        @keyframes toastIn {
-            from {
-                transform: translateX(120%);
-                opacity: 0;
-            }
-
-            to {
-                transform: translateX(0);
-                opacity: 1;
-            }
-        }
-
-        /* ============ SCROLLBAR ============ */
-        ::-webkit-scrollbar {
-            width: 5px;
-        }
-
-        ::-webkit-scrollbar-track {
-            background: transparent;
-        }
-
-        ::-webkit-scrollbar-thumb {
-            background: var(--border);
-            border-radius: 3px;
-        }
-
-        ::-webkit-scrollbar-thumb:hover {
-            background: var(--text-muted);
-        }
-
-        /* ============ RESPONSIVE ============ */
-        @media (max-width: 900px) {
-            .login-hero {
-                display: none;
-            }
-
-            .login-box {
-                width: 100%;
-            }
-
-            .sidebar {
-                display: none;
-            }
-
-            .trade-panel {
-                width: 280px;
-            }
-
-            .nav {
-                display: none;
-            }
-
-            .dashboard {
-                grid-template-columns: 1fr;
-            }
-        }
-
-        @media (max-width: 600px) {
-            .trade-panel {
-                position: fixed;
-                bottom: 0;
-                left: 0;
-                right: 0;
-                width: 100%;
-                height: 50vh;
-                border-left: none;
-                border-top: 1px solid var(--border);
-                border-radius: var(--radius-xl) var(--radius-xl) 0 0;
-            }
-
-            .chart-toolbar {
-                flex-direction: column;
-                gap: 8px;
-                align-items: flex-start;
-            }
-        }
-    </style>
+    <link rel="stylesheet" href="styles.css">
 </head>
 
 <body>
 
-    <!-- ========== HEADER ========== -->
-    <header class="header" id="header">
+    <!-- HEADER -->
+    <header class="header">
         <div class="header-left">
             <a class="logo" href="#">
                 <div class="logo-icon"><i class="fas fa-chart-line"></i></div>
                 <span class="logo-text">MyTrader</span>
             </a>
-            <nav class="nav" id="mainNav">
-                <a class="nav-link active" data-page="dashboard">Dashboard</a>
-                <a class="nav-link" data-page="trading">Trade</a>
-                <a class="nav-link" data-page="reports">Reports</a>
-                <a class="nav-link" data-page="cashier">Cashier</a>
+            <nav class="nav">
+                <a class="nav-link active" data-page="dashboard" role="button" tabindex="0">Dashboard</a>
+                <a class="nav-link" data-page="trading" role="button" tabindex="0">Trade</a>
+                <a class="nav-link" data-page="reports" role="button" tabindex="0">Reports</a>
+                <a class="nav-link" data-page="cashier" role="button" tabindex="0">Cashier</a>
             </nav>
         </div>
         <div class="header-right">
-            <div class="account-badge" id="accBadge">
+            <div class="account-badge">
                 <span class="acc-type-badge" id="accType">Demo</span>
-                <span class="acc-balance" id="accBalance">10,000.00 USD</span>
+                <span class="acc-balance" id="accBalance">0.00 USD</span>
                 <i class="fas fa-chevron-down acc-chevron"></i>
             </div>
-            <button class="icon-btn" id="notifBtn">
+            <button class="icon-btn" aria-label="Notifications" title="Notifications">
                 <i class="fas fa-bell"></i>
                 <span class="notif-badge">3</span>
             </button>
-            <button class="icon-btn" id="themeBtn">
+            <button class="icon-btn" aria-label="Toggle theme" title="Toggle theme">
                 <i class="fas fa-moon"></i>
             </button>
-            <div class="user-avatar" id="userBtn">
+            <button class="user-avatar" aria-label="User menu" title="User menu">
                 <i class="fas fa-user"></i>
-            </div>
+            </button>
         </div>
     </header>
 
-    <!-- ========== LOGIN SCREEN ========== -->
+    <!-- LOGIN SCREEN -->
     <div class="login-screen" id="loginScreen">
         <div class="login-box">
-            <!-- Left Hero -->
             <div class="login-hero">
                 <div class="hero-content">
-                    <div class="hero-logo">
-                        <i class="fas fa-chart-line"></i>
-                    </div>
+                    <div class="hero-logo"><i class="fas fa-chart-line"></i></div>
                     <h1>MyTrader</h1>
                     <p>Trade forex, commodities, synthetic indices, and more on a secure, intuitive platform.</p>
-
                     <div class="hero-features">
                         <div class="hero-feature">
                             <div class="hero-feature-icon"><i class="fas fa-shield-alt"></i></div>
-                            <span>Secure & Regulated</span>
+                            <span>Secure &amp; Regulated</span>
                         </div>
                         <div class="hero-feature">
                             <div class="hero-feature-icon"><i class="fas fa-bolt"></i></div>
@@ -1512,65 +71,95 @@
                 </div>
             </div>
 
-            <!-- Right Form -->
             <div class="login-form-panel">
                 <h2>Log in</h2>
-                <p class="login-subtitle">Enter your credentials to access your account</p>
+                <p class="login-subtitle">Connect to your Deriv account</p>
 
-                <form id="loginForm">
-                    <div class="form-group">
-                        <label class="form-label">Email</label>
-                        <div class="input-box">
-                            <i class="fas fa-envelope"></i>
-                            <input type="email" id="loginEmail" placeholder="Enter your email" required>
-                        </div>
-                    </div>
+                <!-- Connection Status -->
+                <div class="ws-status" id="wsStatus">
+                    <div class="ws-dot" id="wsDot"></div>
+                    <span id="wsText">Initializing...</span>
+                </div>
 
+                <!-- Error Box -->
+                <div class="error-msg" id="errorMsg"></div>
+
+                <!-- Success Box -->
+                <div class="success-msg" id="successMsg"></div>
+
+                <!-- Debug Log -->
+                <div class="debug-panel" id="debugPanel"></div>
+
+                <form id="loginForm" novalidate>
                     <div class="form-group">
-                        <label class="form-label">API Token / Password</label>
+                        <label class="form-label" for="loginToken">API Token</label>
                         <div class="input-box">
-                            <i class="fas fa-lock"></i>
-                            <input type="password" id="loginToken" placeholder="Paste your API token here" required>
-                            <button type="button" class="toggle-pass" id="togglePass">
+                            <i class="fas fa-key"></i>
+                            <input type="text" id="loginToken" placeholder="Paste token e.g. a1-xAbCdEfGh..."
+                                autocomplete="off" spellcheck="false" required>
+                            <button type="button" class="toggle-pass" id="togglePass" aria-label="Toggle visibility"
+                                title="Toggle visibility">
                                 <i class="fas fa-eye"></i>
                             </button>
+                        </div>
+                        <div class="form-hint">
+                            Get your token:
+                            <a href="https://app.deriv.com/account/api-token" target="_blank" rel="noopener noreferrer">
+                                app.deriv.com/account/api-token
+                            </a>
+                            — check ALL scopes
                         </div>
                     </div>
 
                     <div class="form-options">
                         <label class="checkbox-label">
-                            <input type="checkbox" checked>
-                            Remember me
+                            <input type="checkbox" id="showDebug">
+                            Show debug log
                         </label>
-                        <a href="#" class="forgot-link">Forgot password?</a>
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="rememberToken" checked>
+                            Remember
+                        </label>
                     </div>
 
                     <button type="submit" class="btn btn-primary" id="loginBtn">
-                        Log in
+                        <i class="fas fa-sign-in-alt" id="loginIcon"></i>
+                        <span id="loginBtnText">Log in with Token</span>
                     </button>
                 </form>
 
                 <div class="divider"><span>or</span></div>
 
-                <button class="btn btn-outline" id="oauthBtn">
+                <button class="btn btn-outline" id="oauthBtn" type="button">
                     <i class="fas fa-external-link-alt"></i>
-                    Log in with Deriv
+                    Log in with Deriv (OAuth)
                 </button>
 
-                <p class="signup-text">
-                    Don't have an account? <a href="https://deriv.com/signup/" target="_blank">Sign up</a>
-                </p>
+                <div class="login-help">
+                    <p>
+                        Don't have an account?
+                        <a href="https://deriv.com/signup/" target="_blank" rel="noopener noreferrer">Sign up at
+                            Deriv</a>
+                    </p>
+                    <p>
+                        <strong>Current URL:</strong> <code id="currentUrl"></code>
+                    </p>
+                    <p>
+                        <strong>App ID:</strong> <code id="currentAppId"></code>
+                    </p>
+                    <p class="help-note">
+                        ⚠️ For OAuth: your Deriv app's Redirect URL must match the URL above exactly.
+                    </p>
+                </div>
             </div>
         </div>
     </div>
 
-    <!-- ========== MAIN APP ========== -->
+    <!-- MAIN APP -->
     <div class="main" id="mainApp">
-
-        <!-- Dashboard Page -->
-        <div class="page active" id="dashboardPage" style="display:block;">
+        <!-- Dashboard -->
+        <div class="page active" id="dashboardPage">
             <div class="dashboard">
-                <!-- Portfolio -->
                 <div class="card">
                     <div class="card-head">
                         <h3>Portfolio</h3>
@@ -1578,7 +167,7 @@
                     <div class="stats-grid">
                         <div class="stat-box">
                             <div class="stat-label">Total Balance</div>
-                            <div class="stat-val" id="statBalance">$10,000.00</div>
+                            <div class="stat-val" id="statBalance">$0.00</div>
                         </div>
                         <div class="stat-box">
                             <div class="stat-label">Total P/L</div>
@@ -1591,11 +180,10 @@
                     </div>
                 </div>
 
-                <!-- Quick Markets -->
                 <div class="card">
                     <div class="card-head">
                         <h3>Markets</h3>
-                        <a href="#" class="trade-link">Trade →</a>
+                        <a href="#" id="goTrade">Trade →</a>
                     </div>
                     <div id="dashMarkets">
                         <div class="market-row" data-symbol="R_100">
@@ -1603,65 +191,50 @@
                                 <div class="mkt-name">Volatility 100</div>
                                 <div class="mkt-price" id="dp_R_100">--</div>
                             </div>
-                            <div class="mkt-change up"><i class="fas fa-caret-up"></i> +1.23%</div>
+                            <div class="mkt-change up"><i class="fas fa-caret-up"></i> <span>--</span></div>
                         </div>
                         <div class="market-row" data-symbol="R_50">
                             <div>
                                 <div class="mkt-name">Volatility 50</div>
                                 <div class="mkt-price" id="dp_R_50">--</div>
                             </div>
-                            <div class="mkt-change down"><i class="fas fa-caret-down"></i> -0.45%</div>
+                            <div class="mkt-change up"><i class="fas fa-caret-up"></i> <span>--</span></div>
                         </div>
                         <div class="market-row" data-symbol="R_75">
                             <div>
                                 <div class="mkt-name">Volatility 75</div>
                                 <div class="mkt-price" id="dp_R_75">--</div>
                             </div>
-                            <div class="mkt-change up"><i class="fas fa-caret-up"></i> +0.87%</div>
+                            <div class="mkt-change up"><i class="fas fa-caret-up"></i> <span>--</span></div>
                         </div>
                         <div class="market-row" data-symbol="R_10">
                             <div>
                                 <div class="mkt-name">Volatility 10</div>
                                 <div class="mkt-price" id="dp_R_10">--</div>
                             </div>
-                            <div class="mkt-change up"><i class="fas fa-caret-up"></i> +0.32%</div>
+                            <div class="mkt-change up"><i class="fas fa-caret-up"></i> <span>--</span></div>
                         </div>
                     </div>
                 </div>
 
-                <!-- Open Positions -->
                 <div class="card">
                     <div class="card-head">
-                        <h3>Open Positions</h3>
-                        <a href="#">View All</a>
+                        <h3>Open Positions</h3><a href="#">View All</a>
                     </div>
                     <div class="tbl-head">
-                        <span>Market</span>
-                        <span>Type</span>
-                        <span>Entry</span>
-                        <span>Current</span>
-                        <span>P/L</span>
-                        <span>Action</span>
+                        <span>Market</span><span>Type</span><span>Entry</span><span>Current</span><span>P/L</span><span>Action</span>
                     </div>
-                    <div id="positionsBody">
-                        <div class="empty-msg">
-                            <i class="fas fa-inbox"></i>
-                            <p>No open positions</p>
-                        </div>
+                    <div class="empty-msg"><i class="fas fa-inbox"></i>
+                        <p>No open positions</p>
                     </div>
                 </div>
 
-                <!-- Recent Trades -->
                 <div class="card">
                     <div class="card-head">
-                        <h3>Recent Trades</h3>
-                        <a href="#">View All</a>
+                        <h3>Recent Trades</h3><a href="#">View All</a>
                     </div>
-                    <div id="recentTrades">
-                        <div class="empty-msg">
-                            <i class="fas fa-history"></i>
-                            <p>No recent trades</p>
-                        </div>
+                    <div class="empty-msg"><i class="fas fa-history"></i>
+                        <p>No recent trades</p>
                     </div>
                 </div>
             </div>
@@ -1670,18 +243,19 @@
         <!-- Trading Page -->
         <div class="page" id="tradingPage">
             <div class="trading-layout">
-
-                <!-- Left: Market Sidebar -->
                 <aside class="sidebar">
                     <div class="sidebar-search">
                         <i class="fas fa-search"></i>
                         <input type="text" id="mktSearch" placeholder="Search markets...">
                     </div>
                     <div class="sidebar-tabs">
-                        <button class="sidebar-tab active" data-cat="synthetic">Synthetic</button>
-                        <button class="sidebar-tab" data-cat="forex">Forex</button>
-                        <button class="sidebar-tab" data-cat="commodities">Comm</button>
-                        <button class="sidebar-tab" data-cat="crypto">Crypto</button>
+                        <button class="sidebar-tab active" data-cat="synthetic" type="button"
+                            title="Synthetic indices">Synthetic</button>
+                        <button class="sidebar-tab" data-cat="forex" type="button" title="Forex pairs">Forex</button>
+                        <button class="sidebar-tab" data-cat="commodities" type="button"
+                            title="Commodities">Comm</button>
+                        <button class="sidebar-tab" data-cat="crypto" type="button"
+                            title="Cryptocurrency">Crypto</button>
                     </div>
                     <div class="sidebar-list" id="sidebarList">
                         <div class="sidebar-item active" data-symbol="R_100">
@@ -1705,17 +279,16 @@
                             <span class="si-price" id="sp_R_10">--</span>
                         </div>
                         <div class="sidebar-item" data-symbol="1HZ100V">
-                            <span class="si-name">Volatility 100 (1s)</span>
+                            <span class="si-name">Vol 100 (1s)</span>
                             <span class="si-price" id="sp_1HZ100V">--</span>
                         </div>
                         <div class="sidebar-item" data-symbol="1HZ50V">
-                            <span class="si-name">Volatility 50 (1s)</span>
+                            <span class="si-name">Vol 50 (1s)</span>
                             <span class="si-price" id="sp_1HZ50V">--</span>
                         </div>
                     </div>
                 </aside>
 
-                <!-- Center: Chart -->
                 <div class="chart-area">
                     <div class="chart-toolbar">
                         <div class="chart-info">
@@ -1725,93 +298,88 @@
                         </div>
                         <div class="chart-ctrls">
                             <div class="tf-group">
-                                <button class="tf-btn" data-g="60">1m</button>
-                                <button class="tf-btn active" data-g="300">5m</button>
-                                <button class="tf-btn" data-g="900">15m</button>
-                                <button class="tf-btn" data-g="3600">1H</button>
-                                <button class="tf-btn" data-g="14400">4H</button>
-                                <button class="tf-btn" data-g="86400">1D</button>
+                                <button class="tf-btn" data-g="60" type="button" title="1 Minute">1m</button>
+                                <button class="tf-btn active" data-g="300" type="button" title="5 Minutes">5m</button>
+                                <button class="tf-btn" data-g="900" type="button" title="15 Minutes">15m</button>
+                                <button class="tf-btn" data-g="3600" type="button" title="1 Hour">1H</button>
+                                <button class="tf-btn" data-g="14400" type="button" title="4 Hours">4H</button>
+                                <button class="tf-btn" data-g="86400" type="button" title="1 Day">1D</button>
                             </div>
                             <div class="ct-group">
-                                <button class="ct-btn active" title="Candles"><i class="fas fa-chart-bar"></i></button>
-                                <button class="ct-btn" title="Line"><i class="fas fa-chart-line"></i></button>
+                                <button class="ct-btn active" type="button" aria-label="Candlestick chart"
+                                    title="Candlestick"><i class="fas fa-chart-bar"></i></button>
+                                <button class="ct-btn" type="button" aria-label="Line chart" title="Line chart"><i
+                                        class="fas fa-chart-line"></i></button>
                             </div>
                         </div>
                     </div>
                     <div class="chart-box" id="chartBox"></div>
                 </div>
 
-                <!-- Right: Trade Panel -->
                 <aside class="trade-panel">
                     <div class="tp-tabs">
-                        <button class="tp-tab active">Rise/Fall</button>
-                        <button class="tp-tab">Higher/Lower</button>
-                        <button class="tp-tab">Digits</button>
+                        <button class="tp-tab active" type="button">Rise/Fall</button>
+                        <button class="tp-tab" type="button">Higher/Lower</button>
+                        <button class="tp-tab" type="button">Digits</button>
                     </div>
-
                     <div class="tp-body">
-                        <!-- Duration -->
                         <div class="tp-section">
                             <div class="tp-section-label">Duration</div>
                             <div class="dur-row">
-                                <select class="dur-select" id="durType">
+                                <select class="dur-select" id="durType" aria-label="Duration type">
                                     <option value="t">Ticks</option>
                                     <option value="s">Seconds</option>
                                     <option value="m" selected>Minutes</option>
                                     <option value="h">Hours</option>
                                 </select>
                                 <div class="dur-spinner">
-                                    <button id="durDown">−</button>
-                                    <input type="number" id="durVal" value="5" min="1">
-                                    <button id="durUp">+</button>
+                                    <button id="durDown" type="button" aria-label="Decrease" title="Decrease">−</button>
+                                    <input type="number" id="durVal" value="5" min="1" aria-label="Duration value">
+                                    <button id="durUp" type="button" aria-label="Increase" title="Increase">+</button>
                                 </div>
                             </div>
                         </div>
 
-                        <!-- Stake -->
                         <div class="tp-section">
                             <div class="tp-section-label">Stake</div>
                             <div class="stake-box">
                                 <span class="stake-cur">USD</span>
-                                <input type="number" id="stakeVal" value="10" min="0.35" step="0.01">
+                                <input type="number" id="stakeVal" value="10" min="0.35" step="0.01"
+                                    aria-label="Stake amount">
                             </div>
                             <div class="quick-amounts">
-                                <button class="quick-amt" data-v="5">$5</button>
-                                <button class="quick-amt active" data-v="10">$10</button>
-                                <button class="quick-amt" data-v="25">$25</button>
-                                <button class="quick-amt" data-v="50">$50</button>
-                                <button class="quick-amt" data-v="100">$100</button>
+                                <button class="quick-amt" data-v="5" type="button" title="Set stake to $5">$5</button>
+                                <button class="quick-amt active" data-v="10" type="button"
+                                    title="Set stake to $10">$10</button>
+                                <button class="quick-amt" data-v="25" type="button"
+                                    title="Set stake to $25">$25</button>
+                                <button class="quick-amt" data-v="50" type="button"
+                                    title="Set stake to $50">$50</button>
+                                <button class="quick-amt" data-v="100" type="button"
+                                    title="Set stake to $100">$100</button>
                             </div>
                         </div>
 
-                        <!-- Payout Info -->
                         <div class="payout-box">
-                            <div class="payout-row">
-                                <span>Payout</span>
-                                <span class="payout-val" id="payoutVal">--</span>
+                            <div class="payout-row"><span>Payout</span><span class="payout-val" id="payoutVal">--</span>
                             </div>
-                            <div class="payout-row">
-                                <span>Profit</span>
-                                <span class="payout-val green" id="profitVal">--</span>
-                            </div>
+                            <div class="payout-row"><span>Profit</span><span class="payout-val green"
+                                    id="profitVal">--</span></div>
                         </div>
 
-                        <!-- Trade Buttons -->
                         <div class="trade-btns">
-                            <button class="trade-btn rise-btn" id="riseBtn">
+                            <button class="trade-btn rise-btn" id="riseBtn" type="button" title="Buy Rise contract">
                                 <span class="tb-icon"><i class="fas fa-arrow-up"></i></span>
                                 <span class="tb-label">Rise</span>
                                 <span class="tb-payout" id="risePay">--</span>
                             </button>
-                            <button class="trade-btn fall-btn" id="fallBtn">
+                            <button class="trade-btn fall-btn" id="fallBtn" type="button" title="Buy Fall contract">
                                 <span class="tb-icon"><i class="fas fa-arrow-down"></i></span>
                                 <span class="tb-label">Fall</span>
                                 <span class="tb-payout" id="fallPay">--</span>
                             </button>
                         </div>
                     </div>
-
-                    <!-- Active Contracts -->
                     <div class="contracts-section">
                         <h4>Active Contracts <span class="contract-count" id="cCount">0</span></h4>
                         <div id="contractsList"></div>
@@ -1821,638 +389,11 @@
         </div>
     </div>
 
-    <!-- Toast Container -->
     <div class="toast-wrap" id="toastWrap"></div>
 
-    <!-- ========== JAVASCRIPT ========== -->
     <script
         src="https://cdn.jsdelivr.net/npm/lightweight-charts@4.1.0/dist/lightweight-charts.standalone.production.js"></script>
-
-    <script>
-        // ============================================================
-        // CONFIGURATION
-        // ============================================================
-        const APP_ID = 1089; // Replace with YOUR app_id from api.deriv.com
-        const WS_URL = `wss://ws.derivws.com/websockets/v3?app_id=${APP_ID}`;
-
-        // ============================================================
-        // TOAST HELPER
-        // ============================================================
-        function toast(type, msg) {
-            const wrap = document.getElementById('toastWrap');
-            const icons = { success: 'fa-check-circle', error: 'fa-exclamation-circle', info: 'fa-info-circle' };
-            const t = document.createElement('div');
-            t.className = `toast ${type}`;
-            t.innerHTML = `
-            <i class="toast-icon fas ${icons[type]}"></i>
-            <span class="toast-msg">${msg}</span>
-            <button class="toast-x" onclick="this.parentElement.remove()"><i class="fas fa-times"></i></button>
-        `;
-            wrap.appendChild(t);
-            setTimeout(() => { if (t.parentElement) t.remove(); }, 5000);
-        }
-
-        // ============================================================
-        // WEBSOCKET
-        // ============================================================
-        let ws = null;
-        let reqId = 0;
-        const pending = new Map();
-        const tickCBs = new Map();     // symbol -> [callbacks]
-        const eventCBs = new Map();    // eventName -> [callbacks]
-
-        function wsConnect() {
-            return new Promise((resolve, reject) => {
-                ws = new WebSocket(WS_URL);
-                ws.onopen = () => { console.log('✅ WS Connected'); resolve(); };
-                ws.onerror = (e) => { console.error('WS Error', e); reject(e); };
-                ws.onclose = () => { console.log('❌ WS Closed'); setTimeout(wsConnect, 3000); };
-                ws.onmessage = (e) => handleWSMessage(JSON.parse(e.data));
-            });
-        }
-
-        function wsSend(data) {
-            return new Promise((resolve, reject) => {
-                reqId++;
-                data.req_id = reqId;
-                pending.set(reqId, { resolve, reject });
-                ws.send(JSON.stringify(data));
-                setTimeout(() => {
-                    if (pending.has(data.req_id)) {
-                        pending.delete(data.req_id);
-                        reject(new Error('Timeout'));
-                    }
-                }, 30000);
-            });
-        }
-
-        function wsRaw(data) {
-            if (ws && ws.readyState === 1) ws.send(JSON.stringify(data));
-        }
-
-        function onEvent(name, cb) {
-            if (!eventCBs.has(name)) eventCBs.set(name, []);
-            eventCBs.get(name).push(cb);
-        }
-
-        function emitEvent(name, data) {
-            if (eventCBs.has(name)) eventCBs.get(name).forEach(cb => cb(data));
-        }
-
-        function handleWSMessage(data) {
-            // Pending request
-            if (data.req_id && pending.has(data.req_id)) {
-                const { resolve, reject } = pending.get(data.req_id);
-                pending.delete(data.req_id);
-                data.error ? reject(data.error) : resolve(data);
-            }
-
-            // Tick
-            if (data.tick) {
-                const sym = data.tick.symbol;
-                if (tickCBs.has(sym)) tickCBs.get(sym).forEach(cb => cb(data.tick));
-            }
-
-            // OHLC
-            if (data.ohlc) {
-                emitEvent('ohlc', data.ohlc);
-            }
-
-            // Candles history
-            if (data.candles) {
-                emitEvent('candles_history', data.candles);
-            }
-
-            // Proposal
-            if (data.proposal) {
-                emitEvent('proposal', data.proposal);
-            }
-
-            // Balance
-            if (data.balance) {
-                emitEvent('balance', data.balance);
-            }
-
-            // Open contract
-            if (data.proposal_open_contract) {
-                emitEvent('open_contract', data.proposal_open_contract);
-            }
-
-            // Buy response
-            if (data.buy) {
-                emitEvent('buy', data.buy);
-            }
-        }
-
-        function subscribeTick(symbol, cb) {
-            if (!tickCBs.has(symbol)) tickCBs.set(symbol, []);
-            tickCBs.get(symbol).push(cb);
-            wsRaw({ ticks: symbol, subscribe: 1 });
-        }
-
-        // ============================================================
-        // AUTH
-        // ============================================================
-        let currentAccount = null;
-
-        async function authorize(token) {
-            const res = await wsSend({ authorize: token });
-            currentAccount = res.authorize;
-            localStorage.setItem('deriv_token', token);
-            return currentAccount;
-        }
-
-        function handleOAuth() {
-            const params = new URLSearchParams(window.location.search);
-            const accounts = [];
-            let i = 1;
-            while (params.has(`acct${i}`)) {
-                accounts.push({
-                    account: params.get(`acct${i}`),
-                    token: params.get(`token${i}`),
-                    currency: params.get(`cur${i}`)
-                });
-                i++;
-            }
-            if (accounts.length) {
-                localStorage.setItem('deriv_token', accounts[0].token);
-                localStorage.setItem('deriv_accounts', JSON.stringify(accounts));
-                window.history.replaceState({}, '', window.location.pathname);
-                return accounts[0].token;
-            }
-            return null;
-        }
-
-        // ============================================================
-        // CHART
-        // ============================================================
-        let chart = null;
-        let candleSeries = null;
-        let currentSymbol = 'R_100';
-        let currentGranularity = 300;
-
-        function initChart() {
-            const box = document.getElementById('chartBox');
-            if (!box) return;
-            box.innerHTML = '';
-
-            chart = LightweightCharts.createChart(box, {
-                width: box.clientWidth,
-                height: box.clientHeight,
-                layout: {
-                    background: { type: 'solid', color: '#0e0e0e' },
-                    textColor: '#6e7575',
-                    fontFamily: 'IBM Plex Sans',
-                },
-                grid: {
-                    vertLines: { color: '#1a1c1c' },
-                    horzLines: { color: '#1a1c1c' },
-                },
-                crosshair: {
-                    vertLine: { color: '#ff444f', width: 1, style: 2, labelBackgroundColor: '#ff444f' },
-                    horzLine: { color: '#ff444f', width: 1, style: 2, labelBackgroundColor: '#ff444f' },
-                },
-                timeScale: {
-                    timeVisible: true,
-                    borderColor: '#2a2d2d',
-                },
-                rightPriceScale: {
-                    borderColor: '#2a2d2d',
-                },
-            });
-
-            candleSeries = chart.addCandlestickSeries({
-                upColor: '#0dc49a',
-                downColor: '#ff444f',
-                borderUpColor: '#0dc49a',
-                borderDownColor: '#ff444f',
-                wickUpColor: '#0dc49a',
-                wickDownColor: '#ff444f',
-            });
-
-            // Resize
-            new ResizeObserver(entries => {
-                for (const e of entries) {
-                    chart.applyOptions({ width: e.contentRect.width, height: e.contentRect.height });
-                }
-            }).observe(box);
-        }
-
-        async function loadChart(symbol, gran) {
-            currentSymbol = symbol;
-            currentGranularity = gran;
-
-            try {
-                const res = await wsSend({
-                    ticks_history: symbol,
-                    adjust_start_time: 1,
-                    count: 500,
-                    end: 'latest',
-                    granularity: gran,
-                    style: 'candles'
-                });
-
-                if (res.candles) {
-                    const data = res.candles.map(c => ({
-                        time: c.epoch,
-                        open: +c.open,
-                        high: +c.high,
-                        low: +c.low,
-                        close: +c.close,
-                    }));
-                    candleSeries.setData(data);
-                    chart.timeScale().fitContent();
-                }
-
-                // Subscribe to live candles
-                wsRaw({
-                    ticks_history: symbol,
-                    adjust_start_time: 1,
-                    count: 1,
-                    end: 'latest',
-                    granularity: gran,
-                    style: 'candles',
-                    subscribe: 1
-                });
-
-            } catch (err) {
-                console.error('Chart load error:', err);
-            }
-        }
-
-        // Handle live candle updates
-        onEvent('ohlc', (ohlc) => {
-            if (ohlc.symbol === currentSymbol && candleSeries) {
-                candleSeries.update({
-                    time: +ohlc.open_time,
-                    open: +ohlc.open,
-                    high: +ohlc.high,
-                    low: +ohlc.low,
-                    close: +ohlc.close,
-                });
-            }
-        });
-
-        // ============================================================
-        // TRADING
-        // ============================================================
-        let activeContracts = [];
-
-        function subscribeProposals() {
-            wsRaw({ forget_all: 'proposal' });
-
-            const amount = +document.getElementById('stakeVal').value;
-            const duration = +document.getElementById('durVal').value;
-            const durType = document.getElementById('durType').value;
-
-            // CALL
-            wsRaw({
-                proposal: 1, amount, basis: 'stake', contract_type: 'CALL',
-                currency: 'USD', duration, duration_unit: durType,
-                symbol: currentSymbol, subscribe: 1
-            });
-            // PUT
-            wsRaw({
-                proposal: 1, amount, basis: 'stake', contract_type: 'PUT',
-                currency: 'USD', duration, duration_unit: durType,
-                symbol: currentSymbol, subscribe: 1
-            });
-        }
-
-        onEvent('proposal', (p) => {
-            const payout = (+p.payout).toFixed(2);
-            const profit = (+p.payout - +p.ask_price).toFixed(2);
-
-            if (p.contract_type === 'CALL') {
-                document.getElementById('risePay').textContent = `$${payout}`;
-            } else {
-                document.getElementById('fallPay').textContent = `$${payout}`;
-            }
-
-            document.getElementById('payoutVal').textContent = `$${payout}`;
-            document.getElementById('profitVal').textContent = `+$${profit}`;
-        });
-
-        async function buyContract(type) {
-            const amount = +document.getElementById('stakeVal').value;
-            const duration = +document.getElementById('durVal').value;
-            const durType = document.getElementById('durType').value;
-
-            try {
-                // Get fresh proposal
-                const pRes = await wsSend({
-                    proposal: 1, amount, basis: 'stake',
-                    contract_type: type, currency: 'USD',
-                    duration, duration_unit: durType, symbol: currentSymbol
-                });
-
-                // Buy
-                const bRes = await wsSend({
-                    buy: pRes.proposal.id,
-                    price: pRes.proposal.ask_price
-                });
-
-                toast('success', `Trade opened! Contract #${bRes.buy.contract_id}`);
-                activeContracts.push(bRes.buy);
-                updateContractCount();
-
-                // Subscribe to contract updates
-                wsRaw({
-                    proposal_open_contract: 1,
-                    contract_id: bRes.buy.contract_id,
-                    subscribe: 1
-                });
-
-            } catch (err) {
-                toast('error', `Trade failed: ${err.message || err.code}`);
-            }
-        }
-
-        onEvent('open_contract', (c) => {
-            const pnl = (+c.profit || 0).toFixed(2);
-            const isWin = +pnl >= 0;
-            const list = document.getElementById('contractsList');
-
-            if (c.is_sold) {
-                const el = document.getElementById(`cc-${c.contract_id}`);
-                if (el) el.remove();
-                activeContracts = activeContracts.filter(x => x.contract_id !== c.contract_id);
-                updateContractCount();
-                toast(isWin ? 'success' : 'error',
-                    `Contract #${c.contract_id}: ${isWin ? 'Won' : 'Lost'} $${Math.abs(pnl)}`);
-                return;
-            }
-
-            const html = `
-            <div class="contract-card ${isWin ? '' : 'loss'}" id="cc-${c.contract_id}">
-                <div class="cc-top">
-                    <span class="cc-type">${c.contract_type === 'CALL' ? '↑ Rise' : '↓ Fall'}</span>
-                    <span class="cc-pnl ${isWin ? 'green' : 'red'}">${isWin ? '+' : ''}$${pnl}</span>
-                </div>
-                <div class="cc-bottom">
-                    <span>${c.display_name || currentSymbol}</span>
-                    <span>Stake: $${(+c.buy_price).toFixed(2)}</span>
-                </div>
-            </div>
-        `;
-
-            const existing = document.getElementById(`cc-${c.contract_id}`);
-            if (existing) {
-                existing.outerHTML = html;
-            } else {
-                list.insertAdjacentHTML('afterbegin', html);
-            }
-        });
-
-        function updateContractCount() {
-            document.getElementById('cCount').textContent = activeContracts.length;
-        }
-
-        // ============================================================
-        // UI CONTROLLERS
-        // ============================================================
-        function showLogin() {
-            document.getElementById('loginScreen').classList.remove('hidden');
-            document.getElementById('mainApp').classList.remove('visible');
-        }
-
-        function hideLogin() {
-            document.getElementById('loginScreen').classList.add('hidden');
-            document.getElementById('mainApp').classList.add('visible');
-        }
-
-        function navigateTo(page) {
-            document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
-            document.querySelector(`.nav-link[data-page="${page}"]`)?.classList.add('active');
-            document.querySelectorAll('.page').forEach(p => { p.classList.remove('active'); p.style.display = 'none'; });
-            const el = document.getElementById(`${page}Page`);
-            if (el) { el.classList.add('active'); el.style.display = page === 'trading' ? 'flex' : 'block'; }
-
-            if (page === 'trading') {
-                setTimeout(() => {
-                    initChart();
-                    loadChart(currentSymbol, currentGranularity);
-                    subscribeProposals();
-                }, 50);
-            }
-        }
-
-        function updateBalanceUI(bal, cur) {
-            document.getElementById('accBalance').textContent = `${(+bal).toLocaleString('en-US', { minimumFractionDigits: 2 })} ${cur || 'USD'}`;
-            document.getElementById('statBalance').textContent = `$${(+bal).toLocaleString('en-US', { minimumFractionDigits: 2 })}`;
-        }
-
-        // ============================================================
-        // INIT
-        // ============================================================
-        async function init() {
-            // Connect WS
-            try {
-                await wsConnect();
-                toast('info', 'Connected to server');
-            } catch (e) {
-                toast('error', 'Connection failed');
-                return;
-            }
-
-            // OAuth check
-            const oauthToken = handleOAuth();
-
-            // Try saved or OAuth token
-            const token = oauthToken || localStorage.getItem('deriv_token');
-            if (token) {
-                try {
-                    const acct = await authorize(token);
-                    onAuthorized(acct);
-                } catch (e) {
-                    showLogin();
-                }
-            } else {
-                showLogin();
-            }
-
-            setupEvents();
-        }
-
-        function onAuthorized(acct) {
-            hideLogin();
-            updateBalanceUI(acct.balance, acct.currency);
-
-            const typeEl = document.getElementById('accType');
-            typeEl.textContent = acct.is_virtual ? 'Demo' : 'Real';
-            typeEl.style.background = acct.is_virtual ? 'var(--green)' : 'var(--blue)';
-
-            toast('success', `Welcome, ${acct.fullname || 'Trader'}!`);
-
-            // Subscribe balance
-            wsRaw({ balance: 1, subscribe: 1 });
-            onEvent('balance', (b) => updateBalanceUI(b.balance, b.currency));
-
-            // Subscribe dashboard ticks
-            ['R_100', 'R_50', 'R_75', 'R_10'].forEach(sym => {
-                subscribeTick(sym, (tick) => {
-                    const q = (+tick.quote).toFixed(2);
-                    const dp = document.getElementById(`dp_${sym}`);
-                    const sp = document.getElementById(`sp_${sym}`);
-                    if (dp) dp.textContent = q;
-                    if (sp) sp.textContent = q;
-                    if (sym === currentSymbol) {
-                        document.getElementById('chartLivePrice').textContent = q;
-                    }
-                });
-            });
-        }
-
-        function setupEvents() {
-            // Login form
-            document.getElementById('loginForm').addEventListener('submit', async (e) => {
-                e.preventDefault();
-                const token = document.getElementById('loginToken').value.trim();
-                if (!token) return toast('error', 'Please enter your API token');
-
-                const btn = document.getElementById('loginBtn');
-                btn.textContent = 'Connecting...';
-                btn.disabled = true;
-
-                try {
-                    const acct = await authorize(token);
-                    onAuthorized(acct);
-                } catch (err) {
-                    toast('error', 'Invalid token: ' + (err.message || err.code));
-                }
-                btn.textContent = 'Log in';
-                btn.disabled = false;
-            });
-
-            // OAuth
-            document.getElementById('oauthBtn').addEventListener('click', () => {
-                const redirect = encodeURIComponent(window.location.href.split('?')[0]);
-                window.location.href = `https://oauth.deriv.com/oauth2/authorize?app_id=${APP_ID}&l=EN&brand=deriv`;
-            });
-
-            // Toggle password
-            document.getElementById('togglePass').addEventListener('click', () => {
-                const inp = document.getElementById('loginToken');
-                const icon = document.querySelector('#togglePass i');
-                inp.type = inp.type === 'password' ? 'text' : 'password';
-                icon.className = inp.type === 'password' ? 'fas fa-eye' : 'fas fa-eye-slash';
-            });
-
-            // Navigation
-            document.querySelectorAll('.nav-link').forEach(l => {
-                l.addEventListener('click', (e) => { e.preventDefault(); navigateTo(l.dataset.page); });
-            });
-
-            // Dashboard market rows -> go to trading
-            document.querySelectorAll('.market-row').forEach(r => {
-                r.addEventListener('click', () => {
-                    currentSymbol = r.dataset.symbol;
-                    const name = r.querySelector('.mkt-name').textContent;
-                    document.getElementById('chartSymName').textContent = name;
-                    navigateTo('trading');
-                });
-            });
-
-            // Sidebar items
-            document.getElementById('sidebarList').addEventListener('click', (e) => {
-                const item = e.target.closest('.sidebar-item');
-                if (!item) return;
-                document.querySelectorAll('.sidebar-item').forEach(i => i.classList.remove('active'));
-                item.classList.add('active');
-                currentSymbol = item.dataset.symbol;
-                document.getElementById('chartSymName').textContent = item.querySelector('.si-name').textContent;
-
-                wsRaw({ forget_all: 'candles' });
-                loadChart(currentSymbol, currentGranularity);
-
-                wsRaw({ forget_all: 'proposal' });
-                subscribeProposals();
-
-                // Subscribe tick for new symbol
-                subscribeTick(currentSymbol, (tick) => {
-                    document.getElementById('chartLivePrice').textContent = (+tick.quote).toFixed(2);
-                    const sp = document.getElementById(`sp_${currentSymbol}`);
-                    if (sp) sp.textContent = (+tick.quote).toFixed(2);
-                });
-            });
-
-            // Timeframe
-            document.querySelectorAll('.tf-btn').forEach(b => {
-                b.addEventListener('click', () => {
-                    document.querySelectorAll('.tf-btn').forEach(x => x.classList.remove('active'));
-                    b.classList.add('active');
-                    currentGranularity = +b.dataset.g;
-                    wsRaw({ forget_all: 'candles' });
-                    loadChart(currentSymbol, currentGranularity);
-                });
-            });
-
-            // Duration +/-
-            document.getElementById('durDown').addEventListener('click', () => {
-                const inp = document.getElementById('durVal');
-                if (+inp.value > 1) { inp.value = +inp.value - 1; subscribeProposals(); }
-            });
-            document.getElementById('durUp').addEventListener('click', () => {
-                const inp = document.getElementById('durVal');
-                inp.value = +inp.value + 1;
-                subscribeProposals();
-            });
-
-            // Quick amounts
-            document.querySelectorAll('.quick-amt').forEach(b => {
-                b.addEventListener('click', () => {
-                    document.querySelectorAll('.quick-amt').forEach(x => x.classList.remove('active'));
-                    b.classList.add('active');
-                    document.getElementById('stakeVal').value = b.dataset.v;
-                    subscribeProposals();
-                });
-            });
-
-            // Stake change
-            document.getElementById('stakeVal').addEventListener('change', subscribeProposals);
-            document.getElementById('durType').addEventListener('change', subscribeProposals);
-            document.getElementById('durVal').addEventListener('change', subscribeProposals);
-
-            // TRADE BUTTONS
-            document.getElementById('riseBtn').addEventListener('click', () => buyContract('CALL'));
-            document.getElementById('fallBtn').addEventListener('click', () => buyContract('PUT'));
-
-            // Sidebar tabs
-            document.querySelectorAll('.sidebar-tab').forEach(t => {
-                t.addEventListener('click', () => {
-                    document.querySelectorAll('.sidebar-tab').forEach(x => x.classList.remove('active'));
-                    t.classList.add('active');
-                    // TODO: filter markets by category
-                });
-            });
-
-            // Trade panel tabs
-            document.querySelectorAll('.tp-tab').forEach(t => {
-                t.addEventListener('click', () => {
-                    document.querySelectorAll('.tp-tab').forEach(x => x.classList.remove('active'));
-                    t.classList.add('active');
-                });
-            });
-
-            // Search
-            document.getElementById('mktSearch').addEventListener('input', (e) => {
-                const q = e.target.value.toLowerCase();
-                document.querySelectorAll('.sidebar-item').forEach(item => {
-                    const name = item.querySelector('.si-name').textContent.toLowerCase();
-                    item.style.display = name.includes(q) ? 'flex' : 'none';
-                });
-            });
-
-            // Trade link on dashboard
-            document.querySelector('.trade-link')?.addEventListener('click', (e) => {
-                e.preventDefault();
-                navigateTo('trading');
-            });
-        }
-
-        // Start
-        document.addEventListener('DOMContentLoaded', init);
-    </script>
+    <script src="app.js"></script>
 </body>
 
 </html>
