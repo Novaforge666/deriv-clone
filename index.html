@@ -4,16 +4,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MyTrader - Trading Platform</title>
+    <title>MyTrader</title>
     <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300;400;500;600;700&display=swap"
         rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="./styles.css">
 </head>
 
 <body>
 
-    <!-- HEADER -->
     <header class="header">
         <div class="header-left">
             <a class="logo" href="#">
@@ -28,331 +27,281 @@
             </nav>
         </div>
         <div class="header-right">
-            <div class="account-badge" id="accBadge">
+            <div class="account-badge">
                 <span class="acc-type-badge" id="accType">Demo</span>
                 <span class="acc-balance" id="accBalance">0.00 USD</span>
                 <i class="fas fa-chevron-down acc-chevron"></i>
             </div>
             <button class="icon-btn" aria-label="Notifications" title="Notifications">
                 <i class="fas fa-bell"></i>
-                <span class="notif-badge">0</span>
             </button>
-            <button class="icon-btn" aria-label="Toggle theme" title="Toggle theme" id="themeBtn">
+            <button class="icon-btn" aria-label="Theme" title="Theme" id="themeBtn">
                 <i class="fas fa-moon"></i>
             </button>
-            <button class="user-avatar" aria-label="User menu" title="User menu" id="logoutBtn">
+            <button class="user-avatar" aria-label="Logout" title="Click to logout" id="logoutBtn">
                 <i class="fas fa-user"></i>
             </button>
         </div>
     </header>
 
-    <!-- LOGIN SCREEN -->
     <div class="login-screen" id="loginScreen">
         <div class="login-box">
             <div class="login-hero">
                 <div class="hero-content">
                     <div class="hero-logo"><i class="fas fa-chart-line"></i></div>
                     <h1>MyTrader</h1>
-                    <p>Trade forex, commodities, synthetic indices, and more on a secure, intuitive platform.</p>
+                    <p>Trade forex, commodities, synthetic indices, and more.</p>
                     <div class="hero-features">
                         <div class="hero-feature">
-                            <div class="hero-feature-icon"><i class="fas fa-shield-alt"></i></div>
+                            <div class="hf-icon"><i class="fas fa-shield-alt"></i></div>
                             <span>Secure &amp; Regulated</span>
                         </div>
                         <div class="hero-feature">
-                            <div class="hero-feature-icon"><i class="fas fa-bolt"></i></div>
+                            <div class="hf-icon"><i class="fas fa-bolt"></i></div>
                             <span>Instant Execution</span>
                         </div>
                         <div class="hero-feature">
-                            <div class="hero-feature-icon"><i class="fas fa-clock"></i></div>
+                            <div class="hf-icon"><i class="fas fa-clock"></i></div>
                             <span>24/7 Trading</span>
                         </div>
                     </div>
                 </div>
             </div>
-
             <div class="login-form-panel">
                 <h2>Log in</h2>
-                <p class="login-subtitle">Connect your Deriv account to start trading</p>
+                <p class="login-sub">Connect your Deriv account</p>
 
-                <div class="ws-status" id="wsStatus">
+                <div class="ws-bar" id="wsBar">
                     <div class="ws-dot" id="wsDot"></div>
                     <span id="wsText">Initializing...</span>
                 </div>
 
-                <div class="error-msg" id="errorMsg"></div>
-                <div class="success-msg" id="successMsg"></div>
-                <div class="debug-panel" id="debugPanel"></div>
+                <div class="alert alert-error" id="alertError"></div>
+                <div class="alert alert-success" id="alertSuccess"></div>
+                <div class="debug-box" id="debugBox"></div>
 
-                <!-- METHOD 1: OAuth (Recommended) -->
-                <div class="login-method-section">
-                    <div class="method-label">
-                        <span class="method-badge recommended">Recommended</span>
-                        Deriv OAuth Login
-                    </div>
-                    <button class="btn btn-primary" id="oauthBtn" type="button">
-                        <i class="fas fa-external-link-alt"></i>
-                        Log in with Deriv
+                <div class="login-section">
+                    <div class="section-label"><span class="badge-green">Recommended</span> Deriv OAuth</div>
+                    <button class="btn btn-red" id="oauthBtn" type="button">
+                        <i class="fas fa-external-link-alt"></i> Log in with Deriv
                     </button>
-                    <p class="method-hint">You'll be redirected to Deriv to authorize securely.</p>
+                    <p class="hint">Redirects to Deriv for secure login</p>
                 </div>
 
-                <div class="divider"><span>or use API token</span></div>
+                <div class="divider"><span>or paste API token</span></div>
 
-                <!-- METHOD 2: API Token -->
                 <form id="loginForm" novalidate>
                     <div class="form-group">
                         <label class="form-label" for="loginToken">API Token</label>
-                        <div class="input-box">
+                        <div class="input-row">
                             <i class="fas fa-key"></i>
-                            <input type="text" id="loginToken" placeholder="Paste token e.g. a1-xAbCdEfGh..."
-                                autocomplete="off" spellcheck="false">
-                            <button type="button" class="toggle-pass" id="togglePass" aria-label="Toggle visibility"
-                                title="Toggle visibility">
-                                <i class="fas fa-eye"></i>
-                            </button>
+                            <input type="text" id="loginToken" placeholder="a1-xAbCdEfGhIjKl..." autocomplete="off"
+                                spellcheck="false">
                         </div>
-                        <div class="form-hint">
-                            <a href="https://app.deriv.com/account/api-token" target="_blank" rel="noopener noreferrer">
-                                Get your API token here →
-                            </a>
-                            (check ALL scopes)
-                        </div>
+                        <p class="hint"><a href="https://app.deriv.com/account/api-token" target="_blank"
+                                rel="noopener noreferrer">Get token here →</a> (check ALL scopes)</p>
                     </div>
-
                     <button type="submit" class="btn btn-outline" id="loginBtn">
                         <i class="fas fa-sign-in-alt" id="loginIcon"></i>
                         <span id="loginBtnText">Log in with Token</span>
                     </button>
                 </form>
 
-                <div class="form-options" style="margin-top: 14px;">
-                    <label class="checkbox-label">
-                        <input type="checkbox" id="showDebug">
-                        Show debug log
-                    </label>
-                    <label class="checkbox-label">
-                        <input type="checkbox" id="rememberToken" checked>
-                        Remember session
-                    </label>
+                <div class="login-opts">
+                    <label class="chk"><input type="checkbox" id="showDebug"> Debug</label>
+                    <label class="chk"><input type="checkbox" id="rememberToken" checked> Remember</label>
                 </div>
 
-                <div class="login-help">
-                    <p>Don't have an account? <a href="https://deriv.com/signup/" target="_blank"
-                            rel="noopener noreferrer">Sign up at Deriv</a></p>
-                    <div class="debug-info">
-                        <p><strong>App ID:</strong> <code id="showAppId"></code></p>
-                        <p><strong>Origin:</strong> <code id="showOrigin"></code></p>
+                <div class="login-footer">
+                    <p>No account? <a href="https://deriv.com/signup/" target="_blank" rel="noopener noreferrer">Sign
+                            up</a></p>
+                    <div class="info-box">
+                        <p>App ID: <code id="showAppId"></code></p>
+                        <p>URL: <code id="showOrigin"></code></p>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- MAIN APP -->
     <div class="main" id="mainApp">
-        <!-- Dashboard -->
         <div class="page active" id="dashboardPage">
             <div class="dashboard">
                 <div class="card">
-                    <div class="card-head">
+                    <div class="card-top">
                         <h3>Portfolio</h3>
                     </div>
-                    <div class="stats-grid">
-                        <div class="stat-box">
-                            <div class="stat-label">Total Balance</div>
-                            <div class="stat-val" id="statBalance">$0.00</div>
+                    <div class="stats-row">
+                        <div class="stat">
+                            <div class="stat-lbl">Balance</div>
+                            <div class="stat-num" id="statBalance">$0.00</div>
                         </div>
-                        <div class="stat-box">
-                            <div class="stat-label">Total P/L</div>
-                            <div class="stat-val green" id="statPnl">+$0.00</div>
+                        <div class="stat">
+                            <div class="stat-lbl">P/L</div>
+                            <div class="stat-num gn" id="statPnl">+$0.00</div>
                         </div>
-                        <div class="stat-box">
-                            <div class="stat-label">Open Trades</div>
-                            <div class="stat-val" id="statOpen">0</div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="card">
-                    <div class="card-head">
-                        <h3>Markets</h3>
-                        <a href="#" id="goTrade">Trade →</a>
-                    </div>
-                    <div id="dashMarkets">
-                        <div class="market-row" data-symbol="R_100">
-                            <div>
-                                <div class="mkt-name">Volatility 100</div>
-                                <div class="mkt-price" id="dp_R_100">--</div>
-                            </div>
-                            <div class="mkt-change up"><i class="fas fa-caret-up"></i> <span>--</span></div>
-                        </div>
-                        <div class="market-row" data-symbol="R_50">
-                            <div>
-                                <div class="mkt-name">Volatility 50</div>
-                                <div class="mkt-price" id="dp_R_50">--</div>
-                            </div>
-                            <div class="mkt-change up"><i class="fas fa-caret-up"></i> <span>--</span></div>
-                        </div>
-                        <div class="market-row" data-symbol="R_75">
-                            <div>
-                                <div class="mkt-name">Volatility 75</div>
-                                <div class="mkt-price" id="dp_R_75">--</div>
-                            </div>
-                            <div class="mkt-change up"><i class="fas fa-caret-up"></i> <span>--</span></div>
-                        </div>
-                        <div class="market-row" data-symbol="R_10">
-                            <div>
-                                <div class="mkt-name">Volatility 10</div>
-                                <div class="mkt-price" id="dp_R_10">--</div>
-                            </div>
-                            <div class="mkt-change up"><i class="fas fa-caret-up"></i> <span>--</span></div>
+                        <div class="stat">
+                            <div class="stat-lbl">Open</div>
+                            <div class="stat-num" id="statOpen">0</div>
                         </div>
                     </div>
                 </div>
-
                 <div class="card">
-                    <div class="card-head">
-                        <h3>Open Positions</h3><a href="#">View All</a>
+                    <div class="card-top">
+                        <h3>Markets</h3><a href="#" id="goTrade">Trade →</a>
                     </div>
-                    <div class="tbl-head">
-                        <span>Market</span><span>Type</span><span>Entry</span><span>Current</span><span>P/L</span><span>Action</span>
+                    <div class="mkt-row" data-symbol="R_100">
+                        <div>
+                            <div class="mkt-n">Volatility 100</div>
+                            <div class="mkt-p" id="dp_R_100">--</div>
+                        </div>
+                        <div class="mkt-ch up"><i class="fas fa-caret-up"></i>--</div>
                     </div>
-                    <div class="empty-msg"><i class="fas fa-inbox"></i>
+                    <div class="mkt-row" data-symbol="R_50">
+                        <div>
+                            <div class="mkt-n">Volatility 50</div>
+                            <div class="mkt-p" id="dp_R_50">--</div>
+                        </div>
+                        <div class="mkt-ch up"><i class="fas fa-caret-up"></i>--</div>
+                    </div>
+                    <div class="mkt-row" data-symbol="R_75">
+                        <div>
+                            <div class="mkt-n">Volatility 75</div>
+                            <div class="mkt-p" id="dp_R_75">--</div>
+                        </div>
+                        <div class="mkt-ch up"><i class="fas fa-caret-up"></i>--</div>
+                    </div>
+                    <div class="mkt-row" data-symbol="R_10">
+                        <div>
+                            <div class="mkt-n">Volatility 10</div>
+                            <div class="mkt-p" id="dp_R_10">--</div>
+                        </div>
+                        <div class="mkt-ch up"><i class="fas fa-caret-up"></i>--</div>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-top">
+                        <h3>Open Positions</h3>
+                    </div>
+                    <div class="empty"><i class="fas fa-inbox"></i>
                         <p>No open positions</p>
                     </div>
                 </div>
-
                 <div class="card">
-                    <div class="card-head">
-                        <h3>Recent Trades</h3><a href="#">View All</a>
+                    <div class="card-top">
+                        <h3>Recent Trades</h3>
                     </div>
-                    <div class="empty-msg"><i class="fas fa-history"></i>
+                    <div class="empty"><i class="fas fa-history"></i>
                         <p>No recent trades</p>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- Trading Page -->
         <div class="page" id="tradingPage">
-            <div class="trading-layout">
-                <aside class="sidebar">
-                    <div class="sidebar-search">
-                        <i class="fas fa-search"></i>
-                        <input type="text" id="mktSearch" placeholder="Search markets...">
+            <div class="trade-layout">
+                <aside class="side-panel">
+                    <div class="sp-search"><i class="fas fa-search"></i><input type="text" id="mktSearch"
+                            placeholder="Search..."></div>
+                    <div class="sp-tabs">
+                        <button class="sp-tab active" type="button" title="Synthetic">Synth</button>
+                        <button class="sp-tab" type="button" title="Forex">Forex</button>
+                        <button class="sp-tab" type="button" title="Commodities">Comm</button>
                     </div>
-                    <div class="sidebar-tabs">
-                        <button class="sidebar-tab active" data-cat="synthetic" type="button"
-                            title="Synthetic">Synthetic</button>
-                        <button class="sidebar-tab" data-cat="forex" type="button" title="Forex">Forex</button>
-                        <button class="sidebar-tab" data-cat="commodities" type="button"
-                            title="Commodities">Comm</button>
-                        <button class="sidebar-tab" data-cat="crypto" type="button" title="Crypto">Crypto</button>
-                    </div>
-                    <div class="sidebar-list" id="sidebarList">
-                        <div class="sidebar-item active" data-symbol="R_100"><span class="si-name">Volatility
-                                100</span><span class="si-price" id="sp_R_100">--</span></div>
-                        <div class="sidebar-item" data-symbol="R_75"><span class="si-name">Volatility 75</span><span
-                                class="si-price" id="sp_R_75">--</span></div>
-                        <div class="sidebar-item" data-symbol="R_50"><span class="si-name">Volatility 50</span><span
-                                class="si-price" id="sp_R_50">--</span></div>
-                        <div class="sidebar-item" data-symbol="R_25"><span class="si-name">Volatility 25</span><span
-                                class="si-price" id="sp_R_25">--</span></div>
-                        <div class="sidebar-item" data-symbol="R_10"><span class="si-name">Volatility 10</span><span
-                                class="si-price" id="sp_R_10">--</span></div>
-                        <div class="sidebar-item" data-symbol="1HZ100V"><span class="si-name">Vol 100 (1s)</span><span
-                                class="si-price" id="sp_1HZ100V">--</span></div>
-                        <div class="sidebar-item" data-symbol="1HZ50V"><span class="si-name">Vol 50 (1s)</span><span
-                                class="si-price" id="sp_1HZ50V">--</span></div>
+                    <div class="sp-list" id="sidebarList">
+                        <div class="sp-item active" data-symbol="R_100"><span class="sp-name">Volatility 100</span><span
+                                class="sp-price" id="sp_R_100">--</span></div>
+                        <div class="sp-item" data-symbol="R_75"><span class="sp-name">Volatility 75</span><span
+                                class="sp-price" id="sp_R_75">--</span></div>
+                        <div class="sp-item" data-symbol="R_50"><span class="sp-name">Volatility 50</span><span
+                                class="sp-price" id="sp_R_50">--</span></div>
+                        <div class="sp-item" data-symbol="R_25"><span class="sp-name">Volatility 25</span><span
+                                class="sp-price" id="sp_R_25">--</span></div>
+                        <div class="sp-item" data-symbol="R_10"><span class="sp-name">Volatility 10</span><span
+                                class="sp-price" id="sp_R_10">--</span></div>
+                        <div class="sp-item" data-symbol="1HZ100V"><span class="sp-name">Vol 100 (1s)</span><span
+                                class="sp-price" id="sp_1HZ100V">--</span></div>
+                        <div class="sp-item" data-symbol="1HZ50V"><span class="sp-name">Vol 50 (1s)</span><span
+                                class="sp-price" id="sp_1HZ50V">--</span></div>
                     </div>
                 </aside>
 
                 <div class="chart-area">
-                    <div class="chart-toolbar">
+                    <div class="chart-bar">
                         <div class="chart-info">
                             <h2 id="chartSymName">Volatility 100 Index</h2>
-                            <span class="chart-live-price" id="chartLivePrice">--</span>
-                            <span class="chart-pct up" id="chartPct">+0.00%</span>
+                            <span class="chart-price" id="chartLivePrice">--</span>
+                            <span class="chart-badge up" id="chartPct">+0.00%</span>
                         </div>
-                        <div class="chart-ctrls">
-                            <div class="tf-group">
-                                <button class="tf-btn" data-g="60" type="button" title="1 Minute">1m</button>
-                                <button class="tf-btn active" data-g="300" type="button" title="5 Minutes">5m</button>
-                                <button class="tf-btn" data-g="900" type="button" title="15 Minutes">15m</button>
-                                <button class="tf-btn" data-g="3600" type="button" title="1 Hour">1H</button>
-                                <button class="tf-btn" data-g="14400" type="button" title="4 Hours">4H</button>
-                                <button class="tf-btn" data-g="86400" type="button" title="1 Day">1D</button>
-                            </div>
-                            <div class="ct-group">
-                                <button class="ct-btn active" type="button" aria-label="Candlestick"
-                                    title="Candlestick"><i class="fas fa-chart-bar"></i></button>
-                                <button class="ct-btn" type="button" aria-label="Line chart" title="Line"><i
-                                        class="fas fa-chart-line"></i></button>
+                        <div class="chart-btns">
+                            <div class="btn-group">
+                                <button class="gb" data-g="60" type="button" title="1m">1m</button>
+                                <button class="gb active" data-g="300" type="button" title="5m">5m</button>
+                                <button class="gb" data-g="900" type="button" title="15m">15m</button>
+                                <button class="gb" data-g="3600" type="button" title="1H">1H</button>
+                                <button class="gb" data-g="14400" type="button" title="4H">4H</button>
+                                <button class="gb" data-g="86400" type="button" title="1D">1D</button>
                             </div>
                         </div>
                     </div>
-                    <div class="chart-box" id="chartBox"></div>
+                    <div class="chart-canvas" id="chartBox"></div>
                 </div>
 
-                <aside class="trade-panel">
-                    <div class="tp-tabs">
-                        <button class="tp-tab active" type="button">Rise/Fall</button>
-                        <button class="tp-tab" type="button">Higher/Lower</button>
-                        <button class="tp-tab" type="button">Digits</button>
+                <aside class="trade-right">
+                    <div class="tr-tabs">
+                        <button class="tr-tab active" type="button">Rise/Fall</button>
+                        <button class="tr-tab" type="button">Digits</button>
                     </div>
-                    <div class="tp-body">
-                        <div class="tp-section">
-                            <div class="tp-section-label">Duration</div>
+                    <div class="tr-body">
+                        <div class="tr-section">
+                            <div class="tr-label">Duration</div>
                             <div class="dur-row">
-                                <select class="dur-select" id="durType" aria-label="Duration type">
+                                <select class="dur-sel" id="durType" aria-label="Type">
                                     <option value="t">Ticks</option>
                                     <option value="s">Seconds</option>
                                     <option value="m" selected>Minutes</option>
                                     <option value="h">Hours</option>
                                 </select>
-                                <div class="dur-spinner">
-                                    <button id="durDown" type="button" aria-label="Decrease" title="Decrease">−</button>
+                                <div class="dur-spin">
+                                    <button type="button" id="durDown" title="Less" aria-label="Less">−</button>
                                     <input type="number" id="durVal" value="5" min="1" aria-label="Duration">
-                                    <button id="durUp" type="button" aria-label="Increase" title="Increase">+</button>
+                                    <button type="button" id="durUp" title="More" aria-label="More">+</button>
                                 </div>
                             </div>
                         </div>
-                        <div class="tp-section">
-                            <div class="tp-section-label">Stake</div>
-                            <div class="stake-box">
-                                <span class="stake-cur">USD</span>
+                        <div class="tr-section">
+                            <div class="tr-label">Stake</div>
+                            <div class="stake-row">
+                                <span class="stake-c">USD</span>
                                 <input type="number" id="stakeVal" value="10" min="0.35" step="0.01" aria-label="Stake">
                             </div>
-                            <div class="quick-amounts">
-                                <button class="quick-amt" data-v="5" type="button" title="$5">$5</button>
-                                <button class="quick-amt active" data-v="10" type="button" title="$10">$10</button>
-                                <button class="quick-amt" data-v="25" type="button" title="$25">$25</button>
-                                <button class="quick-amt" data-v="50" type="button" title="$50">$50</button>
-                                <button class="quick-amt" data-v="100" type="button" title="$100">$100</button>
+                            <div class="qk-row">
+                                <button class="qk" data-v="5" type="button" title="$5">$5</button>
+                                <button class="qk active" data-v="10" type="button" title="$10">$10</button>
+                                <button class="qk" data-v="25" type="button" title="$25">$25</button>
+                                <button class="qk" data-v="50" type="button" title="$50">$50</button>
+                                <button class="qk" data-v="100" type="button" title="$100">$100</button>
                             </div>
                         </div>
-                        <div class="payout-box">
-                            <div class="payout-row"><span>Payout</span><span class="payout-val" id="payoutVal">--</span>
-                            </div>
-                            <div class="payout-row"><span>Profit</span><span class="payout-val green"
-                                    id="profitVal">--</span></div>
+                        <div class="payout-info">
+                            <div class="pi-row"><span>Payout</span><span id="payoutVal">--</span></div>
+                            <div class="pi-row"><span>Profit</span><span class="gn" id="profitVal">--</span></div>
                         </div>
-                        <div class="trade-btns">
-                            <button class="trade-btn rise-btn" id="riseBtn" type="button" title="Buy Rise">
-                                <span class="tb-icon"><i class="fas fa-arrow-up"></i></span>
-                                <span class="tb-label">Rise</span>
-                                <span class="tb-payout" id="risePay">--</span>
+                        <div class="action-btns">
+                            <button class="act-btn rise" id="riseBtn" type="button" title="Rise">
+                                <i class="fas fa-arrow-up"></i>
+                                <strong>Rise</strong>
+                                <span id="risePay">--</span>
                             </button>
-                            <button class="trade-btn fall-btn" id="fallBtn" type="button" title="Buy Fall">
-                                <span class="tb-icon"><i class="fas fa-arrow-down"></i></span>
-                                <span class="tb-label">Fall</span>
-                                <span class="tb-payout" id="fallPay">--</span>
+                            <button class="act-btn fall" id="fallBtn" type="button" title="Fall">
+                                <i class="fas fa-arrow-down"></i>
+                                <strong>Fall</strong>
+                                <span id="fallPay">--</span>
                             </button>
                         </div>
                     </div>
-                    <div class="contracts-section">
-                        <h4>Active Contracts <span class="contract-count" id="cCount">0</span></h4>
+                    <div class="contracts-area">
+                        <h4>Contracts <span class="c-count" id="cCount">0</span></h4>
                         <div id="contractsList"></div>
                     </div>
                 </aside>
@@ -360,11 +309,11 @@
         </div>
     </div>
 
-    <div class="toast-wrap" id="toastWrap"></div>
+    <div class="toast-area" id="toastWrap"></div>
 
     <script
         src="https://cdn.jsdelivr.net/npm/lightweight-charts@4.1.0/dist/lightweight-charts.standalone.production.js"></script>
-    <script src="app.js"></script>
+    <script src="./app.js"></script>
 </body>
 
 </html>
