@@ -5,6 +5,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MyTrader</title>
+    <meta name="description" content="Trade forex, synthetics, and more">
+    <link rel="icon" type="image/svg+xml"
+        href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='6' fill='%23ff444f'/><text x='50%25' y='55%25' font-size='18' text-anchor='middle' dominant-baseline='middle' fill='white' font-family='sans-serif' font-weight='bold'>M</text></svg>">
     <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300;400;500;600;700&display=swap"
         rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -13,269 +16,368 @@
 
 <body>
 
-    <header class="header">
-        <div class="header-left">
-            <a class="logo" href="#">
-                <div class="logo-icon"><i class="fas fa-chart-line"></i></div>
-                <span class="logo-text">MyTrader</span>
+    <!-- ===== HEADER ===== -->
+    <header class="hdr">
+        <div class="hdr-l">
+            <a class="logo" href="#" id="logoHome">
+                <div class="logo-box"><i class="fas fa-chart-line"></i></div>
+                <span class="logo-txt">MyTrader</span>
             </a>
-            <nav class="nav">
-                <a class="nav-link active" data-page="dashboard" role="button" tabindex="0">Dashboard</a>
-                <a class="nav-link" data-page="trading" role="button" tabindex="0">Trade</a>
-                <a class="nav-link" data-page="reports" role="button" tabindex="0">Reports</a>
-                <a class="nav-link" data-page="cashier" role="button" tabindex="0">Cashier</a>
+            <nav class="nav" id="mainNav">
+                <a class="nav-a active" data-page="dashboard" role="button" tabindex="0">
+                    <i class="fas fa-th-large"></i> Dashboard
+                </a>
+                <a class="nav-a" data-page="trading" role="button" tabindex="0">
+                    <i class="fas fa-exchange-alt"></i> Trade
+                </a>
+                <a class="nav-a" data-page="reports" role="button" tabindex="0">
+                    <i class="fas fa-chart-pie"></i> Reports
+                </a>
+                <a class="nav-a" data-page="cashier" role="button" tabindex="0">
+                    <i class="fas fa-wallet"></i> Cashier
+                </a>
             </nav>
         </div>
-        <div class="header-right">
-            <div class="account-badge">
-                <span class="acc-type-badge" id="accType">Demo</span>
-                <span class="acc-balance" id="accBalance">0.00 USD</span>
-                <i class="fas fa-chevron-down acc-chevron"></i>
+        <div class="hdr-r">
+            <!-- Account Switcher -->
+            <div class="acc-switch" id="accSwitch">
+                <div class="acc-current" id="accCurrent">
+                    <span class="acc-tag" id="accTag">Demo</span>
+                    <span class="acc-bal" id="accBal">0.00 USD</span>
+                    <i class="fas fa-chevron-down acc-arr"></i>
+                </div>
+                <div class="acc-dropdown" id="accDrop">
+                    <div class="acc-drop-title">Switch Account</div>
+                    <div id="accList"></div>
+                    <div class="acc-drop-footer">
+                        <a href="https://deriv.com" target="_blank" rel="noopener noreferrer">
+                            <i class="fas fa-plus-circle"></i> Add account
+                        </a>
+                    </div>
+                </div>
             </div>
-            <button class="icon-btn" aria-label="Notifications" title="Notifications">
+
+            <button class="h-btn" id="notifBtn" aria-label="Notifications" title="Notifications">
                 <i class="fas fa-bell"></i>
+                <span class="h-badge" id="notifCount">0</span>
             </button>
-            <button class="icon-btn" aria-label="Theme" title="Theme" id="themeBtn">
-                <i class="fas fa-moon"></i>
+            <button class="h-btn" id="themeBtn" aria-label="Theme" title="Toggle theme">
+                <i class="fas fa-moon" id="themeIcon"></i>
             </button>
-            <button class="user-avatar" aria-label="Logout" title="Click to logout" id="logoutBtn">
-                <i class="fas fa-user"></i>
-            </button>
+            <div class="h-user" id="userMenu">
+                <button class="h-avatar" aria-label="Account" title="Account">
+                    <span id="userInitial">?</span>
+                </button>
+                <div class="user-dropdown" id="userDrop">
+                    <div class="ud-header">
+                        <div class="ud-name" id="udName">Trader</div>
+                        <div class="ud-email" id="udEmail">user@email.com</div>
+                    </div>
+                    <div class="ud-body">
+                        <a class="ud-item" href="https://app.deriv.com/account/personal-details" target="_blank"
+                            rel="noopener noreferrer">
+                            <i class="fas fa-user"></i> My Profile
+                        </a>
+                        <a class="ud-item" href="https://app.deriv.com/account/api-token" target="_blank"
+                            rel="noopener noreferrer">
+                            <i class="fas fa-key"></i> API Tokens
+                        </a>
+                        <button class="ud-item" id="logoutBtn" type="button">
+                            <i class="fas fa-sign-out-alt"></i> Log out
+                        </button>
+                    </div>
+                </div>
+            </div>
         </div>
+
+        <!-- Mobile menu button -->
+        <button class="mob-menu" id="mobMenu" aria-label="Menu" title="Menu">
+            <i class="fas fa-bars"></i>
+        </button>
     </header>
 
+    <!-- ===== MOBILE NAV OVERLAY ===== -->
+    <div class="mob-nav" id="mobNav">
+        <div class="mob-nav-head">
+            <span>Menu</span>
+            <button id="mobClose" aria-label="Close" title="Close"><i class="fas fa-times"></i></button>
+        </div>
+        <a class="mob-link active" data-page="dashboard"><i class="fas fa-th-large"></i> Dashboard</a>
+        <a class="mob-link" data-page="trading"><i class="fas fa-exchange-alt"></i> Trade</a>
+        <a class="mob-link" data-page="reports"><i class="fas fa-chart-pie"></i> Reports</a>
+        <a class="mob-link" data-page="cashier"><i class="fas fa-wallet"></i> Cashier</a>
+        <div class="mob-divider"></div>
+        <button class="mob-link" id="mobLogout"><i class="fas fa-sign-out-alt"></i> Log out</button>
+    </div>
+
+    <!-- ===== LOGIN ===== -->
     <div class="login-screen" id="loginScreen">
         <div class="login-box">
             <div class="login-hero">
-                <div class="hero-content">
+                <div class="hero-inner">
                     <div class="hero-logo"><i class="fas fa-chart-line"></i></div>
                     <h1>MyTrader</h1>
                     <p>Trade forex, commodities, synthetic indices, and more.</p>
-                    <div class="hero-features">
-                        <div class="hero-feature">
-                            <div class="hf-icon"><i class="fas fa-shield-alt"></i></div>
-                            <span>Secure &amp; Regulated</span>
+                    <div class="hero-feats">
+                        <div class="hf">
+                            <div class="hf-i"><i class="fas fa-shield-alt"></i></div><span>Secure &amp; Regulated</span>
                         </div>
-                        <div class="hero-feature">
-                            <div class="hf-icon"><i class="fas fa-bolt"></i></div>
-                            <span>Instant Execution</span>
+                        <div class="hf">
+                            <div class="hf-i"><i class="fas fa-bolt"></i></div><span>Instant Execution</span>
                         </div>
-                        <div class="hero-feature">
-                            <div class="hf-icon"><i class="fas fa-clock"></i></div>
-                            <span>24/7 Trading</span>
+                        <div class="hf">
+                            <div class="hf-i"><i class="fas fa-clock"></i></div><span>24/7 Trading</span>
+                        </div>
+                        <div class="hf">
+                            <div class="hf-i"><i class="fas fa-chart-area"></i></div><span>Advanced Charts</span>
                         </div>
                     </div>
                 </div>
             </div>
-            <div class="login-form-panel">
+            <div class="login-form-side">
                 <h2>Log in</h2>
                 <p class="login-sub">Connect your Deriv account</p>
-
                 <div class="ws-bar" id="wsBar">
-                    <div class="ws-dot" id="wsDot"></div>
-                    <span id="wsText">Initializing...</span>
+                    <div class="ws-dot" id="wsDot"></div><span id="wsText">Initializing...</span>
+                </div>
+                <div class="alert alert-err" id="alertErr"></div>
+                <div class="alert alert-ok" id="alertOk"></div>
+                <div class="dbg" id="dbgBox"></div>
+
+                <div class="login-primary">
+                    <div class="lp-label"><span class="tag-green">Recommended</span> Deriv OAuth</div>
+                    <button class="btn btn-red" id="oauthBtn" type="button"><i class="fas fa-external-link-alt"></i> Log
+                        in with Deriv</button>
+                    <p class="lp-hint">Secure redirect to Deriv</p>
                 </div>
 
-                <div class="alert alert-error" id="alertError"></div>
-                <div class="alert alert-success" id="alertSuccess"></div>
-                <div class="debug-box" id="debugBox"></div>
-
-                <div class="login-section">
-                    <div class="section-label"><span class="badge-green">Recommended</span> Deriv OAuth</div>
-                    <button class="btn btn-red" id="oauthBtn" type="button">
-                        <i class="fas fa-external-link-alt"></i> Log in with Deriv
-                    </button>
-                    <p class="hint">Redirects to Deriv for secure login</p>
-                </div>
-
-                <div class="divider"><span>or paste API token</span></div>
+                <div class="divider"><span>or use API token</span></div>
 
                 <form id="loginForm" novalidate>
-                    <div class="form-group">
-                        <label class="form-label" for="loginToken">API Token</label>
-                        <div class="input-row">
+                    <div class="fg">
+                        <label class="fl" for="loginToken">API Token</label>
+                        <div class="fi">
                             <i class="fas fa-key"></i>
-                            <input type="text" id="loginToken" placeholder="a1-xAbCdEfGhIjKl..." autocomplete="off"
+                            <input type="text" id="loginToken" placeholder="a1-xAbCdEfGh..." autocomplete="off"
                                 spellcheck="false">
                         </div>
-                        <p class="hint"><a href="https://app.deriv.com/account/api-token" target="_blank"
-                                rel="noopener noreferrer">Get token here →</a> (check ALL scopes)</p>
+                        <p class="fh"><a href="https://app.deriv.com/account/api-token" target="_blank"
+                                rel="noopener noreferrer">Get token →</a> (all scopes)</p>
                     </div>
-                    <button type="submit" class="btn btn-outline" id="loginBtn">
-                        <i class="fas fa-sign-in-alt" id="loginIcon"></i>
-                        <span id="loginBtnText">Log in with Token</span>
+                    <button type="submit" class="btn btn-ghost" id="loginBtn">
+                        <i class="fas fa-sign-in-alt" id="loginIco"></i>
+                        <span id="loginTxt">Log in with Token</span>
                     </button>
                 </form>
 
                 <div class="login-opts">
-                    <label class="chk"><input type="checkbox" id="showDebug"> Debug</label>
-                    <label class="chk"><input type="checkbox" id="rememberToken" checked> Remember</label>
+                    <label class="chk"><input type="checkbox" id="showDbg"> Debug</label>
+                    <label class="chk"><input type="checkbox" id="remTok" checked> Remember</label>
                 </div>
 
-                <div class="login-footer">
+                <div class="login-foot">
                     <p>No account? <a href="https://deriv.com/signup/" target="_blank" rel="noopener noreferrer">Sign
                             up</a></p>
-                    <div class="info-box">
-                        <p>App ID: <code id="showAppId"></code></p>
-                        <p>URL: <code id="showOrigin"></code></p>
+                    <div class="app-info">
+                        <span>App: <code id="showAID"></code></span>
+                        <span>URL: <code id="showURL"></code></span>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 
+    <!-- ===== MAIN APP ===== -->
     <div class="main" id="mainApp">
+
+        <!-- DASHBOARD -->
         <div class="page active" id="dashboardPage">
-            <div class="dashboard">
-                <div class="card">
-                    <div class="card-top">
-                        <h3>Portfolio</h3>
-                    </div>
-                    <div class="stats-row">
-                        <div class="stat">
-                            <div class="stat-lbl">Balance</div>
-                            <div class="stat-num" id="statBalance">$0.00</div>
-                        </div>
-                        <div class="stat">
-                            <div class="stat-lbl">P/L</div>
-                            <div class="stat-num gn" id="statPnl">+$0.00</div>
-                        </div>
-                        <div class="stat">
-                            <div class="stat-lbl">Open</div>
-                            <div class="stat-num" id="statOpen">0</div>
-                        </div>
+            <div class="page-header">
+                <h1>Dashboard</h1>
+                <p>Overview of your trading activity</p>
+            </div>
+            <div class="dash-grid">
+                <!-- Balance Card -->
+                <div class="d-card d-balance">
+                    <div class="dc-icon"><i class="fas fa-wallet"></i></div>
+                    <div class="dc-info">
+                        <span class="dc-label">Total Balance</span>
+                        <span class="dc-value" id="dBal">$0.00</span>
                     </div>
                 </div>
-                <div class="card">
-                    <div class="card-top">
-                        <h3>Markets</h3><a href="#" id="goTrade">Trade →</a>
-                    </div>
-                    <div class="mkt-row" data-symbol="R_100">
-                        <div>
-                            <div class="mkt-n">Volatility 100</div>
-                            <div class="mkt-p" id="dp_R_100">--</div>
-                        </div>
-                        <div class="mkt-ch up"><i class="fas fa-caret-up"></i>--</div>
-                    </div>
-                    <div class="mkt-row" data-symbol="R_50">
-                        <div>
-                            <div class="mkt-n">Volatility 50</div>
-                            <div class="mkt-p" id="dp_R_50">--</div>
-                        </div>
-                        <div class="mkt-ch up"><i class="fas fa-caret-up"></i>--</div>
-                    </div>
-                    <div class="mkt-row" data-symbol="R_75">
-                        <div>
-                            <div class="mkt-n">Volatility 75</div>
-                            <div class="mkt-p" id="dp_R_75">--</div>
-                        </div>
-                        <div class="mkt-ch up"><i class="fas fa-caret-up"></i>--</div>
-                    </div>
-                    <div class="mkt-row" data-symbol="R_10">
-                        <div>
-                            <div class="mkt-n">Volatility 10</div>
-                            <div class="mkt-p" id="dp_R_10">--</div>
-                        </div>
-                        <div class="mkt-ch up"><i class="fas fa-caret-up"></i>--</div>
+                <div class="d-card d-profit">
+                    <div class="dc-icon green-bg"><i class="fas fa-trending-up"></i></div>
+                    <div class="dc-info">
+                        <span class="dc-label">Today's P/L</span>
+                        <span class="dc-value gn" id="dPnl">+$0.00</span>
                     </div>
                 </div>
-                <div class="card">
-                    <div class="card-top">
-                        <h3>Open Positions</h3>
-                    </div>
-                    <div class="empty"><i class="fas fa-inbox"></i>
-                        <p>No open positions</p>
+                <div class="d-card d-trades">
+                    <div class="dc-icon blue-bg"><i class="fas fa-receipt"></i></div>
+                    <div class="dc-info">
+                        <span class="dc-label">Total Trades</span>
+                        <span class="dc-value" id="dTrades">0</span>
                     </div>
                 </div>
-                <div class="card">
-                    <div class="card-top">
-                        <h3>Recent Trades</h3>
+                <div class="d-card d-open">
+                    <div class="dc-icon yellow-bg"><i class="fas fa-spinner"></i></div>
+                    <div class="dc-info">
+                        <span class="dc-label">Open Positions</span>
+                        <span class="dc-value" id="dOpen">0</span>
                     </div>
-                    <div class="empty"><i class="fas fa-history"></i>
-                        <p>No recent trades</p>
+                </div>
+
+                <!-- Markets Watch -->
+                <div class="card span2">
+                    <div class="card-h">
+                        <h3><i class="fas fa-globe"></i> Market Watch</h3>
+                        <button class="card-btn" id="goTradeBtn" type="button">Trade <i
+                                class="fas fa-arrow-right"></i></button>
+                    </div>
+                    <div class="mw-header">
+                        <span>Market</span><span>Price</span><span>Change</span>
+                    </div>
+                    <div id="marketWatch">
+                        <div class="mw-row" data-symbol="R_100"><span class="mw-name"><i
+                                    class="fas fa-chart-line mw-ico"></i>Volatility 100</span><span class="mw-price"
+                                id="mw_R_100">--</span><span class="mw-change up" id="mc_R_100">--</span></div>
+                        <div class="mw-row" data-symbol="R_75"><span class="mw-name"><i
+                                    class="fas fa-chart-line mw-ico"></i>Volatility 75</span><span class="mw-price"
+                                id="mw_R_75">--</span><span class="mw-change up" id="mc_R_75">--</span></div>
+                        <div class="mw-row" data-symbol="R_50"><span class="mw-name"><i
+                                    class="fas fa-chart-line mw-ico"></i>Volatility 50</span><span class="mw-price"
+                                id="mw_R_50">--</span><span class="mw-change up" id="mc_R_50">--</span></div>
+                        <div class="mw-row" data-symbol="R_25"><span class="mw-name"><i
+                                    class="fas fa-chart-line mw-ico"></i>Volatility 25</span><span class="mw-price"
+                                id="mw_R_25">--</span><span class="mw-change up" id="mc_R_25">--</span></div>
+                        <div class="mw-row" data-symbol="R_10"><span class="mw-name"><i
+                                    class="fas fa-chart-line mw-ico"></i>Volatility 10</span><span class="mw-price"
+                                id="mw_R_10">--</span><span class="mw-change up" id="mc_R_10">--</span></div>
+                        <div class="mw-row" data-symbol="1HZ100V"><span class="mw-name"><i
+                                    class="fas fa-chart-line mw-ico"></i>Vol 100 (1s)</span><span class="mw-price"
+                                id="mw_1HZ100V">--</span><span class="mw-change up" id="mc_1HZ100V">--</span></div>
+                    </div>
+                </div>
+
+                <!-- Open Positions -->
+                <div class="card span2">
+                    <div class="card-h">
+                        <h3><i class="fas fa-layer-group"></i> Open Positions</h3>
+                    </div>
+                    <div id="dashPositions">
+                        <div class="empty-state"><i class="fas fa-inbox"></i>
+                            <p>No open positions</p><span>Your active trades will appear here</span>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
 
+        <!-- TRADING -->
         <div class="page" id="tradingPage">
             <div class="trade-layout">
-                <aside class="side-panel">
-                    <div class="sp-search"><i class="fas fa-search"></i><input type="text" id="mktSearch"
-                            placeholder="Search..."></div>
-                    <div class="sp-tabs">
-                        <button class="sp-tab active" type="button" title="Synthetic">Synth</button>
-                        <button class="sp-tab" type="button" title="Forex">Forex</button>
-                        <button class="sp-tab" type="button" title="Commodities">Comm</button>
+                <!-- Sidebar -->
+                <aside class="t-side" id="tSide">
+                    <div class="ts-search"><i class="fas fa-search"></i><input type="text" id="mktSearch"
+                            placeholder="Search markets..."></div>
+                    <div class="ts-cats" id="tsCats">
+                        <button class="ts-cat active" data-cat="synthetic" type="button" title="Synthetic">
+                            <i class="fas fa-robot"></i> Synthetic
+                        </button>
+                        <button class="ts-cat" data-cat="forex" type="button" title="Forex">
+                            <i class="fas fa-dollar-sign"></i> Forex
+                        </button>
+                        <button class="ts-cat" data-cat="commodities" type="button" title="Commodities">
+                            <i class="fas fa-gem"></i> Comm
+                        </button>
                     </div>
-                    <div class="sp-list" id="sidebarList">
-                        <div class="sp-item active" data-symbol="R_100"><span class="sp-name">Volatility 100</span><span
-                                class="sp-price" id="sp_R_100">--</span></div>
-                        <div class="sp-item" data-symbol="R_75"><span class="sp-name">Volatility 75</span><span
-                                class="sp-price" id="sp_R_75">--</span></div>
-                        <div class="sp-item" data-symbol="R_50"><span class="sp-name">Volatility 50</span><span
-                                class="sp-price" id="sp_R_50">--</span></div>
-                        <div class="sp-item" data-symbol="R_25"><span class="sp-name">Volatility 25</span><span
-                                class="sp-price" id="sp_R_25">--</span></div>
-                        <div class="sp-item" data-symbol="R_10"><span class="sp-name">Volatility 10</span><span
-                                class="sp-price" id="sp_R_10">--</span></div>
-                        <div class="sp-item" data-symbol="1HZ100V"><span class="sp-name">Vol 100 (1s)</span><span
-                                class="sp-price" id="sp_1HZ100V">--</span></div>
-                        <div class="sp-item" data-symbol="1HZ50V"><span class="sp-name">Vol 50 (1s)</span><span
-                                class="sp-price" id="sp_1HZ50V">--</span></div>
-                    </div>
+                    <div class="ts-list" id="tsList"></div>
                 </aside>
 
-                <div class="chart-area">
-                    <div class="chart-bar">
-                        <div class="chart-info">
-                            <h2 id="chartSymName">Volatility 100 Index</h2>
-                            <span class="chart-price" id="chartLivePrice">--</span>
-                            <span class="chart-badge up" id="chartPct">+0.00%</span>
+                <!-- Chart -->
+                <div class="t-chart">
+                    <div class="tc-bar">
+                        <div class="tc-info">
+                            <button class="tc-toggle" id="sideToggle" type="button" aria-label="Toggle sidebar"
+                                title="Toggle sidebar">
+                                <i class="fas fa-bars"></i>
+                            </button>
+                            <h2 id="chartName">Volatility 100 Index</h2>
+                            <span class="tc-price" id="chartPrice">--</span>
+                            <span class="tc-badge up" id="chartBadge">+0.00%</span>
                         </div>
-                        <div class="chart-btns">
-                            <div class="btn-group">
-                                <button class="gb" data-g="60" type="button" title="1m">1m</button>
-                                <button class="gb active" data-g="300" type="button" title="5m">5m</button>
-                                <button class="gb" data-g="900" type="button" title="15m">15m</button>
-                                <button class="gb" data-g="3600" type="button" title="1H">1H</button>
-                                <button class="gb" data-g="14400" type="button" title="4H">4H</button>
-                                <button class="gb" data-g="86400" type="button" title="1D">1D</button>
+                        <div class="tc-controls">
+                            <div class="tc-group" id="tfGroup">
+                                <button class="tcg-btn" data-g="60" type="button" title="1 Minute">1m</button>
+                                <button class="tcg-btn active" data-g="300" type="button" title="5 Minutes">5m</button>
+                                <button class="tcg-btn" data-g="900" type="button" title="15 Minutes">15m</button>
+                                <button class="tcg-btn" data-g="3600" type="button" title="1 Hour">1H</button>
+                                <button class="tcg-btn" data-g="14400" type="button" title="4 Hours">4H</button>
+                                <button class="tcg-btn" data-g="86400" type="button" title="1 Day">1D</button>
+                            </div>
+                            <div class="tc-group">
+                                <button class="tcg-btn active" id="chartCandle" type="button" aria-label="Candles"
+                                    title="Candles"><i class="fas fa-chart-bar"></i></button>
+                                <button class="tcg-btn" id="chartLine" type="button" aria-label="Line" title="Line"><i
+                                        class="fas fa-chart-line"></i></button>
+                                <button class="tcg-btn" id="chartArea" type="button" aria-label="Area" title="Area"><i
+                                        class="fas fa-chart-area"></i></button>
                             </div>
                         </div>
                     </div>
-                    <div class="chart-canvas" id="chartBox"></div>
+                    <div class="tc-canvas" id="chartBox"></div>
                 </div>
 
-                <aside class="trade-right">
-                    <div class="tr-tabs">
-                        <button class="tr-tab active" type="button">Rise/Fall</button>
-                        <button class="tr-tab" type="button">Digits</button>
+                <!-- Trade Panel -->
+                <aside class="t-panel" id="tPanel">
+                    <div class="tp-head">
+                        <button class="tp-toggle" id="panelToggle" type="button" aria-label="Toggle panel"
+                            title="Toggle panel">
+                            <i class="fas fa-sliders-h"></i> Trade
+                        </button>
                     </div>
-                    <div class="tr-body">
-                        <div class="tr-section">
-                            <div class="tr-label">Duration</div>
+                    <div class="tp-tabs" id="tpTabs">
+                        <button class="tp-tab active" data-type="rise_fall" type="button">Rise/Fall</button>
+                        <button class="tp-tab" data-type="higher_lower" type="button">Higher/Lower</button>
+                        <button class="tp-tab" data-type="touch" type="button">Touch</button>
+                        <button class="tp-tab" data-type="digits" type="button">Digits</button>
+                    </div>
+                    <div class="tp-form">
+                        <!-- Duration -->
+                        <div class="tp-sec">
+                            <div class="tp-lbl">
+                                <i class="fas fa-clock"></i> Duration
+                            </div>
                             <div class="dur-row">
-                                <select class="dur-sel" id="durType" aria-label="Type">
+                                <select class="dur-sel" id="durType" aria-label="Duration type">
                                     <option value="t">Ticks</option>
                                     <option value="s">Seconds</option>
                                     <option value="m" selected>Minutes</option>
                                     <option value="h">Hours</option>
+                                    <option value="d">Days</option>
                                 </select>
                                 <div class="dur-spin">
-                                    <button type="button" id="durDown" title="Less" aria-label="Less">−</button>
-                                    <input type="number" id="durVal" value="5" min="1" aria-label="Duration">
-                                    <button type="button" id="durUp" title="More" aria-label="More">+</button>
+                                    <button type="button" id="durDn" title="Decrease" aria-label="Decrease">−</button>
+                                    <input type="number" id="durVal" value="5" min="1" aria-label="Duration value">
+                                    <button type="button" id="durUp" title="Increase" aria-label="Increase">+</button>
                                 </div>
                             </div>
                         </div>
-                        <div class="tr-section">
-                            <div class="tr-label">Stake</div>
-                            <div class="stake-row">
-                                <span class="stake-c">USD</span>
-                                <input type="number" id="stakeVal" value="10" min="0.35" step="0.01" aria-label="Stake">
+
+                        <!-- Basis toggle -->
+                        <div class="tp-sec">
+                            <div class="tp-lbl"><i class="fas fa-coins"></i> Amount</div>
+                            <div class="basis-toggle">
+                                <button class="basis-btn active" data-basis="stake" type="button">Stake</button>
+                                <button class="basis-btn" data-basis="payout" type="button">Payout</button>
                             </div>
-                            <div class="qk-row">
+                            <div class="stake-input">
+                                <span class="stake-cur" id="stakeCur">USD</span>
+                                <input type="number" id="stakeVal" value="10" min="0.35" step="0.01"
+                                    aria-label="Amount">
+                            </div>
+                            <div class="qk-btns">
+                                <button class="qk" data-v="1" type="button" title="$1">$1</button>
                                 <button class="qk" data-v="5" type="button" title="$5">$5</button>
                                 <button class="qk active" data-v="10" type="button" title="$10">$10</button>
                                 <button class="qk" data-v="25" type="button" title="$25">$25</button>
@@ -283,36 +385,133 @@
                                 <button class="qk" data-v="100" type="button" title="$100">$100</button>
                             </div>
                         </div>
-                        <div class="payout-info">
-                            <div class="pi-row"><span>Payout</span><span id="payoutVal">--</span></div>
-                            <div class="pi-row"><span>Profit</span><span class="gn" id="profitVal">--</span></div>
+
+                        <!-- Payout display -->
+                        <div class="payout-card">
+                            <div class="pc-row"><span>Payout</span><span class="pc-val" id="poVal">--</span></div>
+                            <div class="pc-row"><span>Profit</span><span class="pc-val gn" id="prVal">--</span></div>
                         </div>
-                        <div class="action-btns">
-                            <button class="act-btn rise" id="riseBtn" type="button" title="Rise">
-                                <i class="fas fa-arrow-up"></i>
-                                <strong>Rise</strong>
-                                <span id="risePay">--</span>
+
+                        <!-- Action buttons -->
+                        <div class="act-grid">
+                            <button class="act rise" id="riseBtn" type="button" title="Buy Rise">
+                                <div class="act-top"><i class="fas fa-arrow-up"></i><strong>Rise</strong></div>
+                                <span class="act-pay" id="risePay">--</span>
                             </button>
-                            <button class="act-btn fall" id="fallBtn" type="button" title="Fall">
-                                <i class="fas fa-arrow-down"></i>
-                                <strong>Fall</strong>
-                                <span id="fallPay">--</span>
+                            <button class="act fall" id="fallBtn" type="button" title="Buy Fall">
+                                <div class="act-top"><i class="fas fa-arrow-down"></i><strong>Fall</strong></div>
+                                <span class="act-pay" id="fallPay">--</span>
                             </button>
                         </div>
                     </div>
-                    <div class="contracts-area">
-                        <h4>Contracts <span class="c-count" id="cCount">0</span></h4>
-                        <div id="contractsList"></div>
+
+                    <!-- Contracts -->
+                    <div class="tp-contracts">
+                        <div class="tpc-head">
+                            <span><i class="fas fa-file-contract"></i> Contracts</span>
+                            <span class="tpc-count" id="cCount">0</span>
+                        </div>
+                        <div class="tpc-list" id="cList"></div>
                     </div>
                 </aside>
             </div>
         </div>
+
+        <!-- REPORTS -->
+        <div class="page" id="reportsPage">
+            <div class="page-header">
+                <h1>Reports</h1>
+                <p>View your trading history and performance</p>
+            </div>
+            <div class="reports-content">
+                <div class="report-tabs">
+                    <button class="rp-tab active" data-rtab="history" type="button">Trade History</button>
+                    <button class="rp-tab" data-rtab="statement" type="button">Statement</button>
+                    <button class="rp-tab" data-rtab="profit" type="button">Profit Table</button>
+                </div>
+                <div class="report-filters">
+                    <div class="rf-group">
+                        <label>From</label>
+                        <input type="date" id="rfFrom" class="rf-input">
+                    </div>
+                    <div class="rf-group">
+                        <label>To</label>
+                        <input type="date" id="rfTo" class="rf-input">
+                    </div>
+                    <button class="btn btn-sm" id="rfApply" type="button">Apply</button>
+                </div>
+                <div class="report-table">
+                    <div class="rt-head">
+                        <span>Date</span><span>Market</span><span>Type</span><span>Stake</span><span>Payout</span><span>P/L</span>
+                    </div>
+                    <div id="reportBody">
+                        <div class="empty-state"><i class="fas fa-chart-pie"></i>
+                            <p>No trade history</p><span>Your completed trades will appear here</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- CASHIER -->
+        <div class="page" id="cashierPage">
+            <div class="page-header">
+                <h1>Cashier</h1>
+                <p>Manage your funds</p>
+            </div>
+            <div class="cashier-content">
+                <div class="cash-balance-card">
+                    <div class="cbc-label">Available Balance</div>
+                    <div class="cbc-amount" id="cashBal">$0.00</div>
+                    <div class="cbc-type" id="cashType">Demo Account</div>
+                </div>
+                <div class="cash-actions">
+                    <div class="cash-card">
+                        <div class="cc-icon green-bg"><i class="fas fa-plus-circle"></i></div>
+                        <h3>Deposit</h3>
+                        <p>Add funds to your account</p>
+                        <a class="btn btn-sm btn-green" href="https://app.deriv.com/cashier/deposit" target="_blank"
+                            rel="noopener noreferrer">Deposit</a>
+                    </div>
+                    <div class="cash-card">
+                        <div class="cc-icon red-bg"><i class="fas fa-minus-circle"></i></div>
+                        <h3>Withdraw</h3>
+                        <p>Withdraw funds to your account</p>
+                        <a class="btn btn-sm btn-red-outline" href="https://app.deriv.com/cashier/withdrawal"
+                            target="_blank" rel="noopener noreferrer">Withdraw</a>
+                    </div>
+                    <div class="cash-card">
+                        <div class="cc-icon blue-bg"><i class="fas fa-exchange-alt"></i></div>
+                        <h3>Transfer</h3>
+                        <p>Transfer between accounts</p>
+                        <a class="btn btn-sm btn-ghost" href="https://app.deriv.com/cashier/account-transfer"
+                            target="_blank" rel="noopener noreferrer">Transfer</a>
+                    </div>
+                </div>
+                <div class="cash-history">
+                    <h3><i class="fas fa-history"></i> Recent Transactions</h3>
+                    <div id="cashHistory">
+                        <div class="empty-state"><i class="fas fa-exchange-alt"></i>
+                            <p>No recent transactions</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 
+    <!-- TOASTS -->
     <div class="toast-area" id="toastWrap"></div>
 
+    <!-- SCRIPTS -->
     <script
         src="https://cdn.jsdelivr.net/npm/lightweight-charts@4.1.0/dist/lightweight-charts.standalone.production.js"></script>
+    <script src="./ws.js"></script>
+    <script src="./auth.js"></script>
+    <script src="./ui.js"></script>
+    <script src="./markets.js"></script>
+    <script src="./chart.js"></script>
+    <script src="./trade.js"></script>
     <script src="./app.js"></script>
 </body>
 
