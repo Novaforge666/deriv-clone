@@ -38,4 +38,4 @@ function authStartOAuth() {
 
 function authStartSignup() {
     window.open('https://deriv.com/signup/', '_blank');
-}
+}   
