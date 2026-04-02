@@ -1,50 +1,36 @@
-// ========================================
-// App Controller - Entry Point
-// ========================================
-
 document.addEventListener('DOMContentLoaded', function () {
-    // Show debug info
-    var a1 = document.getElementById('showAID');
-    var a2 = document.getElementById('showURL');
-    if (a1) a1.textContent = APP_ID;
-    if (a2) a2.textContent = location.origin;
+    // Landing page buttons
+    ['landLogin', 'heroLogin', 'ctaLogin'].forEach(function (id) {
+        var el = document.getElementById(id);
+        if (el) el.addEventListener('click', function () { authStartOAuth(); });
+    });
+    ['landSignup', 'heroSignup', 'ctaSignup'].forEach(function (id) {
+        var el = document.getElementById(id);
+        if (el) el.addEventListener('click', function () { authStartSignup(); });
+    });
 
     boot();
 });
 
 function boot() {
-    dbg('MyTrader v2.0');
-    dbg('URL: ' + location.href);
-    dbg('App ID: ' + APP_ID);
-
-    // Bind login events
-    bindLoginEvents();
-
-    // Bind common UI
-    uiBindCommon();
-
-    // Connect WebSocket
+    // Connect WS
     wsConnect().then(function () {
-        toast('i', 'Connected');
-
-        // Check OAuth
+        // Check OAuth callback
         var oauthToken = authCheckOAuth();
-        var token = oauthToken || authGetSavedToken();
+        var token = oauthToken || localStorage.getItem('deriv_token');
 
         if (token) {
-            dbg('Token found, authenticating...');
             authLogin(token).then(function (acct) {
                 onLoggedIn(acct);
-            }).catch(function (e) {
-                dbg('Auth failed: ' + (e.message || e.code), 'error');
+            }).catch(function () {
                 localStorage.removeItem('deriv_token');
-                uiShowLogin();
+                uiShowLanding();
             });
         } else {
-            uiShowLogin();
+            uiShowLanding();
         }
     }).catch(function () {
-        showAlert('alertErr', 'Cannot connect to Deriv.');
+        uiShowLanding();
     });
 }
 
@@ -52,56 +38,49 @@ function onLoggedIn(acct) {
     uiOnAuth(acct);
     toast('s', 'Welcome, ' + (acct.fullname || acct.loginid) + '!');
 
-    // Subscribe to balance
+    // Balance
     wsRaw({ balance: 1, subscribe: 1 });
-    wsOn('balance', function (b) {
-        uiUpdateBalance(b.balance, b.currency);
-    });
+    wsOn('balance', function (b) { uiUpdateBal(b.balance, b.currency); });
 
-    // Populate sidebar
-    mktPopulateSidebar('synthetic');
-
-    // Subscribe dashboard ticks
-    mktSubscribeDashboard();
-
-    // Bind trading events
-    tradeBindEvents();
+    // Build UI
+    mktBuildDashboard();
+    mktBuildSidebar('synthetic');
+    mktSubscribe();
+    tradeBindAll();
+    bindAppNav();
 }
 
-function bindLoginEvents() {
-    // OAuth
-    document.getElementById('oauthBtn').addEventListener('click', function () {
-        toast('i', 'Redirecting...');
-        setTimeout(authStartOAuth, 300);
+function bindAppNav() {
+    // Desktop nav
+    document.querySelectorAll('.anav').forEach(function (a) {
+        a.addEventListener('click', function (e) { e.preventDefault(); uiGoPage(a.dataset.page); });
     });
 
-    // Token login
-    document.getElementById('loginForm').addEventListener('submit', function (e) {
-        e.preventDefault();
-        hideAlert('alertErr');
-        hideAlert('alertOk');
+    // Logo
+    document.getElementById('appLogo').addEventListener('click', function (e) { e.preventDefault(); uiGoPage('dashboard'); });
 
-        var token = document.getElementById('loginToken').value.trim();
-        if (!token) { showAlert('alertErr', 'Paste your API token.'); return; }
+    // Dashboard trade button
+    document.getElementById('dashTrade').addEventListener('click', function () { uiGoPage('trading'); });
 
-        var btn = document.getElementById('loginBtn');
-        var ico = document.getElementById('loginIco');
-        var txt = document.getElementById('loginTxt');
-        btn.disabled = true;
-        txt.textContent = 'Connecting...';
-        ico.className = 'fas fa-spinner fa-spin';
-
-        authLogin(token).then(function (acct) {
-            showAlert('alertOk', 'Success!');
-            authSaveToken(token);
-            setTimeout(function () { onLoggedIn(acct); }, 300);
-        }).catch(function (e) {
-            showAlert('alertErr', 'Failed: ' + (e.message || e.code || '?'));
-            toast('e', e.message || 'Auth failed');
-        }).finally(function () {
-            btn.disabled = false;
-            txt.textContent = 'Log in with Token';
-            ico.className = 'fas fa-sign-in-alt';
-        });
+    // Dashboard market rows
+    document.getElementById('mwBody').addEventListener('click', function (e) {
+        var row = e.target.closest('.mw-row'); if (!row) return;
+        curSymbol = row.dataset.symbol;
+        document.getElementById('chartName').textContent = mktName(curSymbol);
+        uiGoPage('trading');
     });
+
+    // Mobile menu
+    document.getElementById('appMobBtn').addEventListener('click', function () { document.getElementById('mobOverlay').classList.add('open'); });
+    document.getElementById('mobClose').addEventListener('click', function () { document.getElementById('mobOverlay').classList.remove('open'); });
+    document.querySelectorAll('.mnav[data-page]').forEach(function (a) {
+        a.addEventListener('click', function () { uiGoPage(a.dataset.page); });
+    });
+
+    // Logout
+    document.getElementById('appLogout').addEventListener('click', authLogout);
+    document.getElementById('mobLogout').addEventListener('click', authLogout);
+
+    // Landing mobile menu (simple toggle for now)
+    document.getElementById('landMobBtn').addEventListener('click', function () { authStartOAuth(); });
 }

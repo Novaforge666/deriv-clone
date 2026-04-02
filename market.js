@@ -1,29 +1,23 @@
-// ========================================
-// Markets Module
-// ========================================
 var MARKETS = {
     synthetic: [
-        { sym: 'R_100', name: 'Volatility 100 Index', dp: 2 },
-        { sym: 'R_75', name: 'Volatility 75 Index', dp: 4 },
-        { sym: 'R_50', name: 'Volatility 50 Index', dp: 4 },
-        { sym: 'R_25', name: 'Volatility 25 Index', dp: 4 },
-        { sym: 'R_10', name: 'Volatility 10 Index', dp: 3 },
-        { sym: '1HZ100V', name: 'Volatility 100 (1s)', dp: 2 },
-        { sym: '1HZ75V', name: 'Volatility 75 (1s)', dp: 4 },
-        { sym: '1HZ50V', name: 'Volatility 50 (1s)', dp: 4 },
-        { sym: '1HZ25V', name: 'Volatility 25 (1s)', dp: 4 },
-        { sym: '1HZ10V', name: 'Volatility 10 (1s)', dp: 3 }
+        { s: 'R_100', n: 'Volatility 100 Index', d: 2 },
+        { s: 'R_75', n: 'Volatility 75 Index', d: 4 },
+        { s: 'R_50', n: 'Volatility 50 Index', d: 4 },
+        { s: 'R_25', n: 'Volatility 25 Index', d: 4 },
+        { s: 'R_10', n: 'Volatility 10 Index', d: 3 },
+        { s: '1HZ100V', n: 'Volatility 100 (1s)', d: 2 },
+        { s: '1HZ50V', n: 'Volatility 50 (1s)', d: 4 },
+        { s: '1HZ10V', n: 'Volatility 10 (1s)', d: 3 }
     ],
     forex: [
-        { sym: 'frxEURUSD', name: 'EUR/USD', dp: 5 },
-        { sym: 'frxGBPUSD', name: 'GBP/USD', dp: 5 },
-        { sym: 'frxUSDJPY', name: 'USD/JPY', dp: 3 },
-        { sym: 'frxAUDUSD', name: 'AUD/USD', dp: 5 },
-        { sym: 'frxUSDCAD', name: 'USD/CAD', dp: 5 }
+        { s: 'frxEURUSD', n: 'EUR/USD', d: 5 },
+        { s: 'frxGBPUSD', n: 'GBP/USD', d: 5 },
+        { s: 'frxUSDJPY', n: 'USD/JPY', d: 3 },
+        { s: 'frxAUDUSD', n: 'AUD/USD', d: 5 }
     ],
     commodities: [
-        { sym: 'frxXAUUSD', name: 'Gold/USD', dp: 2 },
-        { sym: 'frxXAGUSD', name: 'Silver/USD', dp: 4 }
+        { s: 'frxXAUUSD', n: 'Gold/USD', d: 2 },
+        { s: 'frxXAGUSD', n: 'Silver/USD', d: 4 }
     ]
 };
 
@@ -31,72 +25,54 @@ var curSymbol = 'R_100';
 var curGranularity = 300;
 var prevPrices = {};
 
-function mktGetDP(sym) {
-    for (var cat in MARKETS) {
-        for (var i = 0; i < MARKETS[cat].length; i++) {
-            if (MARKETS[cat][i].sym === sym) return MARKETS[cat][i].dp;
-        }
-    }
-    return 2;
-}
+function mktDP(sym) { for (var c in MARKETS) for (var i = 0; i < MARKETS[c].length; i++) if (MARKETS[c][i].s === sym) return MARKETS[c][i].d; return 2; }
+function mktName(sym) { for (var c in MARKETS) for (var i = 0; i < MARKETS[c].length; i++) if (MARKETS[c][i].s === sym) return MARKETS[c][i].n; return sym; }
 
-function mktGetName(sym) {
-    for (var cat in MARKETS) {
-        for (var i = 0; i < MARKETS[cat].length; i++) {
-            if (MARKETS[cat][i].sym === sym) return MARKETS[cat][i].name;
-        }
-    }
-    return sym;
-}
-
-function mktPopulateSidebar(category) {
-    var list = document.getElementById('tsList');
-    if (!list) return;
-    var items = MARKETS[category] || MARKETS.synthetic;
-
+function mktBuildSidebar(cat) {
+    var list = document.getElementById('tsBody'); if (!list) return;
+    var items = MARKETS[cat] || MARKETS.synthetic;
     list.innerHTML = items.map(function (m) {
-        return '<div class="ts-item' + (m.sym === curSymbol ? ' active' : '') + '" data-symbol="' + m.sym + '">' +
-            '<div class="tsi-left"><span class="tsi-name">' + m.name + '</span></div>' +
-            '<div class="tsi-right"><span class="tsi-price" id="tp_' + m.sym + '">--</span>' +
-            '<span class="tsi-change" id="tc_' + m.sym + '"></span></div></div>';
+        return '<div class="ts-item' + (m.s === curSymbol ? ' active' : '') + '" data-symbol="' + m.s + '"><span class="tsi-n">' + m.n + '</span><span class="tsi-p" id="tp_' + m.s + '">--</span></div>';
     }).join('');
 }
 
-function mktSubscribeDashboard() {
-    var watchSymbols = ['R_100', 'R_75', 'R_50', 'R_25', 'R_10', '1HZ100V'];
+function mktBuildDashboard() {
+    var body = document.getElementById('mwBody'); if (!body) return;
+    var syms = ['R_100', 'R_75', 'R_50', 'R_25', 'R_10', '1HZ100V'];
+    body.innerHTML = syms.map(function (s) {
+        return '<div class="mw-row" data-symbol="' + s + '"><span class="mw-name">' + mktName(s) + '</span><span class="mw-price" id="mw_' + s + '">--</span><span class="mw-chg up" id="mc_' + s + '">--</span></div>';
+    }).join('');
+}
 
-    watchSymbols.forEach(function (sym) {
-        var dp = mktGetDP(sym);
+function mktSubscribe() {
+    var syms = ['R_100', 'R_75', 'R_50', 'R_25', 'R_10', '1HZ100V'];
+    syms.forEach(function (sym) {
+        var dp = mktDP(sym);
         wsSubTick(sym, function (tick) {
             var q = (+tick.quote).toFixed(dp);
             var prev = prevPrices[sym];
             prevPrices[sym] = +tick.quote;
 
-            // Dashboard market watch
-            var mwEl = document.getElementById('mw_' + sym);
-            if (mwEl) {
-                mwEl.textContent = q;
-                mwEl.classList.remove('flash-up', 'flash-dn');
+            var mw = document.getElementById('mw_' + sym);
+            if (mw) {
+                mw.textContent = q;
+                mw.classList.remove('flash-up', 'flash-dn');
                 if (prev !== undefined) {
-                    mwEl.classList.add(+tick.quote >= prev ? 'flash-up' : 'flash-dn');
-                    setTimeout(function () { mwEl.classList.remove('flash-up', 'flash-dn'); }, 400);
+                    mw.classList.add(+tick.quote >= prev ? 'flash-up' : 'flash-dn');
+                    setTimeout(function () { mw.classList.remove('flash-up', 'flash-dn'); }, 300);
                 }
             }
 
-            // Change indicator
-            var mcEl = document.getElementById('mc_' + sym);
-            if (mcEl && prev !== undefined) {
+            var mc = document.getElementById('mc_' + sym);
+            if (mc && prev !== undefined) {
                 var diff = +tick.quote - prev;
-                var pct = prev !== 0 ? ((diff / prev) * 100).toFixed(2) : '0.00';
-                mcEl.textContent = (diff >= 0 ? '+' : '') + pct + '%';
-                mcEl.className = 'mw-change ' + (diff >= 0 ? 'up' : 'dn');
+                mc.textContent = (diff >= 0 ? '+' : '') + (prev ? ((diff / prev) * 100).toFixed(2) : '0.00') + '%';
+                mc.className = 'mw-chg ' + (diff >= 0 ? 'up' : 'dn');
             }
 
-            // Sidebar prices
-            var tpEl = document.getElementById('tp_' + sym);
-            if (tpEl) tpEl.textContent = q;
+            var tp = document.getElementById('tp_' + sym);
+            if (tp) tp.textContent = q;
 
-            // Chart header
             if (sym === curSymbol) {
                 var cp = document.getElementById('chartPrice');
                 if (cp) cp.textContent = q;
