@@ -101,6 +101,7 @@ a {
     right: 0;
     z-index: 100;
     background: rgba(14, 14, 14, .85);
+    -webkit-backdrop-filter: blur(12px);
     backdrop-filter: blur(12px);
     border-bottom: 1px solid rgba(255, 255, 255, .06)
 }
@@ -1252,6 +1253,13 @@ a {
     background: var(--bg1);
     position: relative;
     min-height: 0
+}
+
+.tc-box {
+    flex: 1;
+    background: var(--bg1);
+    position: relative;
+    min-height: 360px;
 }
 
 /* Trade Panel */

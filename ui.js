@@ -32,10 +32,12 @@ function uiGoPage(pg) {
     if (el) { el.classList.add('active'); el.style.display = (pg === 'trading') ? 'flex' : 'block'; }
 
     if (pg === 'trading') {
-        setTimeout(function () { chartInit(); chartLoad(curSymbol, curGranularity); if (authAccount) tradeSubProposals(); }, 100);
+        requestAnimationFrame(function () {
+            chartInit();
+            chartLoad(curSymbol, curGranularity);
+            if (authAccount) tradeSubProposals();
+        });
     }
-    if (pg === 'cashier') uiUpdateCashier();
-}
 
 function uiUpdateBal(bal, cur) {
     var f = (+bal).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });

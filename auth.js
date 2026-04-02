@@ -33,7 +33,12 @@ function authLogout() {
 }
 
 function authStartOAuth() {
-    location.href = 'https://oauth.deriv.com/oauth2/authorize?app_id=' + APP_ID + '&l=EN&brand=deriv';
+    var redirect = encodeURIComponent(location.origin + location.pathname);
+    location.href =
+        'https://oauth.deriv.com/oauth2/authorize?app_id=' +
+        APP_ID +
+        '&l=EN&brand=deriv&redirect_uri=' +
+        redirect;
 }
 
 function authStartSignup() {

@@ -4,22 +4,42 @@ var ws, wsReqId = 0, wsPending = {}, wsTickCBs = {}, wsEvCBs = {}, wsOK = false;
 
 function wsConnect() {
     return new Promise(function (ok, no) {
-        try { ws = new WebSocket(WS_URL); } catch (e) { no(e); return; }
-        ws.onopen = function () { wsOK = true; ok(); };
-        ws.onerror = function () { };
-        ws.onclose = function () { wsOK = false; setTimeout(function () { wsConnect().catch(function () { }); }, 3000); };
-        ws.onmessage = function (e) { try { wsHandle(JSON.parse(e.data)); } catch (x) { } };
-    });
-}
+        var settled = false;
 
-function wsSend(d) {
-    return new Promise(function (ok, no) {
-        if (!ws || ws.readyState !== 1) { no(new Error('WS not open')); return; }
-        wsReqId++; d.req_id = wsReqId;
-        wsPending[wsReqId] = { ok: ok, no: no };
-        ws.send(JSON.stringify(d));
-        var r = wsReqId;
-        setTimeout(function () { if (wsPending[r]) { delete wsPending[r]; no(new Error('Timeout')); } }, 15000);
+        try {
+            ws = new WebSocket(WS_URL);
+        } catch (e) {
+            no(e);
+            return;
+        }
+
+        ws.onopen = function () {
+            wsOK = true;
+            settled = true;
+            ok();
+        };
+
+        ws.onerror = function (e) {
+            if (!settled) {
+                settled = true;
+                no(e);
+            }
+        };
+
+        ws.onclose = function () {
+            wsOK = false;
+            setTimeout(function () {
+                wsConnect().catch(function () { });
+            }, 3000);
+        };
+
+        ws.onmessage = function (e) {
+            try {
+                wsHandle(JSON.parse(e.data));
+            } catch (x) {
+                console.error('Bad WS message:', x);
+            }
+        };
     });
 }
 

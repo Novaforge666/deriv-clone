@@ -39,18 +39,28 @@ function onLoggedIn(acct) {
     toast('s', 'Welcome, ' + (acct.fullname || acct.loginid) + '!');
 
     // Balance
+    wsForgetAll('balance');
     wsRaw({ balance: 1, subscribe: 1 });
-    wsOn('balance', function (b) { uiUpdateBal(b.balance, b.currency); });
+    wsOn('balance', function (b) {
+        uiUpdateBal(b.balance, b.currency);
+    });
 
-    // Build UI
-    mktBuildDashboard();
-    mktBuildSidebar('synthetic');
-    mktSubscribe();
-    tradeBindAll();
-    bindAppNav();
-}
+    try {
+        // Build UI
+        mktBuildDashboard();
+        mktBuildSidebar('synthetic');
+        mktSubscribe();
+        tradeBindAll();
+        bindAppNav();
 
-function bindAppNav() {
+        // Open trading page immediately so chart is visible
+        uiGoPage('trading');
+    } catch (err) {
+        console.error('App init failed:', err);
+        toast('e', 'App failed to initialize. Check console.');
+    }
+    
+} function bindAppNav() {
     // Desktop nav
     document.querySelectorAll('.anav').forEach(function (a) {
         a.addEventListener('click', function (e) { e.preventDefault(); uiGoPage(a.dataset.page); });
