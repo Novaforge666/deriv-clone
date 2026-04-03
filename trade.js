@@ -584,7 +584,13 @@ function tradeDigitSnapshot(sym) {
             current: st.current,
             most: [],
             least: [],
-            due: '-'
+            due: '-',
+            evenCount: 0,
+            oddCount: 0,
+            overCount: 0,
+            underCount: 0,
+            equalCount: 0,
+            stream: []
         };
     }
 
@@ -599,19 +605,101 @@ function tradeDigitSnapshot(sym) {
         if (count === min) least.push(digit);
     });
 
+    var evenCount = 0;
+    var oddCount = 0;
+    var overCount = 0;
+    var underCount = 0;
+    var equalCount = counts[tradeDigit] || 0;
+
+    st.history.forEach(function (d) {
+        if (d % 2 === 0) evenCount++;
+        else oddCount++;
+
+        if (d > tradeDigit) overCount++;
+        else if (d < tradeDigit) underCount++;
+    });
+
     return {
         counts: counts,
         total: total,
         current: st.current,
         most: most,
         least: least,
-        due: least.length ? least[0] : '-'
+        due: least.length ? least[0] : '-',
+        evenCount: evenCount,
+        oddCount: oddCount,
+        overCount: overCount,
+        underCount: underCount,
+        equalCount: equalCount,
+        stream: st.history.slice(-20)
     };
 }
 
 function tradeDigitPct(count, total) {
     if (!total) return '--';
     return ((count / total) * 100).toFixed(1) + '%';
+}
+
+function tradeDigitPctNum(count, total) {
+    if (!total) return 0;
+    return +((count / total) * 100).toFixed(1);
+}
+
+function tradePctFromValue(value, total) {
+    if (!total) return 0;
+    return +((value / total) * 100).toFixed(1);
+}
+
+function tradeClampPct(v) {
+    return Math.max(0, Math.min(100, +v || 0));
+}
+
+function tradeDigitCircleHTML(d, count, snap, isBoard) {
+    var pctText = tradeDigitPct(count, snap.total);
+    var pctNum = tradeDigitPctNum(count, snap.total);
+
+    var cls = [isBoard ? 'digit-btn' : 'digit-strip-item', 'circle-digit-pro'];
+
+    if (snap.current === d) cls.push('live');
+    if (snap.most.indexOf(d) >= 0) cls.push('most');
+    if (snap.least.indexOf(d) >= 0) cls.push('least');
+    if (d % 2 === 0) cls.push('even');
+    else cls.push('odd');
+
+    if (isBoard && tradeModeKey === 'over_under' && tradeDigit === d) {
+        cls.push('active');
+    }
+
+    var tagOpen = isBoard
+        ? '<button class="' + cls.join(' ') + '" type="button" data-digit="' + d + '">'
+        : '<div class="' + cls.join(' ') + '">';
+
+    var tagClose = isBoard ? '</button>' : '</div>';
+
+    return '' +
+        tagOpen +
+        '   <svg class="digit-ring-svg" viewBox="0 0 44 44" aria-hidden="true">' +
+        '       <circle class="digit-ring-bg" cx="22" cy="22" r="18"></circle>' +
+        '       <circle class="digit-ring-fill" cx="22" cy="22" r="18" pathLength="100" style="stroke-dasharray:' + pctNum + ' 100"></circle>' +
+        '   </svg>' +
+        '   <span class="digit-core">' +
+        '       <span class="digit-num">' + d + '</span>' +
+        '       <span class="digit-pct">' + pctText + '</span>' +
+        '   </span>' +
+        tagClose;
+}
+
+function tradeDigitHeatHTML(label, pct, cls) {
+    return '' +
+        '<div class="digit-heat ' + cls + '">' +
+        '   <div class="digit-heat-top">' +
+        '       <span>' + label + '</span>' +
+        '       <strong>' + pct.toFixed(1) + '%</strong>' +
+        '   </div>' +
+        '   <div class="digit-heat-track">' +
+        '       <span class="digit-heat-fill" style="width:' + tradeClampPct(pct) + '%"></span>' +
+        '   </div>' +
+        '</div>';
 }
 
 function tradeEnsureDigitOverlay() {
@@ -621,14 +709,16 @@ function tradeEnsureDigitOverlay() {
     if (!document.getElementById('digitOverlay')) {
         var el = document.createElement('div');
         el.id = 'digitOverlay';
-        el.className = 'digit-overlay';
+        el.className = 'digit-overlay hidden';
         el.innerHTML =
             '<div class="digit-insights" id="digitInsightsChart">' +
             '   <span class="digit-insight hot">Most: <strong id="digitMostChart">-</strong></span>' +
             '   <span class="digit-insight cold">Least: <strong id="digitLeastChart">-</strong></span>' +
             '   <span class="digit-insight due">Due: <strong id="digitDueChart">-</strong></span>' +
             '</div>' +
-            '<div class="digit-strip" id="digitStrip"></div>';
+            '<div class="digit-heatbars" id="digitHeatbarsChart"></div>' +
+            '<div class="digit-strip" id="digitStrip"></div>' +
+            '<div class="digit-stream" id="digitStreamChart"></div>';
         box.appendChild(el);
     }
 
@@ -642,16 +732,27 @@ function tradeEnsureDigitOverlay() {
             '<span class="digit-insight cold">Least: <strong id="digitLeastPanel">-</strong></span>' +
             '<span class="digit-insight due">Due: <strong id="digitDuePanel">-</strong></span>';
         wrap.appendChild(info);
+
+        var heat = document.createElement('div');
+        heat.className = 'digit-heatbars panel-heatbars';
+        heat.id = 'digitHeatbarsPanel';
+        wrap.appendChild(heat);
+
+        var stream = document.createElement('div');
+        stream.className = 'digit-stream panel-stream';
+        stream.id = 'digitStreamPanel';
+        wrap.appendChild(stream);
     }
 }
-
 function tradeRenderDigitUI() {
     tradeEnsureDigitOverlay();
 
     var snap = tradeDigitSnapshot(curSymbol);
+    var isDigitsMode = tradeCategoryKey === 'digits';
 
-    function pct(d) {
-        return tradeDigitPct(snap.counts[d], snap.total);
+    var overlay = document.getElementById('digitOverlay');
+    if (overlay) {
+        overlay.classList.toggle('hidden', !isDigitsMode);
     }
 
     function setText(id, val) {
@@ -670,60 +771,51 @@ function tradeRenderDigitUI() {
     var strip = document.getElementById('digitStrip');
     if (strip) {
         strip.innerHTML = snap.counts.map(function (count, d) {
-            var cls = ['digit-strip-item'];
-
-            if (snap.current === d) cls.push('live');
-            if (snap.most.indexOf(d) >= 0) cls.push('most');
-            if (snap.least.indexOf(d) >= 0) cls.push('least');
-            if (d % 2 === 0) cls.push('even');
-            else cls.push('odd');
-
-            return '' +
-                '<div class="' + cls.join(' ') + '">' +
-                '   <span class="digit-num">' + d + '</span>' +
-                '   <span class="digit-pct">' + pct(d) + '</span>' +
-                '</div>';
+            return tradeDigitCircleHTML(d, count, snap, false);
         }).join('');
     }
 
     var board = document.getElementById('digitBoard');
     if (board) {
         board.innerHTML = snap.counts.map(function (count, d) {
-            var cls = ['digit-btn', 'circle-digit'];
-
-            if (tradeModeKey === 'over_under' && tradeDigit === d) cls.push('active');
-            if (snap.current === d) cls.push('live');
-            if (snap.most.indexOf(d) >= 0) cls.push('most');
-            if (snap.least.indexOf(d) >= 0) cls.push('least');
-            if (d % 2 === 0) cls.push('even');
-            else cls.push('odd');
-
-            return '' +
-                '<button class="' + cls.join(' ') + '" type="button" data-digit="' + d + '">' +
-                '   <span class="digit-num">' + d + '</span>' +
-                '   <span class="digit-pct">' + pct(d) + '</span>' +
-                '</button>';
+            return tradeDigitCircleHTML(d, count, snap, true);
         }).join('');
     }
+
+    var evenPct = tradePctFromValue(snap.evenCount, snap.total);
+    var oddPct = tradePctFromValue(snap.oddCount, snap.total);
+    var overPct = tradePctFromValue(snap.overCount, snap.total);
+    var underPct = tradePctFromValue(snap.underCount, snap.total);
+
+    var heatHtml =
+        tradeDigitHeatHTML('Even', evenPct, 'even') +
+        tradeDigitHeatHTML('Odd', oddPct, 'odd') +
+        tradeDigitHeatHTML('Over ' + tradeDigit, overPct, 'over') +
+        tradeDigitHeatHTML('Under ' + tradeDigit, underPct, 'under');
+
+    var heatChart = document.getElementById('digitHeatbarsChart');
+    if (heatChart) heatChart.innerHTML = heatHtml;
+
+    var heatPanel = document.getElementById('digitHeatbarsPanel');
+    if (heatPanel) heatPanel.innerHTML = heatHtml;
+
+    var streamHtml = snap.stream.map(function (d, idx) {
+        var isLast = idx === snap.stream.length - 1;
+        var cls = ['digit-stream-item'];
+
+        if (d === snap.current && isLast) cls.push('live');
+        if (d % 2 === 0) cls.push('even');
+        else cls.push('odd');
+
+        return '<span class="' + cls.join(' ') + '">' + d + '</span>';
+    }).join('');
+
+    var streamChart = document.getElementById('digitStreamChart');
+    if (streamChart) streamChart.innerHTML = streamHtml;
+
+    var streamPanel = document.getElementById('digitStreamPanel');
+    if (streamPanel) streamPanel.innerHTML = streamHtml;
 }
-
-window.tradeOnDigitTick = function (sym, tick) {
-    if (!tick) return;
-
-    var st = tradeDigitState(sym);
-    var digit = tradeLastDigitFromQuote(tick.quote);
-
-    st.current = digit;
-    st.history.push(digit);
-
-    if (st.history.length > tradeDigitWindow) {
-        st.history.shift();
-    }
-
-    if (sym === curSymbol) {
-        tradeRenderDigitUI();
-    }
-};
 
 function tradePrimeDigits(sym) {
     return wsSend({
