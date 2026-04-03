@@ -86,7 +86,6 @@ function onLoggedIn(acct) {
 
     uiGoPage('trading');
 }
-
 function bindAppNav() {
     if (appNavBound) return;
     appNavBound = true;
@@ -118,7 +117,6 @@ function bindAppNav() {
         mwBody.addEventListener('click', function (e) {
             var row = e.target.closest('.mw-row');
             if (!row) return;
-
             mktSelectSymbol(row.dataset.symbol, { goTrading: true });
         });
     }
@@ -126,18 +124,43 @@ function bindAppNav() {
     var appMobBtn = document.getElementById('appMobBtn');
     if (appMobBtn) {
         appMobBtn.addEventListener('click', function () {
+            uiCloseAccDD();
             var mobOverlay = document.getElementById('mobOverlay');
             if (mobOverlay) mobOverlay.classList.add('open');
+            uiSetBodyLock(true);
         });
     }
 
     var mobClose = document.getElementById('mobClose');
     if (mobClose) {
         mobClose.addEventListener('click', function () {
-            var mobOverlay = document.getElementById('mobOverlay');
-            if (mobOverlay) mobOverlay.classList.remove('open');
+            uiCloseMob();
         });
     }
+
+    document.querySelectorAll('.mnav[data-page]').forEach(function (a) {
+        a.addEventListener('click', function () {
+            uiGoPage(a.dataset.page);
+        });
+    });
+
+    var appLogout = document.getElementById('appLogout');
+    if (appLogout) {
+        appLogout.addEventListener('click', function () {
+            uiCloseMob();
+            uiCloseAccDD();
+            authLogout();
+        });
+    }
+
+    var mobLogout = document.getElementById('mobLogout');
+    if (mobLogout) {
+        mobLogout.addEventListener('click', function () {
+            uiCloseMob();
+            authLogout();
+        });
+    }
+}
 
     document.querySelectorAll('.mnav[data-page]').forEach(function (a) {
         a.addEventListener('click', function () {

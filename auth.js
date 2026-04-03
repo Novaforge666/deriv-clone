@@ -28,7 +28,6 @@ function authCheckOAuth() {
         authAccounts = arr;
         localStorage.setItem('deriv_token', arr[0].token);
         localStorage.setItem('deriv_accounts', JSON.stringify(arr));
-
         history.replaceState({}, '', location.pathname + location.hash);
         return arr[0].token;
     }
@@ -43,6 +42,17 @@ function authCheckOAuth() {
     }
 
     return null;
+}
+
+function authSwitchAccount(token) {
+    if (!token) return Promise.reject(new Error('Missing account token'));
+    return authLogin(token);
+}
+
+function authIsVirtualEntry(entry) {
+    if (!entry) return false;
+    if (typeof entry.is_virtual === 'boolean') return entry.is_virtual;
+    return /^VRTC/i.test(entry.id || '');
 }
 
 function authLogout() {
