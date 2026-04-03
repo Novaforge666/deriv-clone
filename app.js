@@ -104,6 +104,32 @@ if (!appBootstrapped) {
     mktBuildSidebar('synthetic');
     mktSubscribe();
     tradeBindAll();
+
+    if (typeof botInit === 'function') {
+        botInit();
+    }
+
+    bindAppNav();
+
+    appBootstrapped = true;
+}
+
+if (!appBootstrapped) {
+    wsOn('balance', function (b) {
+        if (!b) return;
+
+        uiUpdateBal(b.balance, b.currency);
+
+        if (authAccount) {
+            authAccount.balance = b.balance;
+            authAccount.currency = b.currency;
+        }
+    });
+
+    mktBuildDashboard();
+    mktBuildSidebar('synthetic');
+    mktSubscribe();
+    tradeBindAll();
     if (typeof botInit === 'function') {
         botInit();
     }

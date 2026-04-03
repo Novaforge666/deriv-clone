@@ -209,6 +209,14 @@ function uiGoPage(pg) {
         a.classList.remove('active');
     });
 
+    var map = {
+        dashboard: 'pgDashboard',
+        trading: 'pgTrading',
+        bot: 'pgBot',
+        reports: 'pgReports',
+        cashier: 'pgCashier'
+    };
+
     var na = document.querySelector('.anav[data-page="' + pg + '"]');
     if (na) na.classList.add('active');
 
@@ -322,6 +330,20 @@ function uiOpenTraderPanel(which) {
 
     if (which === 'trade' && panel) {
         panel.classList.add('open');
+
+        if (typeof tradeEnsureModeUI === 'function') {
+            tradeEnsureModeUI();
+        }
+        if (typeof tradeRenderClassifier === 'function') {
+            tradeRenderClassifier();
+        }
+        if (typeof tradeRenderDigitUI === 'function') {
+            tradeRenderDigitUI();
+        }
+
+        panel.scrollTop = 0;
+        var form = panel.querySelector('.tp-form');
+        if (form) form.scrollTop = 0;
     }
 
     if (backdrop) backdrop.classList.add('open');

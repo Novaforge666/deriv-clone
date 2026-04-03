@@ -188,6 +188,9 @@ function mktOnTick(sym, tick) {
         }
     }
 }
+if (typeof window.tradeOnDigitTick === 'function') {
+    window.tradeOnDigitTick(sym, tick);
+}
 
 if (typeof window.botOnMarketTick === 'function') {
     window.botOnMarketTick(sym, tick);

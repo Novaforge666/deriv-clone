@@ -1,3 +1,8 @@
+var tradeAmountBasis = 'stake';
+var tradeDigit = 2;
+
+var tradeDigitWindow = 60;
+var tradeDigitStats = {};
 var tradeModes = {
     rise_fall: {
         key: 'rise_fall',
@@ -144,6 +149,166 @@ function tradeRenderClassifier() {
     }).join('');
 }
 
+function tradeDigitState(sym) {
+    if (!tradeDigitStats[sym]) {
+        tradeDigitStats[sym] = {
+            history: [],
+            current: null
+        };
+    }
+    return tradeDigitStats[sym];
+}
+
+function tradeLastDigitFromQuote(quote) {
+    var s = String(quote);
+    for (var i = s.length - 1; i >= 0; i--) {
+        var ch = s.charAt(i);
+        if (ch >= '0' && ch <= '9') return +ch;
+    }
+    return 0;
+}
+
+function tradeDigitSnapshot(sym) {
+    var st = tradeDigitState(sym);
+    var counts = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+
+    st.history.forEach(function (d) {
+        counts[d]++;
+    });
+
+    var total = st.history.length || 1;
+    var max = Math.max.apply(null, counts);
+    var min = Math.min.apply(null, counts);
+
+    var most = [];
+    var least = [];
+
+    counts.forEach(function (count, digit) {
+        if (count === max) most.push(digit);
+        if (count === min) least.push(digit);
+    });
+
+    return {
+        counts: counts,
+        total: total,
+        current: st.current,
+        most: most,
+        least: least,
+        due: least[0]
+    };
+}
+
+function tradeEnsureDigitOverlay() {
+    var box = document.getElementById('chartBox');
+    if (!box) return;
+
+    if (!document.getElementById('digitOverlay')) {
+        var el = document.createElement('div');
+        el.id = 'digitOverlay';
+        el.className = 'digit-overlay';
+        el.innerHTML =
+            '<div class="digit-insights" id="digitInsightsChart">' +
+            '   <span class="digit-insight hot">Most: <strong id="digitMostChart">-</strong></span>' +
+            '   <span class="digit-insight cold">Least: <strong id="digitLeastChart">-</strong></span>' +
+            '   <span class="digit-insight due">Due: <strong id="digitDueChart">-</strong></span>' +
+            '</div>' +
+            '<div class="digit-strip" id="digitStrip"></div>';
+        box.appendChild(el);
+    }
+
+    var wrap = document.getElementById('digitBoardWrap');
+    if (wrap && !document.getElementById('digitInsightsPanel')) {
+        var info = document.createElement('div');
+        info.className = 'digit-insights panel-insights';
+        info.id = 'digitInsightsPanel';
+        info.innerHTML =
+            '<span class="digit-insight hot">Most: <strong id="digitMostPanel">-</strong></span>' +
+            '<span class="digit-insight cold">Least: <strong id="digitLeastPanel">-</strong></span>' +
+            '<span class="digit-insight due">Due: <strong id="digitDuePanel">-</strong></span>';
+        wrap.appendChild(info);
+    }
+}
+
+function tradeRenderDigitUI() {
+    tradeEnsureDigitOverlay();
+
+    var snap = tradeDigitSnapshot(curSymbol);
+
+    function pct(d) {
+        return ((snap.counts[d] / snap.total) * 100).toFixed(1) + '%';
+    }
+
+    function setText(id, val) {
+        var el = document.getElementById(id);
+        if (el) el.textContent = val;
+    }
+
+    setText('digitMostChart', snap.most.join(', '));
+    setText('digitLeastChart', snap.least.join(', '));
+    setText('digitDueChart', String(snap.due));
+
+    setText('digitMostPanel', snap.most.join(', '));
+    setText('digitLeastPanel', snap.least.join(', '));
+    setText('digitDuePanel', String(snap.due));
+
+    var strip = document.getElementById('digitStrip');
+    if (strip) {
+        strip.innerHTML = snap.counts.map(function (count, d) {
+            var cls = ['digit-strip-item'];
+
+            if (snap.current === d) cls.push('live');
+            if (snap.most.indexOf(d) >= 0) cls.push('most');
+            if (snap.least.indexOf(d) >= 0) cls.push('least');
+            if (d % 2 === 0) cls.push('even');
+            else cls.push('odd');
+
+            return '' +
+                '<div class="' + cls.join(' ') + '">' +
+                '   <span class="digit-num">' + d + '</span>' +
+                '   <span class="digit-pct">' + pct(d) + '</span>' +
+                '</div>';
+        }).join('');
+    }
+
+    var board = document.getElementById('digitBoard');
+    if (board) {
+        board.innerHTML = snap.counts.map(function (count, d) {
+            var cls = ['digit-btn', 'circle-digit'];
+
+            if (tradeModeKey === 'over_under' && tradeDigit === d) cls.push('active');
+            if (snap.current === d) cls.push('live');
+            if (snap.most.indexOf(d) >= 0) cls.push('most');
+            if (snap.least.indexOf(d) >= 0) cls.push('least');
+            if (d % 2 === 0) cls.push('even');
+            else cls.push('odd');
+
+            return '' +
+                '<button class="' + cls.join(' ') + '" type="button" data-digit="' + d + '">' +
+                '   <span class="digit-num">' + d + '</span>' +
+                '   <span class="digit-pct">' + pct(d) + '</span>' +
+                '</button>';
+        }).join('');
+    }
+}
+
+window.tradeOnDigitTick = function (sym, tick) {
+    if (!tick) return;
+
+    var st = tradeDigitState(sym);
+    var digit = tradeLastDigitFromQuote(tick.quote);
+
+    st.current = digit;
+    st.history.push(digit);
+
+    if (st.history.length > tradeDigitWindow) {
+        st.history.shift();
+    }
+
+    if (sym === curSymbol) {
+        tradeRenderDigitUI();
+    }
+};
+
 function tradeSetMode(key) {
     if (!tradeModes[key]) return;
 
@@ -179,8 +344,10 @@ function tradeSetMode(key) {
     }
 
     if (digitBoardWrap) {
-        digitBoardWrap.classList.toggle('hidden', key !== 'over_under');
+        digitBoardWrap.classList.toggle('hidden', !(key === 'over_under' || key === 'even_odd'));
     }
+
+    tradeRenderDigitUI();
 
     if (mode.forceDurType) {
         var durType = document.getElementById('durType');
@@ -661,5 +828,35 @@ document.addEventListener('click', function (e) {
         digitBtn.classList.add('active');
 
         tradeSubProposals();
+    }
+});
+
+document.addEventListener('click', function (e) {
+    var basisBtn = e.target.closest('.basis-tab');
+    if (basisBtn) {
+        tradeAmountBasis = basisBtn.dataset.basis || 'stake';
+
+        document.querySelectorAll('.basis-tab').forEach(function (x) {
+            x.classList.remove('active');
+        });
+        basisBtn.classList.add('active');
+
+        tradeSubProposals();
+        return;
+    }
+
+    var digitBtn = e.target.closest('.digit-btn[data-digit]');
+    if (digitBtn) {
+        if (tradeModeKey !== 'over_under') return;
+
+        tradeDigit = +digitBtn.dataset.digit;
+
+        document.querySelectorAll('.digit-btn').forEach(function (x) {
+            x.classList.remove('active');
+        });
+        digitBtn.classList.add('active');
+
+        tradeSubProposals();
+        tradeRenderDigitUI();
     }
 });
