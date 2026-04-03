@@ -25,6 +25,16 @@ var tradeModes = {
         forceDurType: 't',
         defaultDur: 5
     },
+    matches_differs: {
+        key: 'matches_differs',
+        label: 'Matches/Differs',
+        aType: 'DIGITMATCH',
+        bType: 'DIGITDIFF',
+        aLabel: 'Matches',
+        bLabel: 'Differs',
+        forceDurType: 't',
+        defaultDur: 5
+    },
     over_under: {
         key: 'over_under',
         label: 'Over/Under',
@@ -48,7 +58,7 @@ var tradeCategories = {
     },
     digits: {
         label: 'Digits',
-        modes: ['even_odd', 'over_under']
+        modes: ['even_odd', 'matches_differs', 'over_under']
     }
 };
 
@@ -192,35 +202,24 @@ function tradeSetMode(key) {
         var durType = document.getElementById('durType');
         var durVal = document.getElementById('durVal');
         if (durType) durType.value = mode.forceDurType;
-        if (durVal && (!durVal.value || +durVal.value < 1)) durVal.value = mode.defaultDur || 5;
+        if (durVal) durVal.value = mode.defaultDur || 5;
     }
 
     var digitBoardWrap = document.getElementById('digitBoardWrap');
-    var barrierWrap = document.getElementById('barrierWrap');
-
-    if (barrierWrap) {
-        barrierWrap.classList.add('hidden');
-    }
-
     if (digitBoardWrap) {
-        digitBoardWrap.classList.toggle('hidden', !(key === 'over_under' || key === 'even_odd'));
+        digitBoardWrap.classList.toggle('hidden', !(key === 'over_under' || key === 'even_odd' || key === 'matches_differs'));
     }
 
-    if (key === 'over_under' || key === 'even_odd') {
+    tradeRenderClassifier();
+
+    if (key === 'over_under' || key === 'even_odd' || key === 'matches_differs') {
         if (typeof tradePrimeDigits === 'function') {
             tradePrimeDigits(curSymbol);
         }
     }
 
-    tradeRenderClassifier();
     tradeRenderDigitUI();
     tradeSubProposals();
-}
-var panel = document.getElementById('trdPanel');
-if (panel && (window.innerWidth > 900)) {
-    panel.classList.add('strategy-focused');
-    var icon = document.querySelector('#tradeFocusBtn i');
-    if (icon) icon.className = 'fas fa-expand-alt';
 }
 
 function tradeCurrentBarrier(type) {
@@ -267,7 +266,12 @@ function tradeBuildProposalReq(type) {
         symbol: curSymbol
     };
 
-    if (type === 'DIGITOVER' || type === 'DIGITUNDER') {
+    if (
+        type === 'DIGITOVER' ||
+        type === 'DIGITUNDER' ||
+        type === 'DIGITMATCH' ||
+        type === 'DIGITDIFF'
+    ) {
         req.barrier = tradeCurrentBarrier(type);
     }
 
@@ -618,13 +622,11 @@ function tradeDigitState(sym) {
     return tradeDigitStats[sym];
 }
 
-function tradeLastDigitFromQuote(quote) {
-    var s = String(quote);
-    for (var i = s.length - 1; i >= 0; i--) {
-        var ch = s.charAt(i);
-        if (ch >= '0' && ch <= '9') return +ch;
-    }
-    return 0;
+function tradeLastDigitFromQuote(sym, quote) {
+    var dp = typeof mktDP === 'function' ? mktDP(sym) : 2;
+    var fixed = Number(quote).toFixed(dp);
+    var digits = fixed.replace(/\D/g, '');
+    return digits ? +digits.charAt(digits.length - 1) : 0;
 }
 
 function tradeDigitSnapshot(sym) {
@@ -878,11 +880,58 @@ function tradeEnsureDigitOverlay() {
         wrap.appendChild(stream);
     }
 }
+
+function tradeModeHeatHTML(snap) {
+    var html = '';
+
+    if (tradeModeKey === 'even_odd') {
+        html += tradeDigitHeatHTML('Even', tradePctFromValue(snap.evenCount, snap.total), 'even');
+        html += tradeDigitHeatHTML('Odd', tradePctFromValue(snap.oddCount, snap.total), 'odd');
+    } else if (tradeModeKey === 'matches_differs') {
+        var matchesPct = tradeDigitPctNum(snap.counts[tradeDigit] || 0, snap.total);
+        var differsPct = snap.total ? +(100 - matchesPct).toFixed(1) : 0;
+        html += tradeDigitHeatHTML('Matches ' + tradeDigit, matchesPct, 'over');
+        html += tradeDigitHeatHTML('Differs ' + tradeDigit, differsPct, 'under');
+    } else if (tradeModeKey === 'over_under') {
+        html += tradeDigitHeatHTML('Over ' + tradeDigit, tradePctFromValue(snap.overCount, snap.total), 'over');
+        html += tradeDigitHeatHTML('Under ' + tradeDigit, tradePctFromValue(snap.underCount, snap.total), 'under');
+    }
+
+    return html;
+}
+
+function tradePositionLiveCursorPanel() {
+    var cursor = document.getElementById('digitLiveCursorPanel');
+    var container = document.getElementById('digitBoard');
+    if (!cursor || !container) return;
+
+    var live = container.querySelector('.circle-digit-pro.live');
+    if (!live) {
+        cursor.classList.remove('show');
+        return;
+    }
+
+    var crect = container.getBoundingClientRect();
+    var lrect = live.getBoundingClientRect();
+    var left = (lrect.left - crect.left) + (lrect.width / 2);
+
+    cursor.style.left = left + 'px';
+    cursor.classList.add('show');
+}
+
+function tradeSyncDigitCursors() {
+    tradePositionLiveCursorPanel();
+}
+
+window.addEventListener('resize', function () {
+    tradeSyncDigitCursors();
+});
+
 function tradeRenderDigitUI() {
     tradeEnsureDigitOverlay();
 
     var snap = tradeDigitSnapshot(curSymbol);
-    var showDigits = (tradeModeKey === 'over_under' || tradeModeKey === 'even_odd');
+    var showDigits = (tradeModeKey === 'over_under' || tradeModeKey === 'even_odd' || tradeModeKey === 'matches_differs');
     var wrap = document.getElementById('digitBoardWrap');
 
     if (wrap) wrap.classList.toggle('hidden', !showDigits);
@@ -925,7 +974,6 @@ function tradeRenderDigitUI() {
 
     tradeSyncDigitCursors();
 }
-
 function tradePrimeDigits(sym) {
     return wsSend({
         ticks_history: sym,
@@ -937,7 +985,7 @@ function tradePrimeDigits(sym) {
         var prices = (r.history && r.history.prices) ? r.history.prices : [];
 
         st.history = prices.map(function (q) {
-            return tradeLastDigitFromQuote(q);
+            return tradeLastDigitFromQuote(sym, q);
         });
 
         st.current = st.history.length ? st.history[st.history.length - 1] : null;
@@ -949,7 +997,6 @@ function tradePrimeDigits(sym) {
         console.error('tradePrimeDigits failed:', err);
     });
 }
-
 function tradeBindAll() {
     if (tradeBound) return;
     tradeBound = true;

@@ -134,7 +134,7 @@ function botEnsurePage() {
                     </div>
 
                     <div class="bbs-summary-box">
-                        <div class="bbs-summary-empty" id="bbsSummaryText">
+                        <div class="bbs-summary-empty">
                             Bot builder shell ready.<br>
                             Next step is wiring the block logic.
                         </div>
@@ -142,13 +142,13 @@ function botEnsurePage() {
                         <div class="bbs-metrics">
                             <div><span>Total stake</span><strong>0.00 USD</strong></div>
                             <div><span>Total payout</span><strong>0.00 USD</strong></div>
-                            <div><span>No. of runs</span><strong id="bbsRuns">0</strong></div>
+                            <div><span>No. of runs</span><strong>0</strong></div>
                             <div><span>Contracts lost</span><strong>0</strong></div>
                             <div><span>Contracts won</span><strong>0</strong></div>
                             <div><span>Total profit/loss</span><strong>0.00 USD</strong></div>
                         </div>
 
-                        <button class="bbs-reset" id="bbsResetBtn" type="button">Reset</button>
+                        <button class="bbs-reset" type="button">Reset</button>
                     </div>
                 </aside>
             </div>

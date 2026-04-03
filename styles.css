@@ -5973,3 +5973,314 @@ body.no-scroll {
 .bbs-summary-empty {
     min-height: 240px;
 }
+/* ===== DIGITS STABILITY + SIMPLE PANEL MODE ===== */
+
+/* no chart analysis */
+#digitOverlay {
+    display: none !important;
+}
+
+/* right panel should not show open contracts */
+#trdPanel .tp-contracts {
+    display: none !important;
+}
+
+/* digit analysis only in panel */
+.digit-board-wrap.hidden {
+    display: none !important;
+}
+
+.digit-board-wrap-inner {
+    position: relative;
+}
+
+.digit-live-cursor {
+    position: absolute;
+    top: -14px;
+    transform: translateX(-50%);
+    padding: 2px 7px;
+    border-radius: 999px;
+    background: #18bca0;
+    color: #fff;
+    font-size: 9px;
+    font-weight: 800;
+    letter-spacing: .4px;
+    opacity: 0;
+    transition: left .14s ease, opacity .14s ease;
+    pointer-events: none;
+    z-index: 8;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, .25);
+}
+
+.digit-live-cursor::after {
+    content: '';
+    position: absolute;
+    left: 50%;
+    bottom: -5px;
+    transform: translateX(-50%);
+    border-left: 5px solid transparent;
+    border-right: 5px solid transparent;
+    border-top: 6px solid #18bca0;
+}
+
+.digit-live-cursor.show {
+    opacity: 1;
+}
+
+/* strategy-specific analysis only */
+.digit-heatbars {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 6px;
+    margin-bottom: 8px;
+}
+
+.digit-heat {
+    background: rgba(18, 20, 24, .88);
+    border: 1px solid #2a2d2d;
+    border-radius: 10px;
+    padding: 7px 8px;
+}
+
+.digit-heat-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 7px;
+}
+
+.digit-heat-top span {
+    font-size: 9px;
+    font-weight: 700;
+    color: var(--t3);
+    text-transform: uppercase;
+}
+
+.digit-heat-top strong {
+    font-size: 10px;
+    color: #fff;
+}
+
+.digit-heat-track {
+    height: 7px;
+    background: #2a2d2d;
+    border-radius: 999px;
+    overflow: hidden;
+}
+
+.digit-heat-fill {
+    display: block;
+    height: 100%;
+    border-radius: 999px;
+}
+
+.digit-heat.even .digit-heat-fill {
+    background: linear-gradient(90deg, #377cfc, #5d98ff);
+}
+
+.digit-heat.odd .digit-heat-fill {
+    background: linear-gradient(90deg, #ff5f6f, #ff8c96);
+}
+
+.digit-heat.over .digit-heat-fill {
+    background: linear-gradient(90deg, #18bca0, #0dc49a);
+}
+
+.digit-heat.under .digit-heat-fill {
+    background: linear-gradient(90deg, #ff4b5c, #df3145);
+}
+
+/* digit circles */
+.digit-btn.circle-digit-pro {
+    min-height: 50px;
+    border-radius: 999px;
+    background: #141618;
+    border: 1px solid #2a2d2d;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.digit-core {
+    position: relative;
+    z-index: 2;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+}
+
+.digit-btn.circle-digit-pro .digit-num {
+    font-size: 12px;
+    font-weight: 700;
+    line-height: 1;
+    color: #fff;
+}
+
+.digit-btn.circle-digit-pro .digit-pct {
+    font-size: 8px;
+    font-weight: 700;
+    line-height: 1;
+    color: #c1c7c8;
+}
+
+.digit-ring-svg {
+    position: absolute;
+    inset: 4px;
+    width: calc(100% - 8px);
+    height: calc(100% - 8px);
+    transform: rotate(-90deg);
+    pointer-events: none;
+}
+
+.digit-ring-bg {
+    fill: none;
+    stroke: rgba(255, 255, 255, .08);
+    stroke-width: 3;
+}
+
+.digit-ring-fill {
+    fill: none;
+    stroke: #8d9496;
+    stroke-width: 3.5;
+    stroke-linecap: round;
+    transition: stroke-dasharray .2s ease, stroke .2s ease;
+}
+
+.digit-btn.circle-digit-pro.even .digit-ring-fill {
+    stroke: #377cfc;
+}
+
+.digit-btn.circle-digit-pro.odd .digit-ring-fill {
+    stroke: #ff5f6f;
+}
+
+.digit-btn.circle-digit-pro.most .digit-ring-fill {
+    stroke: #0dc49a;
+}
+
+.digit-btn.circle-digit-pro.least .digit-ring-fill {
+    stroke: #ffad3a;
+}
+
+.digit-btn.circle-digit-pro.live {
+    border-color: #fff;
+    transform: translateY(-1px);
+}
+
+.digit-btn.circle-digit-pro.live .digit-ring-fill {
+    stroke: #fff;
+}
+
+.digit-btn.circle-digit-pro.active {
+    background: #2d3234;
+    border-color: #596162;
+}
+
+/* stream */
+.digit-stream {
+    display: flex;
+    gap: 5px;
+    flex-wrap: wrap;
+    margin-top: 8px;
+}
+
+.digit-stream-item {
+    min-width: 24px;
+    height: 24px;
+    padding: 0 7px;
+    border-radius: 999px;
+    border: 1px solid #2a2d2d;
+    background: #151719;
+    color: #fff;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 10px;
+    font-weight: 700;
+}
+
+.digit-stream-item.even {
+    background: rgba(55, 124, 252, .08);
+}
+
+.digit-stream-item.odd {
+    background: rgba(255, 68, 79, .08);
+}
+
+.digit-stream-item.live {
+    border-color: #fff;
+    box-shadow: 0 0 0 2px rgba(255, 255, 255, .08);
+}
+
+/* positions only left */
+.side-open-wrap {
+    margin-top: auto;
+    border-top: 1px solid var(--bd);
+    background: #121415;
+    display: flex;
+    flex-direction: column;
+    min-height: 150px;
+    max-height: 220px;
+}
+
+.side-open-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 10px;
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    color: var(--t3);
+    border-bottom: 1px solid var(--bd);
+}
+
+.side-open-head span:last-child {
+    background: var(--redL);
+    color: var(--red);
+    padding: 2px 8px;
+    border-radius: 999px;
+}
+
+.side-open-body {
+    padding: 6px;
+    overflow-y: auto;
+}
+
+/* mobile sheet visible */
+@media (max-width: 900px) {
+    .foundation-panel {
+        transform: translateY(calc(100% - 250px)) !important;
+        height: min(82vh, 640px);
+    }
+
+    .foundation-panel.open {
+        transform: translateY(0) !important;
+    }
+
+    .foundation-panel .tp-head {
+        position: sticky;
+        top: 0;
+        z-index: 8;
+        background: #151718;
+        cursor: pointer;
+    }
+
+    .foundation-panel .tp-tabs {
+        position: sticky;
+        top: 52px;
+        z-index: 7;
+        background: #151718;
+    }
+
+    .foundation-panel .tp-form {
+        overflow-y: auto;
+        padding-bottom: 22px;
+    }
+
+    .side-open-wrap {
+        display: none;
+    }
+}
