@@ -263,7 +263,34 @@ function tradeRenderHistory() {
         return;
     }
 
-    body.innerHTML = tradeHistory.map(tradeHistoryCardHtml).join('');
+    body.innerHTML =
+        '<div class="rpt-table-wrap">' +
+        '   <div class="rpt-table">' +
+        '       <div class="rpt-row rpt-head">' +
+        '           <div class="rpt-cell">Contract</div>' +
+        '           <div class="rpt-cell">Market</div>' +
+        '           <div class="rpt-cell">Buy</div>' +
+        '           <div class="rpt-cell">Sell</div>' +
+        '           <div class="rpt-cell">Profit/Loss</div>' +
+        '           <div class="rpt-cell">Time</div>' +
+        '       </div>' +
+        tradeHistory.map(function (c) {
+            var pnl = +c.profit || 0;
+            var sold = +c.sell_price || 0;
+            var when = c.sold_at ? new Date(c.sold_at * 1000).toLocaleString() : '-';
+
+            return '' +
+                '<div class="rpt-row">' +
+                '   <div class="rpt-cell"><span class="rpt-type ' + (c.contract_type === 'CALL' ? 'up' : 'dn') + '">' + (c.contract_type === 'CALL' ? '↑ Rise' : '↓ Fall') + '</span></div>' +
+                '   <div class="rpt-cell">' + (c.display_name || curSymbol) + '</div>' +
+                '   <div class="rpt-cell">' + tradeMoney(c.buy_price || 0) + '</div>' +
+                '   <div class="rpt-cell">' + tradeMoney(sold) + '</div>' +
+                '   <div class="rpt-cell"><span class="' + (pnl >= 0 ? 'gn' : 'loss-red') + '">' + tradeSignedMoney(pnl) + '</span></div>' +
+                '   <div class="rpt-cell rpt-time">' + when + '</div>' +
+                '</div>';
+        }).join('') +
+        '   </div>' +
+        '</div>';
 }
 
 function tradeUpdateSummary() {

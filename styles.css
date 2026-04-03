@@ -101,7 +101,7 @@ a {
     right: 0;
     z-index: 100;
     background: rgba(14, 14, 14, .85);
-    -webkit-backdrop-filter: blur(12px);
+-webkit-backdrop-filter: blur(12px);
     backdrop-filter: blur(12px);
     border-bottom: 1px solid rgba(255, 255, 255, .06)
 }
@@ -614,6 +614,10 @@ a {
     text-align: center;
     font-size: 12px;
     color: var(--t4)
+}
+
+.footer-logo {
+    margin-bottom: 12px;
 }
 
 /* ===== APP SHELL ===== */
@@ -1804,7 +1808,7 @@ a {
     .hero {
         flex-direction: column;
         padding-top: 80px;
-        min-height: auto
+        mmin-height: 0;
     }
 
     .hero h1 {
@@ -2155,4 +2159,116 @@ body.no-scroll {
     .trd-chart {
         padding-bottom: 55vh;
     }
+}
+/* ===== PRO PACK ===== */
+.loss-red {
+    color: var(--red) !important;
+}
+
+.rpt-table-wrap {
+    overflow-x: auto;
+    border: 1px solid var(--bd);
+    border-radius: var(--rl);
+    background: var(--bg4);
+}
+
+.rpt-table {
+    min-width: 860px;
+}
+
+.rpt-row {
+    display: grid;
+    grid-template-columns: 120px 1.4fr 110px 110px 130px 180px;
+    align-items: center;
+    border-bottom: 1px solid var(--bd);
+}
+
+.rpt-row:last-child {
+    border-bottom: 0;
+}
+
+.rpt-head {
+    background: var(--bg2);
+    position: sticky;
+    top: 0;
+    z-index: 2;
+}
+
+.rpt-cell {
+    padding: 12px 14px;
+    font-size: 12px;
+    color: var(--t2);
+    white-space: nowrap;
+}
+
+.rpt-head .rpt-cell {
+    font-size: 10px;
+    font-weight: 700;
+    color: var(--t3);
+    text-transform: uppercase;
+    letter-spacing: .4px;
+}
+
+.rpt-type {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 8px;
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 700;
+}
+
+.rpt-type.up {
+    background: rgba(13, 196, 154, .12);
+    color: var(--gn);
+}
+
+.rpt-type.dn {
+    background: rgba(255, 68, 79, .12);
+    color: var(--red);
+}
+
+.rpt-time {
+    color: var(--t3);
+}
+
+.acc-pill {
+    min-width: 150px;
+    justify-content: space-between;
+}
+
+.ap-bal {
+    font-variant-numeric: tabular-nums;
+}
+
+.tc-left h2 {
+    font-size: 15px;
+    font-weight: 700;
+}
+
+.tc-price {
+    letter-spacing: .2px;
+}
+
+.mw-price,
+.tsi-p,
+.ap-bal,
+.dcard-v,
+.cba {
+    font-variant-numeric: tabular-nums;
+}
+
+.pg-head h1 {
+    letter-spacing: -.3px;
+}
+
+.card,
+.dcard,
+.cash-act,
+.hero-chart-mock,
+.trd-panel,
+.trd-side {
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
 }

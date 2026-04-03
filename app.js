@@ -64,6 +64,7 @@ function onLoggedIn(acct) {
     if (!appBootstrapped) {
         wsOn('balance', function (b) {
             if (!b) return;
+
             uiUpdateBal(b.balance, b.currency);
 
             if (authAccount) {
@@ -86,6 +87,7 @@ function onLoggedIn(acct) {
 
     uiGoPage('trading');
 }
+
 function bindAppNav() {
     if (appNavBound) return;
     appNavBound = true;
@@ -160,17 +162,4 @@ function bindAppNav() {
             authLogout();
         });
     }
-}
-
-    document.querySelectorAll('.mnav[data-page]').forEach(function (a) {
-        a.addEventListener('click', function () {
-            uiGoPage(a.dataset.page);
-        });
-    });
-
-    var appLogout = document.getElementById('appLogout');
-    if (appLogout) appLogout.addEventListener('click', authLogout);
-
-    var mobLogout = document.getElementById('mobLogout');
-    if (mobLogout) mobLogout.addEventListener('click', authLogout);
 }
