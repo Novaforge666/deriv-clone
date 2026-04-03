@@ -1,96 +1,159 @@
-document.addEventListener('DOMContentLoaded', function () {
-    // Landing page buttons
-    ['landLogin', 'heroLogin', 'ctaLogin'].forEach(function (id) {
-        var el = document.getElementById(id);
-        if (el) el.addEventListener('click', function () { authStartOAuth(); });
-    });
-    ['landSignup', 'heroSignup', 'ctaSignup'].forEach(function (id) {
-        var el = document.getElementById(id);
-        if (el) el.addEventListener('click', function () { authStartSignup(); });
-    });
+var appBootstrapped = false;
+var appNavBound = false;
 
+document.addEventListener('DOMContentLoaded', function () {
+    bindLandingActions();
     boot();
 });
 
-function boot() {
-    // Connect WS
-    wsConnect().then(function () {
-        // Check OAuth callback
-        var oauthToken = authCheckOAuth();
-        var token = oauthToken || localStorage.getItem('deriv_token');
-
-        if (token) {
-            authLogin(token).then(function (acct) {
-                onLoggedIn(acct);
-            }).catch(function () {
-                localStorage.removeItem('deriv_token');
-                uiShowLanding();
+function bindLandingActions() {
+    ['landLogin', 'heroLogin', 'ctaLogin', 'landMobBtn'].forEach(function (id) {
+        var el = document.getElementById(id);
+        if (el) {
+            el.addEventListener('click', function () {
+                authStartOAuth();
             });
-        } else {
-            uiShowLanding();
         }
-    }).catch(function () {
-        uiShowLanding();
+    });
+
+    ['landSignup', 'heroSignup', 'ctaSignup'].forEach(function (id) {
+        var el = document.getElementById(id);
+        if (el) {
+            el.addEventListener('click', function () {
+                authStartSignup();
+            });
+        }
     });
 }
 
+function boot() {
+    wsConnect()
+        .then(function () {
+            var oauthToken = authCheckOAuth();
+            var token = oauthToken || localStorage.getItem('deriv_token');
+
+            if (!token) {
+                uiShowLanding();
+                return;
+            }
+
+            authLogin(token)
+                .then(function (acct) {
+                    onLoggedIn(acct);
+                })
+                .catch(function (err) {
+                    console.error('Authorize failed:', err);
+                    localStorage.removeItem('deriv_token');
+                    localStorage.removeItem('deriv_accounts');
+                    uiShowLanding();
+                    toast('e', 'Login failed. Please try again.');
+                });
+        })
+        .catch(function (err) {
+            console.error('WS connect failed:', err);
+            uiShowLanding();
+            toast('e', 'Could not connect to Deriv API.');
+        });
+}
+
 function onLoggedIn(acct) {
+    authAccount = acct;
     uiOnAuth(acct);
     toast('s', 'Welcome, ' + (acct.fullname || acct.loginid) + '!');
 
-    // Balance
-    wsForgetAll('balance');
-    wsRaw({ balance: 1, subscribe: 1 });
-    wsOn('balance', function (b) {
-        uiUpdateBal(b.balance, b.currency);
-    });
+    if (!appBootstrapped) {
+        wsOn('balance', function (b) {
+            if (!b) return;
+            uiUpdateBal(b.balance, b.currency);
 
-    try {
-        // Build UI
+            if (authAccount) {
+                authAccount.balance = b.balance;
+                authAccount.currency = b.currency;
+            }
+        });
+
         mktBuildDashboard();
         mktBuildSidebar('synthetic');
         mktSubscribe();
         tradeBindAll();
         bindAppNav();
 
-        // Open trading page immediately so chart is visible
-        uiGoPage('trading');
-    } catch (err) {
-        console.error('App init failed:', err);
-        toast('e', 'App failed to initialize. Check console.');
+        appBootstrapped = true;
     }
-    
-} function bindAppNav() {
-    // Desktop nav
+
+    wsForgetAll('balance');
+    wsRaw({ balance: 1, subscribe: 1 });
+
+    uiGoPage('trading');
+}
+
+function bindAppNav() {
+    if (appNavBound) return;
+    appNavBound = true;
+
     document.querySelectorAll('.anav').forEach(function (a) {
-        a.addEventListener('click', function (e) { e.preventDefault(); uiGoPage(a.dataset.page); });
+        a.addEventListener('click', function (e) {
+            e.preventDefault();
+            uiGoPage(a.dataset.page);
+        });
     });
 
-    // Logo
-    document.getElementById('appLogo').addEventListener('click', function (e) { e.preventDefault(); uiGoPage('dashboard'); });
+    var appLogo = document.getElementById('appLogo');
+    if (appLogo) {
+        appLogo.addEventListener('click', function (e) {
+            e.preventDefault();
+            uiGoPage('dashboard');
+        });
+    }
 
-    // Dashboard trade button
-    document.getElementById('dashTrade').addEventListener('click', function () { uiGoPage('trading'); });
+    var dashTrade = document.getElementById('dashTrade');
+    if (dashTrade) {
+        dashTrade.addEventListener('click', function () {
+            uiGoPage('trading');
+        });
+    }
 
-    // Dashboard market rows
-    document.getElementById('mwBody').addEventListener('click', function (e) {
-        var row = e.target.closest('.mw-row'); if (!row) return;
-        curSymbol = row.dataset.symbol;
-        document.getElementById('chartName').textContent = mktName(curSymbol);
-        uiGoPage('trading');
-    });
+    var mwBody = document.getElementById('mwBody');
+    if (mwBody) {
+        mwBody.addEventListener('click', function (e) {
+            var row = e.target.closest('.mw-row');
+            if (!row) return;
 
-    // Mobile menu
-    document.getElementById('appMobBtn').addEventListener('click', function () { document.getElementById('mobOverlay').classList.add('open'); });
-    document.getElementById('mobClose').addEventListener('click', function () { document.getElementById('mobOverlay').classList.remove('open'); });
+            curSymbol = row.dataset.symbol;
+
+            var chartName = document.getElementById('chartName');
+            if (chartName) chartName.textContent = mktName(curSymbol);
+
+            mktBuildSidebar('synthetic');
+            uiGoPage('trading');
+        });
+    }
+
+    var appMobBtn = document.getElementById('appMobBtn');
+    if (appMobBtn) {
+        appMobBtn.addEventListener('click', function () {
+            var mobOverlay = document.getElementById('mobOverlay');
+            if (mobOverlay) mobOverlay.classList.add('open');
+        });
+    }
+
+    var mobClose = document.getElementById('mobClose');
+    if (mobClose) {
+        mobClose.addEventListener('click', function () {
+            var mobOverlay = document.getElementById('mobOverlay');
+            if (mobOverlay) mobOverlay.classList.remove('open');
+        });
+    }
+
     document.querySelectorAll('.mnav[data-page]').forEach(function (a) {
-        a.addEventListener('click', function () { uiGoPage(a.dataset.page); });
+        a.addEventListener('click', function () {
+            uiGoPage(a.dataset.page);
+        });
     });
 
-    // Logout
-    document.getElementById('appLogout').addEventListener('click', authLogout);
-    document.getElementById('mobLogout').addEventListener('click', authLogout);
+    var appLogout = document.getElementById('appLogout');
+    if (appLogout) appLogout.addEventListener('click', authLogout);
 
-    // Landing mobile menu (simple toggle for now)
-    document.getElementById('landMobBtn').addEventListener('click', function () { authStartOAuth(); });
+    var mobLogout = document.getElementById('mobLogout');
+    if (mobLogout) mobLogout.addEventListener('click', authLogout);
 }

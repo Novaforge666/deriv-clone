@@ -104,6 +104,7 @@ a {
     -webkit-backdrop-filter: blur(12px);
     backdrop-filter: blur(12px);
     border-bottom: 1px solid rgba(255, 255, 255, .06)
+} border-bottom: 1px solid rgba(255, 255, 255, .06)
 }
 
 .land-header-inner {
@@ -1246,13 +1247,6 @@ a {
     background: var(--bg4);
     color: var(--t1);
     box-shadow: var(--sh2)
-}
-
-.tc-box {
-    flex: 1;
-    background: var(--bg1);
-    position: relative;
-    min-height: 0
 }
 
 .tc-box {

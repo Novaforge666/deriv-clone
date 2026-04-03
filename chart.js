@@ -1,8 +1,11 @@
-var lwChart = null, lwSeries = null, chartType = 'candle', chartRO = null;
+var lwChart = null;
+var lwSeries = null;
+var chartType = 'candle';
+var chartRO = null;
 
 function chartInit() {
     var box = document.getElementById('chartBox');
-    if (!box) return;
+    if (!box || !window.LightweightCharts) return;
 
     if (lwChart) {
         lwChart.remove();
@@ -18,8 +21,8 @@ function chartInit() {
     box.innerHTML = '';
 
     lwChart = LightweightCharts.createChart(box, {
-        width: box.clientWidth,
-        height: box.clientHeight || 400,
+        width: Math.max(box.clientWidth || 0, 320),
+        height: Math.max(box.clientHeight || 0, 360),
         layout: {
             background: { type: 'solid', color: '#0e0e0e' },
             textColor: '#6e7575',
@@ -31,8 +34,18 @@ function chartInit() {
             horzLines: { color: '#1a1c1c' }
         },
         crosshair: {
-            vertLine: { color: '#ff444f', width: 1, style: 2, labelBackgroundColor: '#ff444f' },
-            horzLine: { color: '#ff444f', width: 1, style: 2, labelBackgroundColor: '#ff444f' }
+            vertLine: {
+                color: '#ff444f',
+                width: 1,
+                style: 2,
+                labelBackgroundColor: '#ff444f'
+            },
+            horzLine: {
+                color: '#ff444f',
+                width: 1,
+                style: 2,
+                labelBackgroundColor: '#ff444f'
+            }
         },
         timeScale: {
             timeVisible: true,
@@ -46,18 +59,19 @@ function chartInit() {
 
     chartAddSeries();
 
-    chartRO = new ResizeObserver(function (entries) {
-        entries.forEach(function (entry) {
-            if (lwChart) {
+    if (window.ResizeObserver) {
+        chartRO = new ResizeObserver(function (entries) {
+            entries.forEach(function (entry) {
+                if (!lwChart) return;
                 lwChart.applyOptions({
-                    width: entry.contentRect.width,
-                    height: entry.contentRect.height
+                    width: Math.max(entry.contentRect.width, 320),
+                    height: Math.max(entry.contentRect.height, 360)
                 });
-            }
+            });
         });
-    });
 
-    chartRO.observe(box);
+        chartRO.observe(box);
+    }
 }
 
 function chartAddSeries() {
@@ -92,6 +106,37 @@ function chartAddSeries() {
     }
 }
 
+function chartSetData(candles) {
+    if (!lwSeries || !candles || !candles.length) return;
+
+    if (chartType === 'candle') {
+        lwSeries.setData(
+            candles.map(function (c) {
+                return {
+                    time: +c.epoch,
+                    open: +c.open,
+                    high: +c.high,
+                    low: +c.low,
+                    close: +c.close
+                };
+            })
+        );
+    } else {
+        lwSeries.setData(
+            candles.map(function (c) {
+                return {
+                    time: +c.epoch,
+                    value: +c.close
+                };
+            })
+        );
+    }
+
+    if (lwChart) {
+        lwChart.timeScale().fitContent();
+    }
+}
+
 function chartLoad(sym, gran) {
     curSymbol = sym;
     curGranularity = gran;
@@ -108,57 +153,36 @@ function chartLoad(sym, gran) {
         end: 'latest',
         granularity: gran,
         style: 'candles'
-    }).then(function (r) {
-        if (!r.candles || !lwSeries) return;
+    })
+        .then(function (r) {
+            if (r.candles && r.candles.length) {
+                chartSetData(r.candles);
+            }
 
-        if (chartType === 'candle') {
-            lwSeries.setData(
-                r.candles.map(function (c) {
-                    return {
-                        time: +c.epoch,
-                        open: +c.open,
-                        high: +c.high,
-                        low: +c.low,
-                        close: +c.close
-                    };
-                })
-            );
-        } else {
-            lwSeries.setData(
-                r.candles.map(function (c) {
-                    return {
-                        time: +c.epoch,
-                        value: +c.close
-                    };
-                })
-            );
-        }
-
-        lwChart.timeScale().fitContent();
-
-        wsRaw({
-            ticks_history: sym,
-            adjust_start_time: 1,
-            count: 1,
-            end: 'latest',
-            granularity: gran,
-            style: 'candles',
-            subscribe: 1
+            wsRaw({
+                ticks_history: sym,
+                adjust_start_time: 1,
+                count: 1,
+                end: 'latest',
+                granularity: gran,
+                style: 'candles',
+                subscribe: 1
+            });
+        })
+        .catch(function (err) {
+            console.error('chartLoad failed:', err);
         });
-    }).catch(function (err) {
-        console.error('chartLoad failed:', err);
-    });
 }
 
 function chartSetType(t) {
     chartType = t;
     chartAddSeries();
-    wsForgetAll('candles');
     chartLoad(curSymbol, curGranularity);
 }
 
 wsOn('ohlc', function (o) {
-    if (o.symbol !== curSymbol || !lwSeries) return;
+    if (!lwSeries) return;
+    if (o.symbol && o.symbol !== curSymbol) return;
 
     if (chartType === 'candle') {
         lwSeries.update({
