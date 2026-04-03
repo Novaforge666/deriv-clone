@@ -150,6 +150,10 @@ function chartInit() {
         tradeRenderDigitUI();
     }
 
+    if (typeof tradeSyncDigitCursors === 'function') {
+        tradeSyncDigitCursors();
+    }
+
     if (window.ResizeObserver) {
         chartRO = new ResizeObserver(function (entries) {
             entries.forEach(function (entry) {

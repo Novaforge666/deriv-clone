@@ -5087,3 +5087,187 @@ body.no-scroll {
         min-height: 44px;
     }
 }
+/* ===== LAST-MILE TRADER FIXES ===== */
+
+/* smaller action buttons */
+.act-row {
+    margin-top: 12px;
+    gap: 8px;
+}
+
+.actb {
+    min-height: 66px !important;
+    padding: 10px 8px !important;
+    border-radius: 12px !important;
+    justify-content: center;
+}
+
+.actb-t {
+    gap: 6px;
+}
+
+.actb-t strong {
+    font-size: 12px !important;
+}
+
+.actb-p {
+    font-size: 13px !important;
+    font-weight: 700 !important;
+    opacity: 1 !important;
+}
+
+/* hide duplicated payout summary card if you want payout in buttons */
+.po-card {
+    display: none !important;
+}
+
+/* left panel open positions */
+.side-open-wrap {
+    margin-top: auto;
+    border-top: 1px solid var(--bd);
+    background: #121415;
+    display: flex;
+    flex-direction: column;
+    min-height: 170px;
+    max-height: 250px;
+}
+
+.side-open-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 12px;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    color: var(--t3);
+    letter-spacing: .3px;
+    border-bottom: 1px solid var(--bd);
+}
+
+.side-open-head span:last-child {
+    background: var(--redL);
+    color: var(--red);
+    padding: 2px 8px;
+    border-radius: 999px;
+    font-size: 10px;
+}
+
+.side-open-body {
+    padding: 8px;
+    overflow-y: auto;
+}
+
+.side-empty {
+    padding: 16px 10px;
+    text-align: center;
+}
+
+/* live digit cursor */
+.digit-strip-wrap,
+.digit-board-wrap-inner {
+    position: relative;
+}
+
+.digit-live-cursor {
+    position: absolute;
+    top: -18px;
+    transform: translateX(-50%);
+    padding: 2px 7px;
+    border-radius: 999px;
+    background: #ffffff;
+    color: #111;
+    font-size: 9px;
+    font-weight: 800;
+    letter-spacing: .4px;
+    opacity: 0;
+    transition: left .14s ease, opacity .14s ease;
+    pointer-events: none;
+    z-index: 8;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, .25);
+}
+
+.digit-live-cursor::after {
+    content: '';
+    position: absolute;
+    left: 50%;
+    bottom: -5px;
+    transform: translateX(-50%);
+    border-left: 5px solid transparent;
+    border-right: 5px solid transparent;
+    border-top: 6px solid #fff;
+}
+
+.digit-live-cursor.show {
+    opacity: 1;
+}
+
+.digit-live-cursor.panel-cursor {
+    top: -14px;
+    background: #18bca0;
+    color: #fff;
+}
+
+.digit-live-cursor.panel-cursor::after {
+    border-top-color: #18bca0;
+}
+
+/* collapse only strategy section */
+.trade-strategy-toggle {
+    width: 30px;
+    height: 30px;
+    border: 1px solid var(--bd);
+    background: var(--bg3);
+    color: var(--t2);
+    border-radius: 10px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+}
+
+.trade-strategy-toggle:hover {
+    background: var(--bgH);
+    color: var(--t1);
+}
+
+.foundation-panel.strategy-collapsed .tp-tabs,
+.foundation-panel.strategy-collapsed .tp-form {
+    display: none !important;
+}
+
+.foundation-panel.strategy-collapsed .tp-contracts {
+    flex: 1;
+    max-height: none;
+}
+
+/* mobile: trade controls visible in peek mode */
+@media (max-width: 900px) {
+    .foundation-panel {
+        transform: translateY(calc(100% - 172px)) !important;
+        height: min(78vh, 620px);
+    }
+
+    .foundation-panel.open {
+        transform: translateY(0) !important;
+    }
+
+    .foundation-panel .tp-head {
+        cursor: pointer;
+    }
+
+    .foundation-panel .tp-tabs {
+        position: sticky;
+        top: 58px;
+        z-index: 8;
+        background: #171919;
+    }
+
+    .foundation-panel .tp-form {
+        overflow-y: auto;
+    }
+
+    .side-open-wrap {
+        display: none;
+    }
+}

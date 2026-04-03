@@ -424,9 +424,33 @@ function tradeOpenCardHtml(c) {
         '</div>';
 }
 
+function tradeEnsureSideOpenContracts() {
+    var side = document.getElementById('trdSide');
+    if (!side) return;
+
+    if (!document.getElementById('sideOpenWrap')) {
+        var wrap = document.createElement('div');
+        wrap.className = 'side-open-wrap';
+        wrap.id = 'sideOpenWrap';
+        wrap.innerHTML =
+            '<div class="side-open-head">' +
+            '   <span>Open positions</span>' +
+            '   <span id="sideOpenCount">0</span>' +
+            '</div>' +
+            '<div class="side-open-body" id="sideOpenList">' +
+            '   <div class="empty side-empty"><p>No open positions</p></div>' +
+            '</div>';
+        side.appendChild(wrap);
+    }
+}
+
 function tradeRenderOpenContracts() {
+    tradeEnsureSideOpenContracts();
+
     var list = document.getElementById('cList');
     var dash = document.getElementById('dashPos');
+    var sideList = document.getElementById('sideOpenList');
+    var sideCount = document.getElementById('sideOpenCount');
 
     if (list) {
         list.innerHTML = tradeContracts.length ? tradeContracts.map(tradeOpenCardHtml).join('') : '';
@@ -436,6 +460,16 @@ function tradeRenderOpenContracts() {
         dash.innerHTML = tradeContracts.length
             ? tradeContracts.map(tradeOpenCardHtml).join('')
             : '<div class="empty"><i class="fas fa-inbox"></i><p>No open positions</p></div>';
+    }
+
+    if (sideList) {
+        sideList.innerHTML = tradeContracts.length
+            ? tradeContracts.map(tradeOpenCardHtml).join('')
+            : '<div class="empty side-empty"><p>No open positions</p></div>';
+    }
+
+    if (sideCount) {
+        sideCount.textContent = tradeContracts.length;
     }
 }
 
@@ -702,6 +736,36 @@ function tradeDigitHeatHTML(label, pct, cls) {
         '</div>';
 }
 
+function tradePositionLiveCursor(cursorId, containerId) {
+    var cursor = document.getElementById(cursorId);
+    var container = document.getElementById(containerId);
+    if (!cursor || !container) return;
+
+    var active = container.querySelector('.live');
+    if (!active) {
+        cursor.classList.remove('show');
+        return;
+    }
+
+    var crect = container.getBoundingClientRect();
+    var arect = active.getBoundingClientRect();
+    var left = (arect.left - crect.left) + (arect.width / 2);
+
+    cursor.style.left = left + 'px';
+    cursor.classList.add('show');
+}
+
+function tradeSyncDigitCursors() {
+    tradePositionLiveCursor('digitLiveCursorChart', 'digitStrip');
+    tradePositionLiveCursor('digitLiveCursorPanel', 'digitBoard');
+}
+
+window.addEventListener('resize', function () {
+    if (typeof tradeSyncDigitCursors === 'function') {
+        tradeSyncDigitCursors();
+    }
+});
+
 function tradeEnsureDigitOverlay() {
     var box = document.getElementById('chartBox');
     if (!box) return;
@@ -717,7 +781,10 @@ function tradeEnsureDigitOverlay() {
             '   <span class="digit-insight due">Due: <strong id="digitDueChart">-</strong></span>' +
             '</div>' +
             '<div class="digit-heatbars" id="digitHeatbarsChart"></div>' +
-            '<div class="digit-strip" id="digitStrip"></div>' +
+            '<div class="digit-strip-wrap">' +
+            '   <div class="digit-live-cursor" id="digitLiveCursorChart">LIVE</div>' +
+            '   <div class="digit-strip" id="digitStrip"></div>' +
+            '</div>' +
             '<div class="digit-stream" id="digitStreamChart"></div>';
         box.appendChild(el);
     }
@@ -738,6 +805,18 @@ function tradeEnsureDigitOverlay() {
         heat.id = 'digitHeatbarsPanel';
         wrap.appendChild(heat);
 
+        var boardWrap = document.createElement('div');
+        boardWrap.className = 'digit-board-wrap-inner';
+        boardWrap.id = 'digitBoardWrapInner';
+        boardWrap.innerHTML =
+            '<div class="digit-live-cursor panel-cursor" id="digitLiveCursorPanel">LIVE</div>';
+
+        var board = document.getElementById('digitBoard');
+        if (board && !board.parentElement.classList.contains('digit-board-wrap-inner')) {
+            board.parentNode.insertBefore(boardWrap, board);
+            boardWrap.appendChild(board);
+        }
+
         var stream = document.createElement('div');
         stream.className = 'digit-stream panel-stream';
         stream.id = 'digitStreamPanel';
@@ -753,6 +832,7 @@ function tradeRenderDigitUI() {
     var overlay = document.getElementById('digitOverlay');
     if (overlay) {
         overlay.classList.toggle('hidden', !isDigitsMode);
+        tradeSyncDigitCursors();
     }
 
     function setText(id, val) {
