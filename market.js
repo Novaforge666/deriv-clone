@@ -189,6 +189,10 @@ function mktOnTick(sym, tick) {
     }
 }
 
+if (typeof window.botOnMarketTick === 'function') {
+    window.botOnMarketTick(sym, tick);
+}
+
 function mktSelectSymbol(sym, opts) {
     opts = opts || {};
 
@@ -220,4 +224,8 @@ function mktSelectSymbol(sym, opts) {
         chartLoad(curSymbol, curGranularity);
         if (authAccount) tradeSubProposals();
     }
+}
+
+if (typeof window.botRefreshUI === 'function') {
+    window.botRefreshUI();
 }

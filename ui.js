@@ -229,6 +229,7 @@ function uiGoPage(pg) {
     var map = {
         dashboard: 'pgDashboard',
         trading: 'pgTrading',
+        bot: 'pgBot',
         reports: 'pgReports',
         cashier: 'pgCashier'
     };
@@ -252,11 +253,14 @@ function uiGoPage(pg) {
         });
     }
 
+    if (pg === 'bot' && typeof botRefreshUI === 'function') {
+        botRefreshUI();
+    }
+
     if (pg === 'cashier') {
         uiUpdateCashier();
     }
 }
-
 function uiUpdateBal(bal, cur) {
     var f = (+bal || 0).toLocaleString('en-US', {
         minimumFractionDigits: 2,

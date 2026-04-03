@@ -88,6 +88,28 @@ function onLoggedIn(acct) {
     uiGoPage('trading');
 }
 
+if (!appBootstrapped) {
+    wsOn('balance', function (b) {
+        if (!b) return;
+
+        uiUpdateBal(b.balance, b.currency);
+
+        if (authAccount) {
+            authAccount.balance = b.balance;
+            authAccount.currency = b.currency;
+        }
+    });
+
+    mktBuildDashboard();
+    mktBuildSidebar('synthetic');
+    mktSubscribe();
+    tradeBindAll();
+    botInit();
+    bindAppNav();
+
+    appBootstrapped = true;
+}
+
 function bindAppNav() {
     if (appNavBound) return;
     appNavBound = true;
