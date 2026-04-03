@@ -450,6 +450,7 @@
                                     <option value="m" selected>Minutes</option>
                                     <option value="h">Hours</option>
                                 </select>
+
         
                                 <div class="dur-spin">
                                     <button type="button" id="durDn" aria-label="Less">−</button>
@@ -474,6 +475,27 @@
                                 <button class="qk" data-v="50" type="button">$50</button>
                                 <button class="qk" data-v="100" type="button">$100</button>
                             </div>
+                        </div>
+
+                        <div class="digit-board-wrap hidden" id="digitBoardWrap">
+                            <label class="tpf-lbl"><i class="fas fa-hashtag"></i> Last digit prediction</label>
+                            <div class="digit-board" id="digitBoard">
+                                <button class="digit-btn" type="button" data-digit="0">0</button>
+                                <button class="digit-btn" type="button" data-digit="1">1</button>
+                                <button class="digit-btn active" type="button" data-digit="2">2</button>
+                                <button class="digit-btn" type="button" data-digit="3">3</button>
+                                <button class="digit-btn" type="button" data-digit="4">4</button>
+                                <button class="digit-btn" type="button" data-digit="5">5</button>
+                                <button class="digit-btn" type="button" data-digit="6">6</button>
+                                <button class="digit-btn" type="button" data-digit="7">7</button>
+                                <button class="digit-btn" type="button" data-digit="8">8</button>
+                                <button class="digit-btn" type="button" data-digit="9">9</button>
+                            </div>
+                        </div>
+                        
+                        <div class="basis-switch" id="amtBasisTabs">
+                            <button class="basis-tab active" type="button" data-basis="stake">Stake</button>
+                            <button class="basis-tab" type="button" data-basis="payout">Payout</button>
                         </div>
         
                         <div class="po-card">

@@ -40,7 +40,8 @@ var tradeModes = {
         defaultDur: 5
     }
 };
-
+var tradeAmountBasis = 'stake';
+var tradeDigit = 2;
 var tradeModeKey = 'rise_fall';
 var tradeContracts = [];
 var tradeHistory = [];
@@ -62,6 +63,9 @@ var tradeCategories = {
 };
 
 var tradeCategoryKey = 'up_down';
+
+var tradeAmountBasis = 'stake';
+var tradeDigit = 2;
 
 function tradeCurrency() {
     return authAccount && authAccount.currency ? authAccount.currency : 'USD';
@@ -167,6 +171,17 @@ function tradeSetMode(key) {
         barrierWrap.classList.toggle('hidden', !mode.needsBarrier);
     }
 
+    var digitBoardWrap = document.getElementById('digitBoardWrap');
+    var barrierWrap = document.getElementById('barrierWrap');
+
+    if (barrierWrap) {
+        barrierWrap.classList.add('hidden');
+    }
+
+    if (digitBoardWrap) {
+        digitBoardWrap.classList.toggle('hidden', key !== 'over_under');
+    }
+
     if (mode.forceDurType) {
         var durType = document.getElementById('durType');
         var durVal = document.getElementById('durVal');
@@ -180,13 +195,12 @@ function tradeSetMode(key) {
 
 
 function tradeCurrentBarrier(type) {
-    var el = document.getElementById('barrierVal');
-    var val = el ? Math.max(0, Math.min(9, +el.value || 0)) : 5;
+    var val = tradeDigit;
 
     if (type === 'DIGITOVER' && val >= 9) val = 8;
     if (type === 'DIGITUNDER' && val <= 0) val = 1;
 
-    if (el) el.value = val;
+    tradeDigit = val;
     return String(val);
 }
 
@@ -216,7 +230,7 @@ function tradeBuildProposalReq(type) {
     var req = {
         proposal: 1,
         amount: amount,
-        basis: 'stake',
+        basis: tradeAmountBasis,
         contract_type: type,
         currency: tradeCurrency(),
         duration: dur,
@@ -623,3 +637,29 @@ function tradeBindAll() {
     tradeRenderHistory();
     tradeUpdateSummary();
 }
+document.addEventListener('click', function (e) {
+    var basisBtn = e.target.closest('.basis-tab');
+    if (basisBtn) {
+        tradeAmountBasis = basisBtn.dataset.basis || 'stake';
+
+        document.querySelectorAll('.basis-tab').forEach(function (x) {
+            x.classList.remove('active');
+        });
+        basisBtn.classList.add('active');
+
+        tradeSubProposals();
+        return;
+    }
+
+    var digitBtn = e.target.closest('.digit-btn');
+    if (digitBtn) {
+        tradeDigit = +digitBtn.dataset.digit;
+
+        document.querySelectorAll('.digit-btn').forEach(function (x) {
+            x.classList.remove('active');
+        });
+        digitBtn.classList.add('active');
+
+        tradeSubProposals();
+    }
+});
