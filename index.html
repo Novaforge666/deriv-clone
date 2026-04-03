@@ -223,12 +223,13 @@
                     <div class="logo-box"><i class="fas fa-chart-line"></i></div>
                     <span class="logo-txt">Revenge Trader</span>
                 </a>
-                <nav class="app-nav" id="appNav">
-                    <a class="anav active" data-page="dashboard"><i class="fas fa-th-large"></i> Dashboard</a>
-                    <a class="anav" data-page="trading"><i class="fas fa-exchange-alt"></i> Trade</a>
-                    <a class="anav" data-page="reports"><i class="fas fa-chart-pie"></i> Reports</a>
-                    <a class="anav" data-page="cashier"><i class="fas fa-wallet"></i> Cashier</a>
-                </nav>
+            <nav class="app-nav" id="appNav">
+                <a class="anav" data-page="dashboard"><i class="fas fa-th-large"></i> Dashboard</a>
+                <a class="anav active" data-page="trading"><i class="fas fa-exchange-alt"></i> Trade</a>
+                <a class="anav" data-page="bot"><i class="fas fa-robot"></i> Bot</a>
+                <a class="anav" data-page="reports"><i class="fas fa-chart-pie"></i> Reports</a>
+                <a class="anav" data-page="cashier"><i class="fas fa-wallet"></i> Cashier</a>
+            </nav>
             </div>
             <div class="app-hdr-r">
                 <div class="acc-pill" id="accPill">
@@ -249,12 +250,11 @@
             <div class="mob-panel">
                 <div class="mob-top"><span>Menu</span><button id="mobClose" aria-label="Close"><i
                             class="fas fa-times"></i></button></div>
-                <a class="mnav active" data-page="dashboard"><i class="fas fa-th-large"></i> Dashboard</a>
-                <a class="mnav" data-page="trading"><i class="fas fa-exchange-alt"></i> Trade</a>
-                <a class="mnav" data-page="reports"><i class="fas fa-chart-pie"></i> Reports</a>
-                <a class="mnav" data-page="cashier"><i class="fas fa-wallet"></i> Cashier</a>
-                <div class="mob-div"></div>
-                <a class="mnav" id="mobLogout"><i class="fas fa-sign-out-alt"></i> Log out</a>
+        <a class="mnav active" data-page="dashboard"><i class="fas fa-th-large"></i> Dashboard</a>
+        <a class="mnav" data-page="trading"><i class="fas fa-exchange-alt"></i> Trade</a>
+        <a class="mnav" data-page="bot"><i class="fas fa-robot"></i> Bot</a>
+        <a class="mnav" data-page="reports"><i class="fas fa-chart-pie"></i> Reports</a>
+        <a class="mnav" data-page="cashier"><i class="fas fa-wallet"></i> Cashier</a>
             </div>
         </div>
 
@@ -312,6 +312,9 @@
             <div class="trade-backdrop" id="tradeBackdrop"></div>
         
             <div class="trd-layout trader-foundation">
+
+                <div class="pg" id="pgBot"></div>
+                
                 <!-- MARKETS -->
                 <aside class="trd-side" id="trdSide">
                     <div class="side-top">
@@ -319,9 +322,9 @@
                             <span class="side-kicker">Markets</span>
                             <h3>Market watch</h3>
                         </div>
-                        <button class="side-close" id="mktCloseBtn" type="button" aria-label="Close markets">
-                            <i class="fas fa-times"></i>
-                        </button>
+                    <button class="side-close panel-toggle-btn" id="mktToggleBtn" type="button" aria-label="Toggle markets">
+                        <i class="fas fa-chevron-left"></i>
+                    </button>
                     </div>
         
                     <div class="ts-srch">
@@ -419,6 +422,13 @@
                                 </button>
                             </div>
                         </aside>
+                        <button class="edge-toggle left hidden" id="mktExpandBtn" type="button" aria-label="Expand markets">
+                            <i class="fas fa-chevron-right"></i>
+                        </button>
+                        
+                        <button class="edge-toggle right hidden" id="tradeExpandBtn" type="button" aria-label="Expand trade panel">
+                            <i class="fas fa-chevron-left"></i>
+                        </button>
         
                         <div class="chart-stage">
                             <div class="tc-box" id="chartBox"></div>
@@ -434,7 +444,7 @@
                             <h3>Trade controls</h3>
                         </div>
                         <button class="side-close" id="tradeCloseBtn" type="button" aria-label="Close trade panel">
-                            <i class="fas fa-times"></i>
+                            <i class="fas fa-chevron-right"></i>
                         </button>
                     </div>
         

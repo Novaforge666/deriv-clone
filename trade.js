@@ -149,6 +149,30 @@ function tradeRenderClassifier() {
     }).join('');
 }
 
+function tradePrimeDigits(sym) {
+    return wsSend({
+        ticks_history: sym,
+        count: tradeDigitWindow,
+        end: 'latest',
+        style: 'ticks'
+    }).then(function (r) {
+        var st = tradeDigitState(sym);
+        var prices = (r.history && r.history.prices) ? r.history.prices : [];
+
+        st.history = prices.map(function (q) {
+            return tradeLastDigitFromQuote(q);
+        });
+
+        st.current = st.history.length ? st.history[st.history.length - 1] : null;
+
+        if (sym === curSymbol) {
+            tradeRenderDigitUI();
+        }
+    }).catch(function (err) {
+        console.error('tradePrimeDigits failed:', err);
+    });
+}
+
 function tradeDigitState(sym) {
     if (!tradeDigitStats[sym]) {
         tradeDigitStats[sym] = {
@@ -176,7 +200,19 @@ function tradeDigitSnapshot(sym) {
         counts[d]++;
     });
 
-    var total = st.history.length || 1;
+    var total = st.history.length;
+
+    if (!total) {
+        return {
+            counts: counts,
+            total: 0,
+            current: st.current,
+            most: [],
+            least: [],
+            due: '-'
+        };
+    }
+
     var max = Math.max.apply(null, counts);
     var min = Math.min.apply(null, counts);
 
@@ -194,7 +230,7 @@ function tradeDigitSnapshot(sym) {
         current: st.current,
         most: most,
         least: least,
-        due: least[0]
+        due: least.length ? least[0] : '-'
     };
 }
 
@@ -235,7 +271,7 @@ function tradeRenderDigitUI() {
     var snap = tradeDigitSnapshot(curSymbol);
 
     function pct(d) {
-        return ((snap.counts[d] / snap.total) * 100).toFixed(1) + '%';
+        return tradeDigitPct(snap.counts[d], snap.total);
     }
 
     function setText(id, val) {
@@ -243,12 +279,12 @@ function tradeRenderDigitUI() {
         if (el) el.textContent = val;
     }
 
-    setText('digitMostChart', snap.most.join(', '));
-    setText('digitLeastChart', snap.least.join(', '));
+    setText('digitMostChart', snap.most.length ? snap.most.join(', ') : '-');
+    setText('digitLeastChart', snap.least.length ? snap.least.join(', ') : '-');
     setText('digitDueChart', String(snap.due));
 
-    setText('digitMostPanel', snap.most.join(', '));
-    setText('digitLeastPanel', snap.least.join(', '));
+    setText('digitMostPanel', snap.most.length ? snap.most.join(', ') : '-');
+    setText('digitLeastPanel', snap.least.length ? snap.least.join(', ') : '-');
     setText('digitDuePanel', String(snap.due));
 
     var strip = document.getElementById('digitStrip');
@@ -308,6 +344,11 @@ window.tradeOnDigitTick = function (sym, tick) {
         tradeRenderDigitUI();
     }
 };
+
+function tradeDigitPct(count, total) {
+    if (!total) return '--';
+    return ((count / total) * 100).toFixed(1) + '%';
+}
 
 function tradeSetMode(key) {
     if (!tradeModes[key]) return;

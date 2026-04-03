@@ -232,6 +232,10 @@ function mktSelectSymbol(sym, opts) {
     }
 }
 
+if (typeof tradePrimeDigits === 'function') {
+    tradePrimeDigits(sym);
+}
+
 if (typeof window.botRefreshUI === 'function') {
     window.botRefreshUI();
 }

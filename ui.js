@@ -270,6 +270,60 @@ function uiGoPage(pg) {
         uiUpdateCashier();
     }
 }
+
+function uiSyncTraderCollapseUI() {
+    var root = document.querySelector('.trader-foundation');
+    if (!root) return;
+
+    var mktExpandBtn = document.getElementById('mktExpandBtn');
+    var tradeExpandBtn = document.getElementById('tradeExpandBtn');
+
+    if (mktExpandBtn) {
+        mktExpandBtn.classList.toggle('hidden', !root.classList.contains('markets-collapsed'));
+    }
+
+    if (tradeExpandBtn) {
+        tradeExpandBtn.classList.toggle('hidden', !root.classList.contains('trade-collapsed'));
+    }
+}
+
+function uiToggleDesktopPanel(which, forceOpen) {
+    var root = document.querySelector('.trader-foundation');
+    if (!root) return;
+
+    if (window.innerWidth <= 900) {
+        if (which === 'markets') uiOpenTraderPanel('markets');
+        if (which === 'trade') uiOpenTraderPanel('trade');
+        return;
+    }
+
+    if (which === 'markets') {
+        var willCollapse = typeof forceOpen === 'boolean'
+            ? !forceOpen
+            : !root.classList.contains('markets-collapsed');
+
+        root.classList.toggle('markets-collapsed', willCollapse);
+    }
+
+    if (which === 'trade') {
+        var willCollapseTrade = typeof forceOpen === 'boolean'
+            ? !forceOpen
+            : !root.classList.contains('trade-collapsed');
+
+        root.classList.toggle('trade-collapsed', willCollapseTrade);
+    }
+
+    uiSyncTraderCollapseUI();
+
+    if (typeof chartInit === 'function') {
+        requestAnimationFrame(function () {
+            chartInit();
+            chartLoad(curSymbol, curGranularity);
+            if (typeof tradeRenderDigitUI === 'function') tradeRenderDigitUI();
+        });
+    }
+}
+
 function uiUpdateBal(bal, cur) {
     var f = (+bal || 0).toLocaleString('en-US', {
         minimumFractionDigits: 2,
@@ -379,3 +433,29 @@ function uiBindTraderFoundation() {
         }
     });
 }
+document.addEventListener('click', function (e) {
+    if (e.target.closest('#mktToggleBtn')) {
+        if (window.innerWidth <= 900) {
+            uiCloseTraderPanels();
+        } else {
+            uiToggleDesktopPanel('markets');
+        }
+    }
+
+    if (e.target.closest('#tradeToggleBtn')) {
+        if (window.innerWidth <= 900) {
+            uiCloseTraderPanels();
+        } else {
+            uiToggleDesktopPanel('trade');
+        }
+    }
+
+    if (e.target.closest('#mktExpandBtn')) {
+        uiToggleDesktopPanel('markets', true);
+    }
+
+    if (e.target.closest('#tradeExpandBtn')) {
+        uiToggleDesktopPanel('trade', true);
+    }
+    uiSyncTraderCollapseUI();
+});

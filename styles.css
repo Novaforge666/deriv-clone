@@ -3922,3 +3922,94 @@ body.no-scroll {
         grid-template-columns: 1fr;
     }
 }
+/* ===== COLLAPSIBLE PANELS ===== */
+.chart-shell {
+    position: relative;
+}
+
+.edge-toggle {
+    position: absolute;
+    top: 14px;
+    z-index: 25;
+    width: 28px;
+    height: 48px;
+    border: 1px solid var(--bd);
+    background: rgba(21, 23, 23, .96);
+    color: var(--t2);
+    border-radius: 10px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, .25);
+}
+
+.edge-toggle.left {
+    left: 8px;
+}
+
+.edge-toggle.right {
+    right: 8px;
+}
+
+.edge-toggle.hidden {
+    display: none !important;
+}
+
+.panel-toggle-btn {
+    display: inline-flex !important;
+}
+
+.trader-foundation.markets-collapsed {
+    grid-template-columns: 0 minmax(0, 1fr) 360px;
+}
+
+.trader-foundation.trade-collapsed {
+    grid-template-columns: 280px minmax(0, 1fr) 0;
+}
+
+.trader-foundation.markets-collapsed.trade-collapsed {
+    grid-template-columns: 0 minmax(0, 1fr) 0;
+}
+
+.trader-foundation.markets-collapsed .trd-side,
+.trader-foundation.trade-collapsed .foundation-panel {
+    overflow: hidden;
+    border: 0;
+}
+
+.trader-foundation.markets-collapsed .trd-side>*,
+.trader-foundation.trade-collapsed .foundation-panel>* {
+    opacity: 0;
+    pointer-events: none;
+}
+
+@media (max-width: 900px) {
+    .edge-toggle {
+        display: none !important;
+    }
+
+    .panel-toggle-btn {
+        display: inline-flex !important;
+    }
+}
+@media (max-width: 900px) {
+    .foundation-panel .tp-head {
+        position: sticky;
+        top: 0;
+        z-index: 7;
+        background: #171919;
+    }
+
+    .foundation-panel .tp-tabs {
+        position: sticky;
+        top: 58px;
+        z-index: 6;
+        background: #171919;
+    }
+
+    .foundation-panel .tp-form {
+        overflow-y: auto;
+        padding-top: 12px;
+    }
+}

@@ -105,6 +105,10 @@ if (!appBootstrapped) {
     mktSubscribe();
     tradeBindAll();
 
+    if (typeof tradePrimeDigits === 'function') {
+        tradePrimeDigits(curSymbol);
+    }
+
     if (typeof botInit === 'function') {
         botInit();
     }
