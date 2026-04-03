@@ -143,6 +143,10 @@ function chartInit() {
         tradeRenderDigitUI();
     }
 
+    if (typeof tradeSyncDigitCursors === 'function') {
+        tradeSyncDigitCursors();
+    }
+
     if (typeof tradeEnsureDigitOverlay === 'function') {
         tradeEnsureDigitOverlay();
     }

@@ -168,6 +168,34 @@ function uiBindChrome() {
             if (!dd.contains(e.target) && !(pill && pill.contains(e.target))) {
                 uiCloseAccDD();
             }
+
+            if (e.target.closest('#tradeFocusBtn')) {
+                var panel = document.getElementById('trdPanel');
+                if (panel) {
+                    panel.classList.toggle('strategy-focused');
+
+                    var icon = document.querySelector('#tradeFocusBtn i');
+                    if (icon) {
+                        icon.className = panel.classList.contains('strategy-focused')
+                            ? 'fas fa-expand-alt'
+                            : 'fas fa-compress-alt';
+                    }
+                }
+                return;
+            }
+
+            var tpHead = e.target.closest('.foundation-panel .tp-head');
+            if (tpHead && window.innerWidth <= 900 && !e.target.closest('button')) {
+                var panel2 = document.getElementById('trdPanel');
+                var backdrop = document.getElementById('tradeBackdrop');
+
+                if (panel2) {
+                    panel2.classList.toggle('open');
+                    if (backdrop) backdrop.classList.toggle('open', panel2.classList.contains('open'));
+                    uiSetBodyLock(panel2.classList.contains('open'));
+                }
+            }
+
         }
     });
 
@@ -203,13 +231,13 @@ function uiEnsureTraderFoundationControls() {
         tradeTop.appendChild(btn2);
     }
 
-    if (tradeTop && !document.getElementById('tradeStrategyToggleBtn')) {
+    if (tradeTop && !document.getElementById('tradeFocusBtn')) {
         var btn3 = document.createElement('button');
         btn3.className = 'trade-strategy-toggle';
-        btn3.id = 'tradeStrategyToggleBtn';
+        btn3.id = 'tradeFocusBtn';
         btn3.type = 'button';
-        btn3.setAttribute('aria-label', 'Collapse strategy');
-        btn3.innerHTML = '<i class="fas fa-chevron-up"></i>';
+        btn3.setAttribute('aria-label', 'Focus strategy');
+        btn3.innerHTML = '<i class="fas fa-compress-alt"></i>';
         tradeTop.insertBefore(btn3, tradeTop.firstChild);
     }
 
@@ -427,7 +455,6 @@ function uiShowLanding() {
     if (landing) landing.classList.remove('hidden');
     if (app) app.classList.add('hidden');
 }
-
 function uiGoPage(pg) {
     document.querySelectorAll('.anav').forEach(function (a) {
         a.classList.remove('active');
@@ -487,7 +514,7 @@ function uiGoPage(pg) {
 
                 if (window.innerWidth <= 900) {
                     var panel = document.getElementById('trdPanel');
-                    if (panel) panel.classList.remove('open'); // mobile peek mode
+                    if (panel) panel.classList.remove('open');
                 }
             });
         });

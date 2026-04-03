@@ -206,6 +206,12 @@ function tradeSetMode(key) {
         digitBoardWrap.classList.toggle('hidden', !(key === 'over_under' || key === 'even_odd'));
     }
 
+    if (key === 'over_under' || key === 'even_odd') {
+        if (typeof tradePrimeDigits === 'function') {
+            tradePrimeDigits(curSymbol);
+        }
+    }
+
     tradeRenderClassifier();
     tradeRenderDigitUI();
     tradeSubProposals();
@@ -444,17 +450,31 @@ function tradeEnsureSideOpenContracts() {
     }
 }
 
+function tradeEnsureSideOpenContracts() {
+    var side = document.getElementById('trdSide');
+    if (!side) return;
+
+    if (!document.getElementById('sideOpenWrap')) {
+        var wrap = document.createElement('div');
+        wrap.className = 'side-open-wrap';
+        wrap.id = 'sideOpenWrap';
+        wrap.innerHTML =
+            '<div class="side-open-head">' +
+            '   <span>Open positions</span>' +
+            '   <span id="sideOpenCount">0</span>' +
+            '</div>' +
+            '<div class="side-open-body" id="sideOpenList">' +
+            '   <div class="empty side-empty"><p>No open positions</p></div>' +
+            '</div>';
+        side.appendChild(wrap);
+    }
+}
 function tradeRenderOpenContracts() {
     tradeEnsureSideOpenContracts();
 
-    var list = document.getElementById('cList');
     var dash = document.getElementById('dashPos');
     var sideList = document.getElementById('sideOpenList');
     var sideCount = document.getElementById('sideOpenCount');
-
-    if (list) {
-        list.innerHTML = tradeContracts.length ? tradeContracts.map(tradeOpenCardHtml).join('') : '';
-    }
 
     if (dash) {
         dash.innerHTML = tradeContracts.length
@@ -736,6 +756,50 @@ function tradeDigitHeatHTML(label, pct, cls) {
         '</div>';
 }
 
+function tradeModeHeatHTML(snap) {
+    var html = '';
+
+    if (tradeModeKey === 'even_odd') {
+        html += tradeDigitHeatHTML('Even', tradePctFromValue(snap.evenCount, snap.total), 'even');
+        html += tradeDigitHeatHTML('Odd', tradePctFromValue(snap.oddCount, snap.total), 'odd');
+    } else if (tradeModeKey === 'over_under') {
+        html += tradeDigitHeatHTML('Over ' + tradeDigit, tradePctFromValue(snap.overCount, snap.total), 'over');
+        html += tradeDigitHeatHTML('Under ' + tradeDigit, tradePctFromValue(snap.underCount, snap.total), 'under');
+    }
+
+    return html;
+}
+
+function tradePositionLiveCursorPanel() {
+    var cursor = document.getElementById('digitLiveCursorPanel');
+    var container = document.getElementById('digitBoard');
+
+    if (!cursor || !container) return;
+
+    var live = container.querySelector('.circle-digit-pro.live');
+    if (!live) {
+        cursor.classList.remove('show');
+        return;
+    }
+
+    var crect = container.getBoundingClientRect();
+    var lrect = live.getBoundingClientRect();
+    var left = (lrect.left - crect.left) + (lrect.width / 2);
+
+    cursor.style.left = left + 'px';
+    cursor.classList.add('show');
+}
+
+function tradeSyncDigitCursors() {
+    tradePositionLiveCursorPanel();
+}
+
+window.addEventListener('resize', function () {
+    if (typeof tradeSyncDigitCursors === 'function') {
+        tradeSyncDigitCursors();
+    }
+});
+
 function tradePositionLiveCursor(cursorId, containerId) {
     var cursor = document.getElementById(cursorId);
     var container = document.getElementById(containerId);
@@ -767,30 +831,13 @@ window.addEventListener('resize', function () {
 });
 
 function tradeEnsureDigitOverlay() {
-    var box = document.getElementById('chartBox');
-    if (!box) return;
-
-    if (!document.getElementById('digitOverlay')) {
-        var el = document.createElement('div');
-        el.id = 'digitOverlay';
-        el.className = 'digit-overlay hidden';
-        el.innerHTML =
-            '<div class="digit-insights" id="digitInsightsChart">' +
-            '   <span class="digit-insight hot">Most: <strong id="digitMostChart">-</strong></span>' +
-            '   <span class="digit-insight cold">Least: <strong id="digitLeastChart">-</strong></span>' +
-            '   <span class="digit-insight due">Due: <strong id="digitDueChart">-</strong></span>' +
-            '</div>' +
-            '<div class="digit-heatbars" id="digitHeatbarsChart"></div>' +
-            '<div class="digit-strip-wrap">' +
-            '   <div class="digit-live-cursor" id="digitLiveCursorChart">LIVE</div>' +
-            '   <div class="digit-strip" id="digitStrip"></div>' +
-            '</div>' +
-            '<div class="digit-stream" id="digitStreamChart"></div>';
-        box.appendChild(el);
-    }
+    var chartOverlay = document.getElementById('digitOverlay');
+    if (chartOverlay) chartOverlay.remove();
 
     var wrap = document.getElementById('digitBoardWrap');
-    if (wrap && !document.getElementById('digitInsightsPanel')) {
+    if (!wrap) return;
+
+    if (!document.getElementById('digitInsightsPanel')) {
         var info = document.createElement('div');
         info.className = 'digit-insights panel-insights';
         info.id = 'digitInsightsPanel';
@@ -799,24 +846,26 @@ function tradeEnsureDigitOverlay() {
             '<span class="digit-insight cold">Least: <strong id="digitLeastPanel">-</strong></span>' +
             '<span class="digit-insight due">Due: <strong id="digitDuePanel">-</strong></span>';
         wrap.appendChild(info);
+    }
 
+    if (!document.getElementById('digitHeatbarsPanel')) {
         var heat = document.createElement('div');
         heat.className = 'digit-heatbars panel-heatbars';
         heat.id = 'digitHeatbarsPanel';
         wrap.appendChild(heat);
+    }
 
+    var board = document.getElementById('digitBoard');
+    if (board && !document.getElementById('digitBoardWrapInner')) {
         var boardWrap = document.createElement('div');
         boardWrap.className = 'digit-board-wrap-inner';
         boardWrap.id = 'digitBoardWrapInner';
-        boardWrap.innerHTML =
-            '<div class="digit-live-cursor panel-cursor" id="digitLiveCursorPanel">LIVE</div>';
+        boardWrap.innerHTML = '<div class="digit-live-cursor panel-cursor" id="digitLiveCursorPanel">LIVE</div>';
+        board.parentNode.insertBefore(boardWrap, board);
+        boardWrap.appendChild(board);
+    }
 
-        var board = document.getElementById('digitBoard');
-        if (board && !board.parentElement.classList.contains('digit-board-wrap-inner')) {
-            board.parentNode.insertBefore(boardWrap, board);
-            boardWrap.appendChild(board);
-        }
-
+    if (!document.getElementById('digitStreamPanel')) {
         var stream = document.createElement('div');
         stream.className = 'digit-stream panel-stream';
         stream.id = 'digitStreamPanel';
@@ -827,33 +876,20 @@ function tradeRenderDigitUI() {
     tradeEnsureDigitOverlay();
 
     var snap = tradeDigitSnapshot(curSymbol);
-    var isDigitsMode = tradeCategoryKey === 'digits';
+    var showDigits = (tradeModeKey === 'over_under' || tradeModeKey === 'even_odd');
+    var wrap = document.getElementById('digitBoardWrap');
 
-    var overlay = document.getElementById('digitOverlay');
-    if (overlay) {
-        overlay.classList.toggle('hidden', !isDigitsMode);
-        tradeSyncDigitCursors();
-    }
+    if (wrap) wrap.classList.toggle('hidden', !showDigits);
+    if (!showDigits) return;
 
     function setText(id, val) {
         var el = document.getElementById(id);
         if (el) el.textContent = val;
     }
 
-    setText('digitMostChart', snap.most.length ? snap.most.join(', ') : '-');
-    setText('digitLeastChart', snap.least.length ? snap.least.join(', ') : '-');
-    setText('digitDueChart', String(snap.due));
-
     setText('digitMostPanel', snap.most.length ? snap.most.join(', ') : '-');
     setText('digitLeastPanel', snap.least.length ? snap.least.join(', ') : '-');
     setText('digitDuePanel', String(snap.due));
-
-    var strip = document.getElementById('digitStrip');
-    if (strip) {
-        strip.innerHTML = snap.counts.map(function (count, d) {
-            return tradeDigitCircleHTML(d, count, snap, false);
-        }).join('');
-    }
 
     var board = document.getElementById('digitBoard');
     if (board) {
@@ -862,39 +898,26 @@ function tradeRenderDigitUI() {
         }).join('');
     }
 
-    var evenPct = tradePctFromValue(snap.evenCount, snap.total);
-    var oddPct = tradePctFromValue(snap.oddCount, snap.total);
-    var overPct = tradePctFromValue(snap.overCount, snap.total);
-    var underPct = tradePctFromValue(snap.underCount, snap.total);
-
-    var heatHtml =
-        tradeDigitHeatHTML('Even', evenPct, 'even') +
-        tradeDigitHeatHTML('Odd', oddPct, 'odd') +
-        tradeDigitHeatHTML('Over ' + tradeDigit, overPct, 'over') +
-        tradeDigitHeatHTML('Under ' + tradeDigit, underPct, 'under');
-
-    var heatChart = document.getElementById('digitHeatbarsChart');
-    if (heatChart) heatChart.innerHTML = heatHtml;
-
     var heatPanel = document.getElementById('digitHeatbarsPanel');
-    if (heatPanel) heatPanel.innerHTML = heatHtml;
-
-    var streamHtml = snap.stream.map(function (d, idx) {
-        var isLast = idx === snap.stream.length - 1;
-        var cls = ['digit-stream-item'];
-
-        if (d === snap.current && isLast) cls.push('live');
-        if (d % 2 === 0) cls.push('even');
-        else cls.push('odd');
-
-        return '<span class="' + cls.join(' ') + '">' + d + '</span>';
-    }).join('');
-
-    var streamChart = document.getElementById('digitStreamChart');
-    if (streamChart) streamChart.innerHTML = streamHtml;
+    if (heatPanel) {
+        heatPanel.innerHTML = tradeModeHeatHTML(snap);
+    }
 
     var streamPanel = document.getElementById('digitStreamPanel');
-    if (streamPanel) streamPanel.innerHTML = streamHtml;
+    if (streamPanel) {
+        streamPanel.innerHTML = snap.stream.map(function (d, idx) {
+            var isLast = idx === snap.stream.length - 1;
+            var cls = ['digit-stream-item'];
+
+            if (d === snap.current && isLast) cls.push('live');
+            if (d % 2 === 0) cls.push('even');
+            else cls.push('odd');
+
+            return '<span class="' + cls.join(' ') + '">' + d + '</span>';
+        }).join('');
+    }
+
+    tradeSyncDigitCursors();
 }
 
 function tradePrimeDigits(sym) {
@@ -926,6 +949,7 @@ function tradeBindAll() {
     tradeBound = true;
 
     tradeEnsureModeUI();
+    tradeEnsureSideOpenContracts();
 
     var riseBtn = document.getElementById('riseBtn');
     if (riseBtn) {

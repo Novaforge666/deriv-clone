@@ -1,48 +1,13 @@
 var botReady = false;
 
 function botInit() {
-    if (botReady) return;
-    botInjectNav();
     botEnsurePage();
-    botBindBuilder();
     botReady = true;
 }
 
-function botInjectNav() {
-    var appNav = document.getElementById('appNav');
-    if (appNav && !appNav.querySelector('[data-page="bot"]')) {
-        var reports = appNav.querySelector('[data-page="reports"]');
-        var link = document.createElement('a');
-        link.className = 'anav';
-        link.dataset.page = 'bot';
-        link.innerHTML = '<i class="fas fa-robot"></i> Bot';
-        if (reports) appNav.insertBefore(link, reports);
-        else appNav.appendChild(link);
-    }
-
-    var mobPanel = document.querySelector('.mob-panel');
-    if (mobPanel && !mobPanel.querySelector('.mnav[data-page="bot"]')) {
-        var reportsMob = mobPanel.querySelector('.mnav[data-page="reports"]');
-        var m = document.createElement('a');
-        m.className = 'mnav';
-        m.dataset.page = 'bot';
-        m.innerHTML = '<i class="fas fa-robot"></i> Bot';
-        if (reportsMob) mobPanel.insertBefore(m, reportsMob);
-        else mobPanel.appendChild(m);
-    }
-}
-
 function botEnsurePage() {
-    var appBody = document.querySelector('.app-body');
-    if (!appBody) return;
-
     var page = document.getElementById('pgBot');
-    if (!page) {
-        page = document.createElement('div');
-        page.className = 'pg';
-        page.id = 'pgBot';
-        appBody.appendChild(page);
-    }
+    if (!page) return;
 
     page.innerHTML = `
         <div class="botbuilder-shell">
@@ -85,8 +50,8 @@ function botEnsurePage() {
                         <div class="bbs-menu-list">
                             <button class="bbs-menu-item active">Trade parameters</button>
                             <button class="bbs-menu-item">Purchase conditions</button>
-                            <button class="bbs-menu-item">Sell conditions (optional)</button>
-                            <button class="bbs-menu-item">Restart trading conditions</button>
+                            <button class="bbs-menu-item">Sell conditions</button>
+                            <button class="bbs-menu-item">Restart conditions</button>
                             <button class="bbs-menu-item">Analysis</button>
                             <button class="bbs-menu-item">Utility</button>
                         </div>
@@ -170,8 +135,8 @@ function botEnsurePage() {
 
                     <div class="bbs-summary-box">
                         <div class="bbs-summary-empty" id="bbsSummaryText">
-                            When you're ready to trade, hit Run.<br>
-                            You'll be able to track your bot's performance here.
+                            Bot builder shell ready.<br>
+                            Next step is wiring the block logic.
                         </div>
 
                         <div class="bbs-metrics">
@@ -189,33 +154,4 @@ function botEnsurePage() {
             </div>
         </div>
     `;
-}
-
-function botBindBuilder() {
-    document.addEventListener('click', function (e) {
-        if (e.target.closest('#bbsRunBtn')) {
-            var fill = document.getElementById('bbsStatusFill');
-            var runs = document.getElementById('bbsRuns');
-            var txt = document.getElementById('bbsSummaryText');
-
-            if (fill) fill.style.width = '100%';
-            if (runs) runs.textContent = String((+runs.textContent || 0) + 1);
-            if (txt) txt.innerHTML = 'Bot builder shell is active.<br>Next step is wiring the block logic.';
-            if (typeof toast === 'function') {
-                toast('i', 'Bot builder shell ready. Logic wiring is next.');
-            }
-        }
-
-        if (e.target.closest('#bbsResetBtn')) {
-            var fill2 = document.getElementById('bbsStatusFill');
-            var runs2 = document.getElementById('bbsRuns');
-            var txt2 = document.getElementById('bbsSummaryText');
-
-            if (fill2) fill2.style.width = '0%';
-            if (runs2) runs2.textContent = '0';
-            if (txt2) {
-                txt2.innerHTML = "When you're ready to trade, hit Run.<br>You'll be able to track your bot's performance here.";
-            }
-        }
-    });
 }

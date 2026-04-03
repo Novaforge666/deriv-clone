@@ -231,6 +231,14 @@ function mktSelectSymbol(sym, opts) {
         tradePrimeDigits(sym);
     }
 
+    if (window.innerWidth > 900) {
+        var root = document.querySelector('.trader-foundation');
+        if (root) {
+            root.classList.add('markets-collapsed');
+            if (typeof uiSyncTraderCollapseUI === 'function') uiSyncTraderCollapseUI();
+        }
+    }
+
     if (opts.goTrading) {
         uiGoPage('trading');
     } else {
