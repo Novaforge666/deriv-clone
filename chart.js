@@ -143,6 +143,13 @@ function chartInit() {
         tradeRenderDigitUI();
     }
 
+    if (typeof tradeEnsureDigitOverlay === 'function') {
+        tradeEnsureDigitOverlay();
+    }
+    if (typeof tradeRenderDigitUI === 'function') {
+        tradeRenderDigitUI();
+    }
+
     if (window.ResizeObserver) {
         chartRO = new ResizeObserver(function (entries) {
             entries.forEach(function (entry) {

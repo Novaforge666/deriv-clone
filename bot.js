@@ -1,14 +1,48 @@
 var botReady = false;
 
 function botInit() {
-    botInjectPage();
+    if (botReady) return;
+    botInjectNav();
+    botEnsurePage();
     botBindBuilder();
     botReady = true;
 }
 
-function botInjectPage() {
+function botInjectNav() {
+    var appNav = document.getElementById('appNav');
+    if (appNav && !appNav.querySelector('[data-page="bot"]')) {
+        var reports = appNav.querySelector('[data-page="reports"]');
+        var link = document.createElement('a');
+        link.className = 'anav';
+        link.dataset.page = 'bot';
+        link.innerHTML = '<i class="fas fa-robot"></i> Bot';
+        if (reports) appNav.insertBefore(link, reports);
+        else appNav.appendChild(link);
+    }
+
+    var mobPanel = document.querySelector('.mob-panel');
+    if (mobPanel && !mobPanel.querySelector('.mnav[data-page="bot"]')) {
+        var reportsMob = mobPanel.querySelector('.mnav[data-page="reports"]');
+        var m = document.createElement('a');
+        m.className = 'mnav';
+        m.dataset.page = 'bot';
+        m.innerHTML = '<i class="fas fa-robot"></i> Bot';
+        if (reportsMob) mobPanel.insertBefore(m, reportsMob);
+        else mobPanel.appendChild(m);
+    }
+}
+
+function botEnsurePage() {
+    var appBody = document.querySelector('.app-body');
+    if (!appBody) return;
+
     var page = document.getElementById('pgBot');
-    if (!page) return;
+    if (!page) {
+        page = document.createElement('div');
+        page.className = 'pg';
+        page.id = 'pgBot';
+        appBody.appendChild(page);
+    }
 
     page.innerHTML = `
         <div class="botbuilder-shell">
@@ -167,7 +201,9 @@ function botBindBuilder() {
             if (fill) fill.style.width = '100%';
             if (runs) runs.textContent = String((+runs.textContent || 0) + 1);
             if (txt) txt.innerHTML = 'Bot builder shell is active.<br>Next step is wiring the block logic.';
-            toast('i', 'Bot builder UI ready. Logic wiring is next.');
+            if (typeof toast === 'function') {
+                toast('i', 'Bot builder shell ready. Logic wiring is next.');
+            }
         }
 
         if (e.target.closest('#bbsResetBtn')) {

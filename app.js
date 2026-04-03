@@ -77,69 +77,24 @@ function onLoggedIn(acct) {
         mktBuildSidebar('synthetic');
         mktSubscribe();
         tradeBindAll();
+
+        if (typeof botInit === 'function') {
+            botInit();
+        }
+
         bindAppNav();
 
         appBootstrapped = true;
+    }
+
+    if (typeof tradePrimeDigits === 'function') {
+        tradePrimeDigits(curSymbol);
     }
 
     wsForgetAll('balance');
     wsRaw({ balance: 1, subscribe: 1 });
 
     uiGoPage('trading');
-}
-
-if (!appBootstrapped) {
-    wsOn('balance', function (b) {
-        if (!b) return;
-
-        uiUpdateBal(b.balance, b.currency);
-
-        if (authAccount) {
-            authAccount.balance = b.balance;
-            authAccount.currency = b.currency;
-        }
-    });
-
-    mktBuildDashboard();
-    mktBuildSidebar('synthetic');
-    mktSubscribe();
-    tradeBindAll();
-
-    if (typeof tradePrimeDigits === 'function') {
-        tradePrimeDigits(curSymbol);
-    }
-
-    if (typeof botInit === 'function') {
-        botInit();
-    }
-
-    bindAppNav();
-
-    appBootstrapped = true;
-}
-
-if (!appBootstrapped) {
-    wsOn('balance', function (b) {
-        if (!b) return;
-
-        uiUpdateBal(b.balance, b.currency);
-
-        if (authAccount) {
-            authAccount.balance = b.balance;
-            authAccount.currency = b.currency;
-        }
-    });
-
-    mktBuildDashboard();
-    mktBuildSidebar('synthetic');
-    mktSubscribe();
-    tradeBindAll();
-    if (typeof botInit === 'function') {
-        botInit();
-    }
-    bindAppNav();
-
-    appBootstrapped = true;
 }
 
 function bindAppNav() {

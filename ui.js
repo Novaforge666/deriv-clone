@@ -1,4 +1,5 @@
 var uiChromeBound = false;
+var traderFoundationBound = false;
 
 function toast(type, msg) {
     var w = document.getElementById('toastWrap');
@@ -78,12 +79,6 @@ function uiBuildAccountDropdown() {
             is_virtual: !!authAccount.is_virtual
         }];
     }
-
-    list.sort(function (a, b) {
-        if (a.token === currentToken) return -1;
-        if (b.token === currentToken) return 1;
-        return 0;
-    });
 
     if (!list.length) {
         wrap.innerHTML = '<div class="acc-dd-empty">No accounts found</div>';
@@ -185,89 +180,87 @@ function uiBindChrome() {
     });
 }
 
-function uiShowApp() {
-    var landing = document.getElementById('landingPage');
-    var app = document.getElementById('appShell');
-
-    if (landing) landing.classList.add('hidden');
-    if (app) app.classList.remove('hidden');
-}
-
-function uiShowLanding() {
-    var landing = document.getElementById('landingPage');
-    var app = document.getElementById('appShell');
-
-    uiCloseMob();
-    uiCloseAccDD();
-
-    if (landing) landing.classList.remove('hidden');
-    if (app) app.classList.add('hidden');
-}
-
-function uiGoPage(pg) {
-    document.querySelectorAll('.anav').forEach(function (a) {
-        a.classList.remove('active');
-    });
-
-    var map = {
-        dashboard: 'pgDashboard',
-        trading: 'pgTrading',
-        bot: 'pgBot',
-        reports: 'pgReports',
-        cashier: 'pgCashier'
-    };
-
-    var na = document.querySelector('.anav[data-page="' + pg + '"]');
-    if (na) na.classList.add('active');
-
-    document.querySelectorAll('.mnav[data-page]').forEach(function (a) {
-        a.classList.remove('active');
-    });
-
-    var ma = document.querySelector('.mnav[data-page="' + pg + '"]');
-    if (ma) ma.classList.add('active');
-
-    uiCloseMob();
-    uiCloseAccDD();
-
-    document.querySelectorAll('.pg').forEach(function (p) {
-        p.classList.remove('active');
-        p.style.display = '';
-    });
-
-    var map = {
-        dashboard: 'pgDashboard',
-        trading: 'pgTrading',
-        bot: 'pgBot',
-        reports: 'pgReports',
-        cashier: 'pgCashier'
-    };
-
-    var el = document.getElementById(map[pg]);
-    if (el) el.classList.add('active');
-
-    if (pg === 'trading') {
-        var activeItem = document.querySelector('.ts-item[data-symbol="' + curSymbol + '"]');
-        document.querySelectorAll('.ts-item').forEach(function (x) {
-            x.classList.remove('active');
-        });
-        if (activeItem) activeItem.classList.add('active');
-
-        requestAnimationFrame(function () {
-            requestAnimationFrame(function () {
-                chartInit();
-                chartLoad(curSymbol, curGranularity);
-                if (authAccount) tradeSubProposals();
-            });
-        });
+function uiEnsureTraderFoundationControls() {
+    var sideTop = document.querySelector('.trd-side .side-top');
+    if (sideTop && !document.getElementById('mktToggleBtn')) {
+        var btn = document.createElement('button');
+        btn.className = 'side-close panel-toggle-btn';
+        btn.id = 'mktToggleBtn';
+        btn.type = 'button';
+        btn.setAttribute('aria-label', 'Toggle markets');
+        btn.innerHTML = '<i class="fas fa-chevron-left"></i>';
+        sideTop.appendChild(btn);
     }
 
-    if (pg === 'bot' && typeof botRefreshUI === 'function') {
-        botRefreshUI();
+    var tradeTop = document.querySelector('.foundation-panel .tp-head');
+    if (tradeTop && !document.getElementById('tradeToggleBtn')) {
+        var btn2 = document.createElement('button');
+        btn2.className = 'side-close panel-toggle-btn';
+        btn2.id = 'tradeToggleBtn';
+        btn2.type = 'button';
+        btn2.setAttribute('aria-label', 'Toggle trade panel');
+        btn2.innerHTML = '<i class="fas fa-chevron-right"></i>';
+        tradeTop.appendChild(btn2);
     }
 
-    if (pg === 'cashier') {
-        uiUpdateCashier();
+    var chartShell = document.querySelector('.chart-shell');
+    if (chartShell && !document.getElementById('mktExpandBtn')) {
+        var left = document.createElement('button');
+        left.className = 'edge-toggle left hidden';
+        left.id = 'mktExpandBtn';
+        left.type = 'button';
+        left.setAttribute('aria-label', 'Expand markets');
+        left.innerHTML = '<i class="fas fa-chevron-right"></i>';
+        chartShell.appendChild(left);
+    }
+
+    if (chartShell && !document.getElementById('tradeExpandBtn')) {
+        var right = document.createElement('button');
+        right.className = 'edge-toggle right hidden';
+        right.id = 'tradeExpandBtn';
+        right.type = 'button';
+        right.setAttribute('aria-label', 'Expand trade panel');
+        right.innerHTML = '<i class="fas fa-chevron-left"></i>';
+        chartShell.appendChild(right);
+    }
+}
+
+function uiOpenTraderPanel(which) {
+    var side = document.getElementById('trdSide');
+    var panel = document.getElementById('trdPanel');
+    var backdrop = document.getElementById('tradeBackdrop');
+
+    if (which === 'markets' && side) {
+        side.classList.add('open');
+    }
+
+    if (which === 'trade' && panel) {
+        panel.classList.add('open');
+
+        if (typeof tradeEnsureModeUI === 'function') tradeEnsureModeUI();
+        if (typeof tradeRenderClassifier === 'function') tradeRenderClassifier();
+        if (typeof tradeRenderDigitUI === 'function') tradeRenderDigitUI();
+
+        panel.scrollTop = 0;
+        var form = panel.querySelector('.tp-form');
+        if (form) form.scrollTop = 0;
+    }
+
+    if (backdrop) backdrop.classList.add('open');
+    uiSetBodyLock(true);
+}
+
+function uiCloseTraderPanels() {
+    var side = document.getElementById('trdSide');
+    var panel = document.getElementById('trdPanel');
+    var backdrop = document.getElementById('tradeBackdrop');
+
+    if (side) side.classList.remove('open');
+    if (panel) panel.classList.remove('open');
+    if (backdrop) backdrop.classList.remove('open');
+
+    if (!document.getElementById('mobOverlay') || !document.getElementById('mobOverlay').classList.contains('open')) {
+        uiSetBodyLock(false);
     }
 }
 
@@ -275,15 +268,28 @@ function uiSyncTraderCollapseUI() {
     var root = document.querySelector('.trader-foundation');
     if (!root) return;
 
+    var marketsCollapsed = root.classList.contains('markets-collapsed');
+    var tradeCollapsed = root.classList.contains('trade-collapsed');
+
     var mktExpandBtn = document.getElementById('mktExpandBtn');
     var tradeExpandBtn = document.getElementById('tradeExpandBtn');
+    var mktToggleBtn = document.getElementById('mktToggleBtn');
+    var tradeToggleBtn = document.getElementById('tradeToggleBtn');
 
     if (mktExpandBtn) {
-        mktExpandBtn.classList.toggle('hidden', !root.classList.contains('markets-collapsed'));
+        mktExpandBtn.classList.toggle('hidden', !marketsCollapsed);
     }
 
     if (tradeExpandBtn) {
-        tradeExpandBtn.classList.toggle('hidden', !root.classList.contains('trade-collapsed'));
+        tradeExpandBtn.classList.toggle('hidden', !tradeCollapsed);
+    }
+
+    if (mktToggleBtn) {
+        mktToggleBtn.innerHTML = '<i class="fas fa-chevron-left"></i>';
+    }
+
+    if (tradeToggleBtn) {
+        tradeToggleBtn.innerHTML = '<i class="fas fa-chevron-right"></i>';
     }
 }
 
@@ -321,6 +327,126 @@ function uiToggleDesktopPanel(which, forceOpen) {
             chartLoad(curSymbol, curGranularity);
             if (typeof tradeRenderDigitUI === 'function') tradeRenderDigitUI();
         });
+    }
+}
+
+function uiBindTraderFoundation() {
+    if (traderFoundationBound) return;
+    traderFoundationBound = true;
+
+    uiEnsureTraderFoundationControls();
+
+    document.addEventListener('click', function (e) {
+        if (e.target.closest('#openMarketsBtn')) {
+            uiOpenTraderPanel('markets');
+        }
+
+        if (e.target.closest('#openTradeBtn')) {
+            uiOpenTraderPanel('trade');
+        }
+
+        if (e.target.closest('#mktCloseBtn') || e.target.closest('#tradeCloseBtn') || e.target.closest('#tradeBackdrop')) {
+            uiCloseTraderPanels();
+        }
+
+        if (e.target.closest('#mktToggleBtn')) {
+            if (window.innerWidth <= 900) uiCloseTraderPanels();
+            else uiToggleDesktopPanel('markets');
+        }
+
+        if (e.target.closest('#tradeToggleBtn')) {
+            if (window.innerWidth <= 900) uiCloseTraderPanels();
+            else uiToggleDesktopPanel('trade');
+        }
+
+        if (e.target.closest('#mktExpandBtn')) {
+            uiToggleDesktopPanel('markets', true);
+        }
+
+        if (e.target.closest('#tradeExpandBtn')) {
+            uiToggleDesktopPanel('trade', true);
+        }
+    });
+
+    uiSyncTraderCollapseUI();
+}
+
+function uiShowApp() {
+    var landing = document.getElementById('landingPage');
+    var app = document.getElementById('appShell');
+
+    if (landing) landing.classList.add('hidden');
+    if (app) app.classList.remove('hidden');
+}
+
+function uiShowLanding() {
+    var landing = document.getElementById('landingPage');
+    var app = document.getElementById('appShell');
+
+    uiCloseMob();
+    uiCloseAccDD();
+    uiCloseTraderPanels();
+
+    if (landing) landing.classList.remove('hidden');
+    if (app) app.classList.add('hidden');
+}
+
+function uiGoPage(pg) {
+    document.querySelectorAll('.anav').forEach(function (a) {
+        a.classList.remove('active');
+    });
+
+    var na = document.querySelector('.anav[data-page="' + pg + '"]');
+    if (na) na.classList.add('active');
+
+    document.querySelectorAll('.mnav[data-page]').forEach(function (a) {
+        a.classList.remove('active');
+    });
+
+    var ma = document.querySelector('.mnav[data-page="' + pg + '"]');
+    if (ma) ma.classList.add('active');
+
+    uiCloseMob();
+    uiCloseAccDD();
+    uiCloseTraderPanels();
+
+    document.querySelectorAll('.pg').forEach(function (p) {
+        p.classList.remove('active');
+        p.style.display = '';
+    });
+
+    var map = {
+        dashboard: 'pgDashboard',
+        trading: 'pgTrading',
+        bot: 'pgBot',
+        reports: 'pgReports',
+        cashier: 'pgCashier'
+    };
+
+    var el = document.getElementById(map[pg]);
+    if (el) el.classList.add('active');
+
+    if (pg === 'trading') {
+        var activeItem = document.querySelector('.ts-item[data-symbol="' + curSymbol + '"]');
+        document.querySelectorAll('.ts-item').forEach(function (x) {
+            x.classList.remove('active');
+        });
+        if (activeItem) activeItem.classList.add('active');
+
+        requestAnimationFrame(function () {
+            requestAnimationFrame(function () {
+                chartInit();
+                chartLoad(curSymbol, curGranularity);
+                if (typeof tradeEnsureModeUI === 'function') tradeEnsureModeUI();
+                if (authAccount && typeof tradeSubProposals === 'function') tradeSubProposals();
+                if (typeof tradeRenderDigitUI === 'function') tradeRenderDigitUI();
+                uiSyncTraderCollapseUI();
+            });
+        });
+    }
+
+    if (pg === 'cashier') {
+        uiUpdateCashier();
     }
 }
 
@@ -371,91 +497,3 @@ function uiUpdateCashier() {
         uiUpdateBal(authAccount.balance, authAccount.currency);
     }
 }
-var traderFoundationBound = false;
-
-function uiOpenTraderPanel(which) {
-    var side = document.getElementById('trdSide');
-    var panel = document.getElementById('trdPanel');
-    var backdrop = document.getElementById('tradeBackdrop');
-
-    if (which === 'markets' && side) {
-        side.classList.add('open');
-    }
-
-    if (which === 'trade' && panel) {
-        panel.classList.add('open');
-
-        if (typeof tradeEnsureModeUI === 'function') {
-            tradeEnsureModeUI();
-        }
-        if (typeof tradeRenderClassifier === 'function') {
-            tradeRenderClassifier();
-        }
-        if (typeof tradeRenderDigitUI === 'function') {
-            tradeRenderDigitUI();
-        }
-
-        panel.scrollTop = 0;
-        var form = panel.querySelector('.tp-form');
-        if (form) form.scrollTop = 0;
-    }
-
-    if (backdrop) backdrop.classList.add('open');
-    uiSetBodyLock(true);
-}
-
-function uiCloseTraderPanels() {
-    var side = document.getElementById('trdSide');
-    var panel = document.getElementById('trdPanel');
-    var backdrop = document.getElementById('tradeBackdrop');
-
-    if (side) side.classList.remove('open');
-    if (panel) panel.classList.remove('open');
-    if (backdrop) backdrop.classList.remove('open');
-    uiSetBodyLock(false);
-}
-
-function uiBindTraderFoundation() {
-    if (traderFoundationBound) return;
-    traderFoundationBound = true;
-
-    document.addEventListener('click', function (e) {
-        if (e.target.closest('#openMarketsBtn')) {
-            uiOpenTraderPanel('markets');
-        }
-
-        if (e.target.closest('#openTradeBtn')) {
-            uiOpenTraderPanel('trade');
-        }
-
-        if (e.target.closest('#mktCloseBtn') || e.target.closest('#tradeCloseBtn') || e.target.closest('#tradeBackdrop')) {
-            uiCloseTraderPanels();
-        }
-    });
-}
-document.addEventListener('click', function (e) {
-    if (e.target.closest('#mktToggleBtn')) {
-        if (window.innerWidth <= 900) {
-            uiCloseTraderPanels();
-        } else {
-            uiToggleDesktopPanel('markets');
-        }
-    }
-
-    if (e.target.closest('#tradeToggleBtn')) {
-        if (window.innerWidth <= 900) {
-            uiCloseTraderPanels();
-        } else {
-            uiToggleDesktopPanel('trade');
-        }
-    }
-
-    if (e.target.closest('#mktExpandBtn')) {
-        uiToggleDesktopPanel('markets', true);
-    }
-
-    if (e.target.closest('#tradeExpandBtn')) {
-        uiToggleDesktopPanel('trade', true);
-    }
-    uiSyncTraderCollapseUI();
-});

@@ -65,6 +65,13 @@ function mktCategoryOf(sym) {
     return m ? m.cat : 'synthetic';
 }
 
+function mktCategoryLabel(cat) {
+    if (cat === 'synthetic') return 'Synthetic indices';
+    if (cat === 'forex') return 'Forex';
+    if (cat === 'commodities') return 'Commodities';
+    return 'Markets';
+}
+
 function mktBuildSidebar(cat) {
     mktCurrentCat = cat || mktCurrentCat || 'synthetic';
 
@@ -173,9 +180,7 @@ function mktOnTick(sym, tick) {
     }
 
     var tp = document.getElementById('tp_' + sym);
-    if (tp) {
-        tp.textContent = q;
-    }
+    if (tp) tp.textContent = q;
 
     if (sym === curSymbol) {
         var cp = document.getElementById('chartPrice');
@@ -187,13 +192,14 @@ function mktOnTick(sym, tick) {
             pctEl.className = 'tc-pct ' + (pct >= 0 ? 'up' : 'dn');
         }
     }
-}
-if (typeof window.tradeOnDigitTick === 'function') {
-    window.tradeOnDigitTick(sym, tick);
-}
 
-if (typeof window.botOnMarketTick === 'function') {
-    window.botOnMarketTick(sym, tick);
+    if (typeof window.tradeOnDigitTick === 'function') {
+        window.tradeOnDigitTick(sym, tick);
+    }
+
+    if (typeof window.botOnMarketTick === 'function') {
+        window.botOnMarketTick(sym, tick);
+    }
 }
 
 function mktSelectSymbol(sym, opts) {
@@ -202,11 +208,12 @@ function mktSelectSymbol(sym, opts) {
     curSymbol = sym;
 
     var cat = mktCategoryOf(sym);
+
     var nameEl = document.getElementById('chartName');
     if (nameEl) nameEl.textContent = mktName(sym);
 
     var catEl = document.getElementById('chartCat');
-    if (catEl) catEl.textContent = mktCategoryLabel(mktCategoryOf(sym));
+    if (catEl) catEl.textContent = mktCategoryLabel(cat);
 
     var cp = document.getElementById('chartPrice');
     if (cp && prevPrices[sym] !== undefined) {
@@ -220,31 +227,21 @@ function mktSelectSymbol(sym, opts) {
         mktBuildSidebar(cat);
     }
 
+    if (typeof tradePrimeDigits === 'function') {
+        tradePrimeDigits(sym);
+    }
+
     if (opts.goTrading) {
         uiGoPage('trading');
-        return;
+    } else {
+        var tradingPage = document.getElementById('pgTrading');
+        if (tradingPage && tradingPage.classList.contains('active')) {
+            chartLoad(curSymbol, curGranularity);
+            if (authAccount) tradeSubProposals();
+        }
     }
 
-    var tradingPage = document.getElementById('pgTrading');
-    if (tradingPage && tradingPage.classList.contains('active')) {
-        chartLoad(curSymbol, curGranularity);
-        if (authAccount) tradeSubProposals();
+    if (window.innerWidth <= 900 && typeof uiCloseTraderPanels === 'function') {
+        uiCloseTraderPanels();
     }
-}
-
-if (typeof tradePrimeDigits === 'function') {
-    tradePrimeDigits(sym);
-}
-
-if (typeof window.botRefreshUI === 'function') {
-    window.botRefreshUI();
-}
-if (window.innerWidth <= 900 && typeof uiCloseTraderPanels === 'function') {
-    uiCloseTraderPanels();
-}
-function mktCategoryLabel(cat) {
-    if (cat === 'synthetic') return 'Synthetic indices';
-    if (cat === 'forex') return 'Forex';
-    if (cat === 'commodities') return 'Commodities';
-    return 'Markets';
 }

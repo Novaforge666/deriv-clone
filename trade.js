@@ -1,8 +1,3 @@
-var tradeAmountBasis = 'stake';
-var tradeDigit = 2;
-
-var tradeDigitWindow = 60;
-var tradeDigitStats = {};
 var tradeModes = {
     rise_fall: {
         key: 'rise_fall',
@@ -10,8 +5,7 @@ var tradeModes = {
         aType: 'CALL',
         bType: 'PUT',
         aLabel: 'Rise',
-        bLabel: 'Fall',
-        needsBarrier: false
+        bLabel: 'Fall'
     },
     higher_lower: {
         key: 'higher_lower',
@@ -19,8 +13,7 @@ var tradeModes = {
         aType: 'CALL',
         bType: 'PUT',
         aLabel: 'Higher',
-        bLabel: 'Lower',
-        needsBarrier: false
+        bLabel: 'Lower'
     },
     even_odd: {
         key: 'even_odd',
@@ -29,7 +22,6 @@ var tradeModes = {
         bType: 'DIGITODD',
         aLabel: 'Even',
         bLabel: 'Odd',
-        needsBarrier: false,
         forceDurType: 't',
         defaultDur: 5
     },
@@ -40,18 +32,11 @@ var tradeModes = {
         bType: 'DIGITUNDER',
         aLabel: 'Over',
         bLabel: 'Under',
-        needsBarrier: true,
         forceDurType: 't',
         defaultDur: 5
     }
 };
-var tradeAmountBasis = 'stake';
-var tradeDigit = 2;
-var tradeModeKey = 'rise_fall';
-var tradeContracts = [];
-var tradeHistory = [];
-var tradeProposalCache = { A: null, B: null };
-var tradeBound = false;
+
 var tradeCategories = {
     up_down: {
         label: 'Up/Down',
@@ -68,22 +53,22 @@ var tradeCategories = {
 };
 
 var tradeCategoryKey = 'up_down';
-
+var tradeModeKey = 'rise_fall';
 var tradeAmountBasis = 'stake';
 var tradeDigit = 2;
+
+var tradeContracts = [];
+var tradeHistory = [];
+var tradeProposalCache = { A: null, B: null };
+var tradeBound = false;
+
+var tradeDigitWindow = 60;
+var tradeDigitStats = {};
 
 function tradeCurrency() {
     return authAccount && authAccount.currency ? authAccount.currency : 'USD';
 }
 
-function tradeErrText(e) {
-    if (!e) return 'Unknown error';
-    if (typeof e === 'string') return e;
-    if (e.message) return e.message;
-    if (e.error && e.error.message) return e.error.message;
-    if (e.code) return e.code;
-    try { return JSON.stringify(e); } catch (_) { return 'Unknown error'; }
-}
 function tradeMoney(v) {
     var n = +v || 0;
     var cur = tradeCurrency();
@@ -95,6 +80,15 @@ function tradeSignedMoney(v) {
     var cur = tradeCurrency();
     var p = (cur === 'USD' ? '$' : cur + ' ');
     return (n >= 0 ? '+' : '-') + p + Math.abs(n).toFixed(2);
+}
+
+function tradeErrText(e) {
+    if (!e) return 'Unknown error';
+    if (typeof e === 'string') return e;
+    if (e.message) return e.message;
+    if (e.error && e.error.message) return e.error.message;
+    if (e.code) return e.code;
+    try { return JSON.stringify(e); } catch (_) { return 'Unknown error'; }
 }
 
 function tradeGetMode() {
@@ -112,23 +106,50 @@ function tradeEnsureModeUI() {
     }
 
     var form = document.querySelector('.tp-form');
+    var poCard = form ? form.querySelector('.po-card') : null;
+
+    if (form && !document.getElementById('digitBoardWrap')) {
+        var digitWrap = document.createElement('div');
+        digitWrap.className = 'digit-board-wrap hidden';
+        digitWrap.id = 'digitBoardWrap';
+        digitWrap.innerHTML =
+            '<label class="tpf-lbl"><i class="fas fa-hashtag"></i> Last digit prediction</label>' +
+            '<div class="digit-board" id="digitBoard"></div>';
+
+        if (poCard) form.insertBefore(digitWrap, poCard);
+        else form.appendChild(digitWrap);
+    }
+
+    if (form && !document.getElementById('amtBasisTabs')) {
+        var basis = document.createElement('div');
+        basis.className = 'basis-switch';
+        basis.id = 'amtBasisTabs';
+        basis.innerHTML =
+            '<button class="basis-tab active" type="button" data-basis="stake">Stake</button>' +
+            '<button class="basis-tab" type="button" data-basis="payout">Payout</button>';
+
+        if (poCard) form.insertBefore(basis, poCard);
+        else form.appendChild(basis);
+    }
+
     if (form && !document.getElementById('barrierWrap')) {
-        var sec = document.createElement('div');
-        sec.className = 'tpf-sec hidden';
-        sec.id = 'barrierWrap';
-        sec.innerHTML =
+        var barrier = document.createElement('div');
+        barrier.className = 'tpf-sec hidden';
+        barrier.id = 'barrierWrap';
+        barrier.innerHTML =
             '<label class="tpf-lbl"><i class="fas fa-hashtag"></i> Barrier / Digit</label>' +
             '<div class="stake-row">' +
             '   <span class="stk-c">DIGIT</span>' +
             '   <input type="number" id="barrierVal" value="5" min="0" max="9" aria-label="Barrier digit">' +
             '</div>';
 
-        var poCard = form.querySelector('.po-card');
-        if (poCard) form.insertBefore(sec, poCard);
-        else form.appendChild(sec);
+        if (poCard) form.insertBefore(barrier, poCard);
+        else form.appendChild(barrier);
     }
 
     tradeRenderClassifier();
+    tradeEnsureDigitOverlay();
+    tradeRenderDigitUI();
 }
 
 function tradeRenderClassifier() {
@@ -149,212 +170,8 @@ function tradeRenderClassifier() {
     }).join('');
 }
 
-function tradePrimeDigits(sym) {
-    return wsSend({
-        ticks_history: sym,
-        count: tradeDigitWindow,
-        end: 'latest',
-        style: 'ticks'
-    }).then(function (r) {
-        var st = tradeDigitState(sym);
-        var prices = (r.history && r.history.prices) ? r.history.prices : [];
-
-        st.history = prices.map(function (q) {
-            return tradeLastDigitFromQuote(q);
-        });
-
-        st.current = st.history.length ? st.history[st.history.length - 1] : null;
-
-        if (sym === curSymbol) {
-            tradeRenderDigitUI();
-        }
-    }).catch(function (err) {
-        console.error('tradePrimeDigits failed:', err);
-    });
-}
-
-function tradeDigitState(sym) {
-    if (!tradeDigitStats[sym]) {
-        tradeDigitStats[sym] = {
-            history: [],
-            current: null
-        };
-    }
-    return tradeDigitStats[sym];
-}
-
-function tradeLastDigitFromQuote(quote) {
-    var s = String(quote);
-    for (var i = s.length - 1; i >= 0; i--) {
-        var ch = s.charAt(i);
-        if (ch >= '0' && ch <= '9') return +ch;
-    }
-    return 0;
-}
-
-function tradeDigitSnapshot(sym) {
-    var st = tradeDigitState(sym);
-    var counts = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
-
-    st.history.forEach(function (d) {
-        counts[d]++;
-    });
-
-    var total = st.history.length;
-
-    if (!total) {
-        return {
-            counts: counts,
-            total: 0,
-            current: st.current,
-            most: [],
-            least: [],
-            due: '-'
-        };
-    }
-
-    var max = Math.max.apply(null, counts);
-    var min = Math.min.apply(null, counts);
-
-    var most = [];
-    var least = [];
-
-    counts.forEach(function (count, digit) {
-        if (count === max) most.push(digit);
-        if (count === min) least.push(digit);
-    });
-
-    return {
-        counts: counts,
-        total: total,
-        current: st.current,
-        most: most,
-        least: least,
-        due: least.length ? least[0] : '-'
-    };
-}
-
-function tradeEnsureDigitOverlay() {
-    var box = document.getElementById('chartBox');
-    if (!box) return;
-
-    if (!document.getElementById('digitOverlay')) {
-        var el = document.createElement('div');
-        el.id = 'digitOverlay';
-        el.className = 'digit-overlay';
-        el.innerHTML =
-            '<div class="digit-insights" id="digitInsightsChart">' +
-            '   <span class="digit-insight hot">Most: <strong id="digitMostChart">-</strong></span>' +
-            '   <span class="digit-insight cold">Least: <strong id="digitLeastChart">-</strong></span>' +
-            '   <span class="digit-insight due">Due: <strong id="digitDueChart">-</strong></span>' +
-            '</div>' +
-            '<div class="digit-strip" id="digitStrip"></div>';
-        box.appendChild(el);
-    }
-
-    var wrap = document.getElementById('digitBoardWrap');
-    if (wrap && !document.getElementById('digitInsightsPanel')) {
-        var info = document.createElement('div');
-        info.className = 'digit-insights panel-insights';
-        info.id = 'digitInsightsPanel';
-        info.innerHTML =
-            '<span class="digit-insight hot">Most: <strong id="digitMostPanel">-</strong></span>' +
-            '<span class="digit-insight cold">Least: <strong id="digitLeastPanel">-</strong></span>' +
-            '<span class="digit-insight due">Due: <strong id="digitDuePanel">-</strong></span>';
-        wrap.appendChild(info);
-    }
-}
-
-function tradeRenderDigitUI() {
-    tradeEnsureDigitOverlay();
-
-    var snap = tradeDigitSnapshot(curSymbol);
-
-    function pct(d) {
-        return tradeDigitPct(snap.counts[d], snap.total);
-    }
-
-    function setText(id, val) {
-        var el = document.getElementById(id);
-        if (el) el.textContent = val;
-    }
-
-    setText('digitMostChart', snap.most.length ? snap.most.join(', ') : '-');
-    setText('digitLeastChart', snap.least.length ? snap.least.join(', ') : '-');
-    setText('digitDueChart', String(snap.due));
-
-    setText('digitMostPanel', snap.most.length ? snap.most.join(', ') : '-');
-    setText('digitLeastPanel', snap.least.length ? snap.least.join(', ') : '-');
-    setText('digitDuePanel', String(snap.due));
-
-    var strip = document.getElementById('digitStrip');
-    if (strip) {
-        strip.innerHTML = snap.counts.map(function (count, d) {
-            var cls = ['digit-strip-item'];
-
-            if (snap.current === d) cls.push('live');
-            if (snap.most.indexOf(d) >= 0) cls.push('most');
-            if (snap.least.indexOf(d) >= 0) cls.push('least');
-            if (d % 2 === 0) cls.push('even');
-            else cls.push('odd');
-
-            return '' +
-                '<div class="' + cls.join(' ') + '">' +
-                '   <span class="digit-num">' + d + '</span>' +
-                '   <span class="digit-pct">' + pct(d) + '</span>' +
-                '</div>';
-        }).join('');
-    }
-
-    var board = document.getElementById('digitBoard');
-    if (board) {
-        board.innerHTML = snap.counts.map(function (count, d) {
-            var cls = ['digit-btn', 'circle-digit'];
-
-            if (tradeModeKey === 'over_under' && tradeDigit === d) cls.push('active');
-            if (snap.current === d) cls.push('live');
-            if (snap.most.indexOf(d) >= 0) cls.push('most');
-            if (snap.least.indexOf(d) >= 0) cls.push('least');
-            if (d % 2 === 0) cls.push('even');
-            else cls.push('odd');
-
-            return '' +
-                '<button class="' + cls.join(' ') + '" type="button" data-digit="' + d + '">' +
-                '   <span class="digit-num">' + d + '</span>' +
-                '   <span class="digit-pct">' + pct(d) + '</span>' +
-                '</button>';
-        }).join('');
-    }
-}
-
-window.tradeOnDigitTick = function (sym, tick) {
-    if (!tick) return;
-
-    var st = tradeDigitState(sym);
-    var digit = tradeLastDigitFromQuote(tick.quote);
-
-    st.current = digit;
-    st.history.push(digit);
-
-    if (st.history.length > tradeDigitWindow) {
-        st.history.shift();
-    }
-
-    if (sym === curSymbol) {
-        tradeRenderDigitUI();
-    }
-};
-
-function tradeDigitPct(count, total) {
-    if (!total) return '--';
-    return ((count / total) * 100).toFixed(1) + '%';
-}
-
 function tradeSetMode(key) {
     if (!tradeModes[key]) return;
-
-    tradeModeKey = key;
-    var mode = tradeGetMode();
 
     Object.keys(tradeCategories).forEach(function (catKey) {
         if (tradeCategories[catKey].modes.indexOf(key) >= 0) {
@@ -362,9 +179,8 @@ function tradeSetMode(key) {
         }
     });
 
-    document.querySelectorAll('.tpt').forEach(function (x) {
-        x.classList.toggle('active', x.dataset.mode === key);
-    });
+    tradeModeKey = key;
+    var mode = tradeGetMode();
 
     var riseLbl = document.querySelector('#riseBtn strong');
     var fallLbl = document.querySelector('#fallBtn strong');
@@ -372,9 +188,11 @@ function tradeSetMode(key) {
     if (riseLbl) riseLbl.textContent = mode.aLabel;
     if (fallLbl) fallLbl.textContent = mode.bLabel;
 
-    var barrierWrap = document.getElementById('barrierWrap');
-    if (barrierWrap) {
-        barrierWrap.classList.toggle('hidden', !mode.needsBarrier);
+    if (mode.forceDurType) {
+        var durType = document.getElementById('durType');
+        var durVal = document.getElementById('durVal');
+        if (durType) durType.value = mode.forceDurType;
+        if (durVal && (!durVal.value || +durVal.value < 1)) durVal.value = mode.defaultDur || 5;
     }
 
     var digitBoardWrap = document.getElementById('digitBoardWrap');
@@ -388,19 +206,10 @@ function tradeSetMode(key) {
         digitBoardWrap.classList.toggle('hidden', !(key === 'over_under' || key === 'even_odd'));
     }
 
-    tradeRenderDigitUI();
-
-    if (mode.forceDurType) {
-        var durType = document.getElementById('durType');
-        var durVal = document.getElementById('durVal');
-        if (durType) durType.value = mode.forceDurType;
-        if (durVal && (!durVal.value || +durVal.value < 1)) durVal.value = mode.defaultDur || 5;
-    }
-
-    tradeSubProposals();
     tradeRenderClassifier();
+    tradeRenderDigitUI();
+    tradeSubProposals();
 }
-
 
 function tradeCurrentBarrier(type) {
     var val = tradeDigit;
@@ -473,6 +282,7 @@ function tradeSubProposals() {
 
     var amount = +document.getElementById('stakeVal').value;
     var dur = +document.getElementById('durVal').value;
+
     if (!amount || amount <= 0 || !dur || dur <= 0) {
         tradeResetProposalUI();
         return;
@@ -497,8 +307,6 @@ wsOn('proposal', function (p) {
     tradeProposalCache[side] = p;
 
     var payout = +p.payout || 0;
-    var ask = +p.ask_price || 0;
-    var profit = payout - ask;
 
     if (side === 'A') {
         var risePay = document.getElementById('risePay');
@@ -509,15 +317,15 @@ wsOn('proposal', function (p) {
     }
 
     var ref = tradeProposalCache.A || tradeProposalCache.B || p;
+    var profit = (+ref.payout || 0) - (+ref.ask_price || 0);
 
     var poVal = document.getElementById('poVal');
     if (poVal) poVal.textContent = tradeMoney(+ref.payout || 0);
 
     var prVal = document.getElementById('prVal');
     if (prVal) {
-        var refProfit = (+ref.payout || 0) - (+ref.ask_price || 0);
-        prVal.textContent = tradeSignedMoney(refProfit);
-        prVal.style.color = refProfit >= 0 ? 'var(--gn)' : 'var(--red)';
+        prVal.textContent = tradeSignedMoney(profit);
+        prVal.style.color = profit >= 0 ? 'var(--gn)' : 'var(--red)';
     }
 });
 
@@ -529,12 +337,13 @@ function tradeBuy(side) {
 function tradeBuyByType(type) {
     if (!authAccount) {
         toast('e', 'Please log in first.');
-        return Promise.reject(new Error('Not authorized'));
+        return Promise.resolve(null);
     }
 
     var mode = tradeGetMode();
     var btn = (type === mode.aType) ? document.getElementById('riseBtn') : document.getElementById('fallBtn');
     var orig = btn ? btn.innerHTML : '';
+
     if (btn) {
         btn.disabled = true;
         btn.innerHTML = '<i class="fas fa-spinner fa-spin" style="font-size:16px"></i>';
@@ -577,7 +386,6 @@ function tradeBuyByType(type) {
             toast('e', tradeErrText(e));
             return null;
         })
-        
         .finally(function () {
             if (btn) {
                 btn.disabled = false;
@@ -740,6 +548,207 @@ wsOn('poc', function (c) {
     tradeUpdateSummary();
 });
 
+function tradeDigitState(sym) {
+    if (!tradeDigitStats[sym]) {
+        tradeDigitStats[sym] = {
+            history: [],
+            current: null
+        };
+    }
+    return tradeDigitStats[sym];
+}
+
+function tradeLastDigitFromQuote(quote) {
+    var s = String(quote);
+    for (var i = s.length - 1; i >= 0; i--) {
+        var ch = s.charAt(i);
+        if (ch >= '0' && ch <= '9') return +ch;
+    }
+    return 0;
+}
+
+function tradeDigitSnapshot(sym) {
+    var st = tradeDigitState(sym);
+    var counts = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+
+    st.history.forEach(function (d) {
+        counts[d]++;
+    });
+
+    var total = st.history.length;
+
+    if (!total) {
+        return {
+            counts: counts,
+            total: 0,
+            current: st.current,
+            most: [],
+            least: [],
+            due: '-'
+        };
+    }
+
+    var max = Math.max.apply(null, counts);
+    var min = Math.min.apply(null, counts);
+
+    var most = [];
+    var least = [];
+
+    counts.forEach(function (count, digit) {
+        if (count === max) most.push(digit);
+        if (count === min) least.push(digit);
+    });
+
+    return {
+        counts: counts,
+        total: total,
+        current: st.current,
+        most: most,
+        least: least,
+        due: least.length ? least[0] : '-'
+    };
+}
+
+function tradeDigitPct(count, total) {
+    if (!total) return '--';
+    return ((count / total) * 100).toFixed(1) + '%';
+}
+
+function tradeEnsureDigitOverlay() {
+    var box = document.getElementById('chartBox');
+    if (!box) return;
+
+    if (!document.getElementById('digitOverlay')) {
+        var el = document.createElement('div');
+        el.id = 'digitOverlay';
+        el.className = 'digit-overlay';
+        el.innerHTML =
+            '<div class="digit-insights" id="digitInsightsChart">' +
+            '   <span class="digit-insight hot">Most: <strong id="digitMostChart">-</strong></span>' +
+            '   <span class="digit-insight cold">Least: <strong id="digitLeastChart">-</strong></span>' +
+            '   <span class="digit-insight due">Due: <strong id="digitDueChart">-</strong></span>' +
+            '</div>' +
+            '<div class="digit-strip" id="digitStrip"></div>';
+        box.appendChild(el);
+    }
+
+    var wrap = document.getElementById('digitBoardWrap');
+    if (wrap && !document.getElementById('digitInsightsPanel')) {
+        var info = document.createElement('div');
+        info.className = 'digit-insights panel-insights';
+        info.id = 'digitInsightsPanel';
+        info.innerHTML =
+            '<span class="digit-insight hot">Most: <strong id="digitMostPanel">-</strong></span>' +
+            '<span class="digit-insight cold">Least: <strong id="digitLeastPanel">-</strong></span>' +
+            '<span class="digit-insight due">Due: <strong id="digitDuePanel">-</strong></span>';
+        wrap.appendChild(info);
+    }
+}
+
+function tradeRenderDigitUI() {
+    tradeEnsureDigitOverlay();
+
+    var snap = tradeDigitSnapshot(curSymbol);
+
+    function pct(d) {
+        return tradeDigitPct(snap.counts[d], snap.total);
+    }
+
+    function setText(id, val) {
+        var el = document.getElementById(id);
+        if (el) el.textContent = val;
+    }
+
+    setText('digitMostChart', snap.most.length ? snap.most.join(', ') : '-');
+    setText('digitLeastChart', snap.least.length ? snap.least.join(', ') : '-');
+    setText('digitDueChart', String(snap.due));
+
+    setText('digitMostPanel', snap.most.length ? snap.most.join(', ') : '-');
+    setText('digitLeastPanel', snap.least.length ? snap.least.join(', ') : '-');
+    setText('digitDuePanel', String(snap.due));
+
+    var strip = document.getElementById('digitStrip');
+    if (strip) {
+        strip.innerHTML = snap.counts.map(function (count, d) {
+            var cls = ['digit-strip-item'];
+
+            if (snap.current === d) cls.push('live');
+            if (snap.most.indexOf(d) >= 0) cls.push('most');
+            if (snap.least.indexOf(d) >= 0) cls.push('least');
+            if (d % 2 === 0) cls.push('even');
+            else cls.push('odd');
+
+            return '' +
+                '<div class="' + cls.join(' ') + '">' +
+                '   <span class="digit-num">' + d + '</span>' +
+                '   <span class="digit-pct">' + pct(d) + '</span>' +
+                '</div>';
+        }).join('');
+    }
+
+    var board = document.getElementById('digitBoard');
+    if (board) {
+        board.innerHTML = snap.counts.map(function (count, d) {
+            var cls = ['digit-btn', 'circle-digit'];
+
+            if (tradeModeKey === 'over_under' && tradeDigit === d) cls.push('active');
+            if (snap.current === d) cls.push('live');
+            if (snap.most.indexOf(d) >= 0) cls.push('most');
+            if (snap.least.indexOf(d) >= 0) cls.push('least');
+            if (d % 2 === 0) cls.push('even');
+            else cls.push('odd');
+
+            return '' +
+                '<button class="' + cls.join(' ') + '" type="button" data-digit="' + d + '">' +
+                '   <span class="digit-num">' + d + '</span>' +
+                '   <span class="digit-pct">' + pct(d) + '</span>' +
+                '</button>';
+        }).join('');
+    }
+}
+
+window.tradeOnDigitTick = function (sym, tick) {
+    if (!tick) return;
+
+    var st = tradeDigitState(sym);
+    var digit = tradeLastDigitFromQuote(tick.quote);
+
+    st.current = digit;
+    st.history.push(digit);
+
+    if (st.history.length > tradeDigitWindow) {
+        st.history.shift();
+    }
+
+    if (sym === curSymbol) {
+        tradeRenderDigitUI();
+    }
+};
+
+function tradePrimeDigits(sym) {
+    return wsSend({
+        ticks_history: sym,
+        count: tradeDigitWindow,
+        end: 'latest',
+        style: 'ticks'
+    }).then(function (r) {
+        var st = tradeDigitState(sym);
+        var prices = (r.history && r.history.prices) ? r.history.prices : [];
+
+        st.history = prices.map(function (q) {
+            return tradeLastDigitFromQuote(q);
+        });
+
+        st.current = st.history.length ? st.history[st.history.length - 1] : null;
+
+        if (sym === curSymbol) {
+            tradeRenderDigitUI();
+        }
+    }).catch(function (err) {
+        console.error('tradePrimeDigits failed:', err);
+    });
+}
+
 function tradeBindAll() {
     if (tradeBound) return;
     tradeBound = true;
@@ -747,10 +756,18 @@ function tradeBindAll() {
     tradeEnsureModeUI();
 
     var riseBtn = document.getElementById('riseBtn');
-    if (riseBtn) riseBtn.addEventListener('click', function () { tradeBuy('A'); });
+    if (riseBtn) {
+        riseBtn.addEventListener('click', function () {
+            tradeBuy('A');
+        });
+    }
 
     var fallBtn = document.getElementById('fallBtn');
-    if (fallBtn) fallBtn.addEventListener('click', function () { tradeBuy('B'); });
+    if (fallBtn) {
+        fallBtn.addEventListener('click', function () {
+            tradeBuy('B');
+        });
+    }
 
     var durDn = document.getElementById('durDn');
     if (durDn) {
@@ -774,7 +791,9 @@ function tradeBindAll() {
 
     document.querySelectorAll('.qk').forEach(function (b) {
         b.addEventListener('click', function () {
-            document.querySelectorAll('.qk').forEach(function (x) { x.classList.remove('active'); });
+            document.querySelectorAll('.qk').forEach(function (x) {
+                x.classList.remove('active');
+            });
             b.classList.add('active');
             document.getElementById('stakeVal').value = b.dataset.v;
             tradeSubProposals();
@@ -786,18 +805,11 @@ function tradeBindAll() {
         if (el) el.addEventListener('change', tradeSubProposals);
     });
 
-    var barrierVal = document.getElementById('barrierVal');
-    if (barrierVal) barrierVal.addEventListener('change', tradeSubProposals);
-
-    document.addEventListener('click', function (e) {
-        var t = e.target.closest('.tpt[data-mode]');
-        if (!t) return;
-        tradeSetMode(t.dataset.mode);
-    });
-
     document.querySelectorAll('.tgb[data-g]').forEach(function (b) {
         b.addEventListener('click', function () {
-            document.querySelectorAll('#tfGrp .tgb').forEach(function (x) { x.classList.remove('active'); });
+            document.querySelectorAll('#tfGrp .tgb').forEach(function (x) {
+                x.classList.remove('active');
+            });
             b.classList.add('active');
             curGranularity = +b.dataset.g;
             chartLoad(curSymbol, curGranularity);
@@ -820,6 +832,11 @@ function tradeBindAll() {
         });
     });
 
+    var mktSearch = document.getElementById('mktSearch');
+    if (mktSearch) {
+        mktSearch.addEventListener('input', mktApplySearchFilter);
+    }
+
     document.addEventListener('click', function (e) {
         var catBtn = e.target.closest('.contract-cat');
         if (catBtn) {
@@ -834,70 +851,48 @@ function tradeBindAll() {
         var typeBtn = e.target.closest('.contract-type');
         if (typeBtn) {
             tradeSetMode(typeBtn.dataset.mode);
+            return;
+        }
+
+        var basisBtn = e.target.closest('.basis-tab');
+        if (basisBtn) {
+            tradeAmountBasis = basisBtn.dataset.basis || 'stake';
+
+            document.querySelectorAll('.basis-tab').forEach(function (x) {
+                x.classList.remove('active');
+            });
+            basisBtn.classList.add('active');
+
+            tradeSubProposals();
+            return;
+        }
+
+        var digitBtn = e.target.closest('.digit-btn[data-digit]');
+        if (digitBtn) {
+            if (tradeModeKey !== 'over_under') return;
+
+            tradeDigit = +digitBtn.dataset.digit;
+
+            document.querySelectorAll('.digit-btn').forEach(function (x) {
+                x.classList.remove('active');
+            });
+            digitBtn.classList.add('active');
+
+            tradeSubProposals();
+            tradeRenderDigitUI();
         }
     });
-
-    var mktSearch = document.getElementById('mktSearch');
-    if (mktSearch) mktSearch.addEventListener('input', mktApplySearchFilter);
 
     tradeSetMode('rise_fall');
     tradeRenderOpenContracts();
     tradeRenderHistory();
     tradeUpdateSummary();
+    tradeRenderDigitUI();
 }
-document.addEventListener('click', function (e) {
-    var basisBtn = e.target.closest('.basis-tab');
-    if (basisBtn) {
-        tradeAmountBasis = basisBtn.dataset.basis || 'stake';
 
-        document.querySelectorAll('.basis-tab').forEach(function (x) {
-            x.classList.remove('active');
-        });
-        basisBtn.classList.add('active');
-
-        tradeSubProposals();
-        return;
-    }
-
-    var digitBtn = e.target.closest('.digit-btn');
-    if (digitBtn) {
-        tradeDigit = +digitBtn.dataset.digit;
-
-        document.querySelectorAll('.digit-btn').forEach(function (x) {
-            x.classList.remove('active');
-        });
-        digitBtn.classList.add('active');
-
-        tradeSubProposals();
-    }
-});
-
-document.addEventListener('click', function (e) {
-    var basisBtn = e.target.closest('.basis-tab');
-    if (basisBtn) {
-        tradeAmountBasis = basisBtn.dataset.basis || 'stake';
-
-        document.querySelectorAll('.basis-tab').forEach(function (x) {
-            x.classList.remove('active');
-        });
-        basisBtn.classList.add('active');
-
-        tradeSubProposals();
-        return;
-    }
-
-    var digitBtn = e.target.closest('.digit-btn[data-digit]');
-    if (digitBtn) {
-        if (tradeModeKey !== 'over_under') return;
-
-        tradeDigit = +digitBtn.dataset.digit;
-
-        document.querySelectorAll('.digit-btn').forEach(function (x) {
-            x.classList.remove('active');
-        });
-        digitBtn.classList.add('active');
-
-        tradeSubProposals();
-        tradeRenderDigitUI();
-    }
-});
+function setChartBtn(el) {
+    document.querySelectorAll('#chCandle,#chLine,#chArea,#chBar,#chBase').forEach(function (x) {
+        x.classList.remove('active');
+    });
+    if (el) el.classList.add('active');
+}
