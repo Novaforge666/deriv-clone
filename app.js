@@ -119,13 +119,7 @@ function bindAppNav() {
             var row = e.target.closest('.mw-row');
             if (!row) return;
 
-            curSymbol = row.dataset.symbol;
-
-            var chartName = document.getElementById('chartName');
-            if (chartName) chartName.textContent = mktName(curSymbol);
-
-            mktBuildSidebar('synthetic');
-            uiGoPage('trading');
+            mktSelectSymbol(row.dataset.symbol, { goTrading: true });
         });
     }
 
