@@ -308,106 +308,208 @@
             </div>
 
             <!-- TRADING -->
-            <div class="pg" id="pgTrading">
-                <div class="trd-layout">
-                    <aside class="trd-side" id="trdSide">
-                        <div class="ts-srch"><i class="fas fa-search"></i><input type="text" id="mktSearch"
-                                placeholder="Search..."></div>
-                        <div class="ts-tabs" id="tsTabs">
-                            <button class="tstab active" data-cat="synthetic" type="button">Synthetic</button>
-                            <button class="tstab" data-cat="forex" type="button">Forex</button>
-                            <button class="tstab" data-cat="commodities" type="button">Comm</button>
+        <div class="pg" id="pgTrading">
+            <div class="trade-backdrop" id="tradeBackdrop"></div>
+        
+            <div class="trd-layout trader-foundation">
+                <!-- MARKETS -->
+                <aside class="trd-side" id="trdSide">
+                    <div class="side-top">
+                        <div>
+                            <span class="side-kicker">Markets</span>
+                            <h3>Market watch</h3>
                         </div>
-                        <div class="ts-body" id="tsBody"></div>
-                    </aside>
-
-                    <div class="trd-chart">
-                        <div class="tc-toolbar">
-                            <div class="tc-left">
-                                <h2 id="chartName">Volatility 100 Index</h2>
-                                <span class="tc-price" id="chartPrice">--</span>
-                                <span class="tc-pct up" id="chartPct">+0.00%</span>
-                            </div>
-                            <div class="tc-right">
-                                <div class="tc-grp" id="tfGrp">
-                                    <button class="tgb" data-g="60" type="button">1m</button>
-                                    <button class="tgb active" data-g="300" type="button">5m</button>
-                                    <button class="tgb" data-g="900" type="button">15m</button>
-                                    <button class="tgb" data-g="3600" type="button">1H</button>
-                                    <button class="tgb" data-g="14400" type="button">4H</button>
-                                    <button class="tgb" data-g="86400" type="button">1D</button>
-                                </div>
-                                <div class="tc-grp">
-                                    <button class="tgb active" id="chCandle" type="button" title="Candles"><i
-                                            class="fas fa-chart-bar"></i></button>
-                                    <button class="tgb" id="chLine" type="button" title="Line"><i
-                                            class="fas fa-chart-line"></i></button>
-                                    <button class="tgb" id="chArea" type="button" title="Area"><i
-                                            class="fas fa-chart-area"></i></button>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="tc-box" id="chartBox"></div>
+                        <button class="side-close" id="mktCloseBtn" type="button" aria-label="Close markets">
+                            <i class="fas fa-times"></i>
+                        </button>
                     </div>
-
-                    <aside class="trd-panel" id="trdPanel">
-                        <div class="tp-tabs">
-                            <button class="tpt active" type="button">Rise/Fall</button>
-                            <button class="tpt" type="button">Digits</button>
-                            <button class="tpt" type="button">Touch</button>
-                        </div>
-                        <div class="tp-form">
-                            <div class="tpf-sec">
-                                <label class="tpf-lbl"><i class="fas fa-clock"></i> Duration</label>
-                                <div class="dur-row">
-                                    <select class="dur-sel" id="durType" aria-label="Type">
-                                        <option value="t">Ticks</option>
-                                        <option value="s">Seconds</option>
-                                        <option value="m" selected>Minutes</option>
-                                        <option value="h">Hours</option>
-                                    </select>
-                                    <div class="dur-spin"><button type="button" id="durDn"
-                                            aria-label="Less">−</button><input type="number" id="durVal" value="5"
-                                            min="1" aria-label="Value"><button type="button" id="durUp"
-                                            aria-label="More">+</button></div>
+        
+                    <div class="ts-srch">
+                        <i class="fas fa-search"></i>
+                        <input type="text" id="mktSearch" placeholder="Search market...">
+                    </div>
+        
+                    <div class="ts-tabs" id="tsTabs">
+                        <button class="tstab active" data-cat="synthetic" type="button">Synthetic</button>
+                        <button class="tstab" data-cat="forex" type="button">Forex</button>
+                        <button class="tstab" data-cat="commodities" type="button">Commodities</button>
+                    </div>
+        
+                    <div class="ts-body" id="tsBody"></div>
+                </aside>
+        
+                <!-- CHART -->
+                <div class="trd-chart">
+                    <div class="tc-toolbar foundation-toolbar">
+                        <div class="foundation-left">
+                            <button class="mob-pill" id="openMarketsBtn" type="button">
+                                <i class="fas fa-bars"></i>
+                                <span>Markets</span>
+                            </button>
+        
+                            <div class="symbol-card">
+                                <span class="symbol-kicker" id="chartCat">Synthetic indices</span>
+                                <div class="symbol-main">
+                                    <h2 id="chartName">Volatility 100 Index</h2>
+                                    <span class="tc-pct up" id="chartPct">+0.00%</span>
+                                </div>
+                                <div class="symbol-sub">
+                                    <span class="tc-price" id="chartPrice">--</span>
                                 </div>
                             </div>
-                            <div class="tpf-sec">
-                                <label class="tpf-lbl"><i class="fas fa-coins"></i> Stake</label>
-                                <div class="stake-row"><span class="stk-c" id="stkCur">USD</span><input type="number"
-                                        id="stakeVal" value="10" min="0.35" step="0.01" aria-label="Stake"></div>
-                                <div class="qk-row">
-                                    <button class="qk" data-v="1" type="button">$1</button>
-                                    <button class="qk" data-v="5" type="button">$5</button>
-                                    <button class="qk active" data-v="10" type="button">$10</button>
-                                    <button class="qk" data-v="25" type="button">$25</button>
-                                    <button class="qk" data-v="50" type="button">$50</button>
-                                    <button class="qk" data-v="100" type="button">$100</button>
-                                </div>
+                        </div>
+        
+                        <div class="tc-right">
+                            <div class="tc-grp" id="tfGrp">
+                                <button class="tgb" data-g="60" type="button">1m</button>
+                                <button class="tgb active" data-g="300" type="button">5m</button>
+                                <button class="tgb" data-g="900" type="button">15m</button>
+                                <button class="tgb" data-g="3600" type="button">1H</button>
+                                <button class="tgb" data-g="14400" type="button">4H</button>
+                                <button class="tgb" data-g="86400" type="button">1D</button>
                             </div>
-                            <div class="po-card">
-                                <div class="po-r"><span>Payout</span><span class="po-v" id="poVal">--</span></div>
-                                <div class="po-r"><span>Profit</span><span class="po-v gn" id="prVal">--</span></div>
-                            </div>
-                            <div class="act-row">
-                                <button class="actb rise" id="riseBtn" type="button">
-                                    <div class="actb-t"><i class="fas fa-arrow-up"></i><strong>Rise</strong></div><span
-                                        class="actb-p" id="risePay">--</span>
+        
+                            <div class="tc-grp chart-type-grp">
+                                <button class="tgb active" id="chCandle" data-chart-type="candle" type="button" title="Candles">
+                                    <i class="fas fa-chart-bar"></i>
                                 </button>
-                                <button class="actb fall" id="fallBtn" type="button">
-                                    <div class="actb-t"><i class="fas fa-arrow-down"></i><strong>Fall</strong></div>
-                                    <span class="actb-p" id="fallPay">--</span>
+                                <button class="tgb" id="chLine" data-chart-type="line" type="button" title="Line">
+                                    <i class="fas fa-chart-line"></i>
+                                </button>
+                                <button class="tgb" id="chArea" data-chart-type="area" type="button" title="Area">
+                                    <i class="fas fa-chart-area"></i>
+                                </button>
+                                <button class="tgb" id="chBar" data-chart-type="bar" type="button" title="Bars">
+                                    <i class="fas fa-chart-column"></i>
+                                </button>
+                                <button class="tgb" id="chBase" data-chart-type="baseline" type="button" title="Baseline">
+                                    <i class="fas fa-wave-square"></i>
                                 </button>
                             </div>
                         </div>
-                        <div class="tp-contracts">
-                            <div class="tpc-h"><span><i class="fas fa-file-contract"></i> Contracts</span><span
-                                    class="tpc-n" id="cCount">0</span></div>
-                            <div id="cList"></div>
+        
+                        <div class="foundation-right">
+                            <button class="mob-pill trade-pill" id="openTradeBtn" type="button">
+                                <i class="fas fa-bolt"></i>
+                                <span>Trade</span>
+                            </button>
                         </div>
-                    </aside>
+                    </div>
+        
+                    <div class="chart-shell">
+                        <aside class="draw-rail">
+                            <div class="draw-tools" id="drawTools">
+                                <button class="draw-btn active" type="button" data-tool="cursor" title="Cursor">
+                                    <i class="fas fa-mouse-pointer"></i>
+                                </button>
+                                <button class="draw-btn" type="button" data-tool="hline" title="Horizontal line">
+                                    <i class="fas fa-minus"></i>
+                                </button>
+                                <button class="draw-btn" type="button" data-tool="vline" title="Vertical line">
+                                    <i class="fas fa-grip-lines-vertical"></i>
+                                </button>
+                                <button class="draw-btn" type="button" data-tool="trend" title="Trend line">
+                                    <i class="fas fa-slash"></i>
+                                </button>
+                                <button class="draw-btn" type="button" data-tool="rect" title="Rectangle">
+                                    <i class="far fa-square"></i>
+                                </button>
+                                <button class="draw-btn" type="button" id="drawClear" title="Clear drawings">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                        </aside>
+        
+                        <div class="chart-stage">
+                            <div class="tc-box" id="chartBox"></div>
+                        </div>
+                    </div>
                 </div>
+        
+                <!-- TRADE PANEL -->
+                <aside class="trd-panel foundation-panel" id="trdPanel">
+                    <div class="tp-head">
+                        <div>
+                            <span class="side-kicker">Trade</span>
+                            <h3>Trade controls</h3>
+                        </div>
+                        <button class="side-close" id="tradeCloseBtn" type="button" aria-label="Close trade panel">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+        
+                    <div class="tp-tabs"></div>
+        
+                    <div class="tp-form">
+                        <div class="tpf-sec">
+                            <label class="tpf-lbl"><i class="fas fa-clock"></i> Duration</label>
+                            <div class="dur-row">
+                                <select class="dur-sel" id="durType" aria-label="Duration type">
+                                    <option value="t">Ticks</option>
+                                    <option value="s">Seconds</option>
+                                    <option value="m" selected>Minutes</option>
+                                    <option value="h">Hours</option>
+                                </select>
+        
+                                <div class="dur-spin">
+                                    <button type="button" id="durDn" aria-label="Less">−</button>
+                                    <input type="number" id="durVal" value="5" min="1" aria-label="Duration value">
+                                    <button type="button" id="durUp" aria-label="More">+</button>
+                                </div>
+                            </div>
+                        </div>
+        
+                        <div class="tpf-sec">
+                            <label class="tpf-lbl"><i class="fas fa-coins"></i> Stake</label>
+                            <div class="stake-row">
+                                <span class="stk-c" id="stkCur">USD</span>
+                                <input type="number" id="stakeVal" value="10" min="0.35" step="0.01" aria-label="Stake">
+                            </div>
+        
+                            <div class="qk-row">
+                                <button class="qk" data-v="1" type="button">$1</button>
+                                <button class="qk" data-v="5" type="button">$5</button>
+                                <button class="qk active" data-v="10" type="button">$10</button>
+                                <button class="qk" data-v="25" type="button">$25</button>
+                                <button class="qk" data-v="50" type="button">$50</button>
+                                <button class="qk" data-v="100" type="button">$100</button>
+                            </div>
+                        </div>
+        
+                        <div class="po-card">
+                            <div class="po-r"><span>Payout</span><span class="po-v" id="poVal">--</span></div>
+                            <div class="po-r"><span>Profit</span><span class="po-v gn" id="prVal">--</span></div>
+                        </div>
+        
+                        <div class="act-row">
+                            <button class="actb rise" id="riseBtn" type="button">
+                                <div class="actb-t">
+                                    <i class="fas fa-arrow-up"></i>
+                                    <strong>Rise</strong>
+                                </div>
+                                <span class="actb-p" id="risePay">--</span>
+                            </button>
+        
+                            <button class="actb fall" id="fallBtn" type="button">
+                                <div class="actb-t">
+                                    <i class="fas fa-arrow-down"></i>
+                                    <strong>Fall</strong>
+                                </div>
+                                <span class="actb-p" id="fallPay">--</span>
+                            </button>
+                        </div>
+                    </div>
+        
+                    <div class="tp-contracts">
+                        <div class="tpc-h">
+                            <span><i class="fas fa-file-contract"></i> Open contracts</span>
+                            <span class="tpc-n" id="cCount">0</span>
+                        </div>
+                        <div id="cList"></div>
+                    </div>
+                </aside>
             </div>
+        </div>
 
             <!-- REPORTS -->
             <div class="pg" id="pgReports">

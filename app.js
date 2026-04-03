@@ -104,7 +104,9 @@ if (!appBootstrapped) {
     mktBuildSidebar('synthetic');
     mktSubscribe();
     tradeBindAll();
-    botInit();
+    if (typeof botInit === 'function') {
+        botInit();
+    }
     bindAppNav();
 
     appBootstrapped = true;

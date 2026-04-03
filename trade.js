@@ -46,11 +46,35 @@ var tradeContracts = [];
 var tradeHistory = [];
 var tradeProposalCache = { A: null, B: null };
 var tradeBound = false;
+var tradeCategories = {
+    up_down: {
+        label: 'Up/Down',
+        modes: ['rise_fall']
+    },
+    high_low: {
+        label: 'High/Low',
+        modes: ['higher_lower']
+    },
+    digits: {
+        label: 'Digits',
+        modes: ['even_odd', 'over_under']
+    }
+};
+
+var tradeCategoryKey = 'up_down';
 
 function tradeCurrency() {
     return authAccount && authAccount.currency ? authAccount.currency : 'USD';
 }
 
+function tradeErrText(e) {
+    if (!e) return 'Unknown error';
+    if (typeof e === 'string') return e;
+    if (e.message) return e.message;
+    if (e.error && e.error.message) return e.error.message;
+    if (e.code) return e.code;
+    try { return JSON.stringify(e); } catch (_) { return 'Unknown error'; }
+}
 function tradeMoney(v) {
     var n = +v || 0;
     var cur = tradeCurrency();
@@ -70,12 +94,12 @@ function tradeGetMode() {
 
 function tradeEnsureModeUI() {
     var tabs = document.querySelector('.tp-tabs');
+
     if (tabs && !tabs.dataset.enhanced) {
         tabs.dataset.enhanced = '1';
-        tabs.innerHTML = Object.keys(tradeModes).map(function (k) {
-            var m = tradeModes[k];
-            return '<button class="tpt' + (k === tradeModeKey ? ' active' : '') + '" type="button" data-mode="' + k + '">' + m.label + '</button>';
-        }).join('');
+        tabs.innerHTML =
+            '<div class="contract-cats" id="contractCats"></div>' +
+            '<div class="contract-types" id="contractTypes"></div>';
     }
 
     var form = document.querySelector('.tp-form');
@@ -94,6 +118,26 @@ function tradeEnsureModeUI() {
         if (poCard) form.insertBefore(sec, poCard);
         else form.appendChild(sec);
     }
+
+    tradeRenderClassifier();
+}
+
+function tradeRenderClassifier() {
+    var catsEl = document.getElementById('contractCats');
+    var typesEl = document.getElementById('contractTypes');
+    if (!catsEl || !typesEl) return;
+
+    catsEl.innerHTML = Object.keys(tradeCategories).map(function (key) {
+        var c = tradeCategories[key];
+        return '<button class="contract-cat' + (key === tradeCategoryKey ? ' active' : '') + '" type="button" data-cat="' + key + '">' + c.label + '</button>';
+    }).join('');
+
+    var modes = tradeCategories[tradeCategoryKey].modes;
+
+    typesEl.innerHTML = modes.map(function (modeKey) {
+        var mode = tradeModes[modeKey];
+        return '<button class="contract-type' + (modeKey === tradeModeKey ? ' active' : '') + '" type="button" data-mode="' + modeKey + '">' + mode.label + '</button>';
+    }).join('');
 }
 
 function tradeSetMode(key) {
@@ -101,6 +145,12 @@ function tradeSetMode(key) {
 
     tradeModeKey = key;
     var mode = tradeGetMode();
+
+    Object.keys(tradeCategories).forEach(function (catKey) {
+        if (tradeCategories[catKey].modes.indexOf(key) >= 0) {
+            tradeCategoryKey = catKey;
+        }
+    });
 
     document.querySelectorAll('.tpt').forEach(function (x) {
         x.classList.toggle('active', x.dataset.mode === key);
@@ -125,7 +175,9 @@ function tradeSetMode(key) {
     }
 
     tradeSubProposals();
+    tradeRenderClassifier();
 }
+
 
 function tradeCurrentBarrier(type) {
     var el = document.getElementById('barrierVal');
@@ -300,9 +352,10 @@ function tradeBuyByType(type) {
         })
         .catch(function (e) {
             console.error('tradeBuyByType failed:', e);
-            toast('e', 'Failed: ' + (e.message || e.code || '?'));
-            throw e;
+            toast('e', tradeErrText(e));
+            return null;
         })
+        
         .finally(function () {
             if (btn) {
                 btn.disabled = false;
@@ -543,6 +596,23 @@ function tradeBindAll() {
             mktSetActiveTab(t.dataset.cat);
             mktBuildSidebar(t.dataset.cat);
         });
+    });
+
+    document.addEventListener('click', function (e) {
+        var catBtn = e.target.closest('.contract-cat');
+        if (catBtn) {
+            tradeCategoryKey = catBtn.dataset.cat;
+            tradeRenderClassifier();
+
+            var firstMode = tradeCategories[tradeCategoryKey].modes[0];
+            if (firstMode) tradeSetMode(firstMode);
+            return;
+        }
+
+        var typeBtn = e.target.closest('.contract-type');
+        if (typeBtn) {
+            tradeSetMode(typeBtn.dataset.mode);
+        }
     });
 
     var mktSearch = document.getElementById('mktSearch');

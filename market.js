@@ -202,6 +202,9 @@ function mktSelectSymbol(sym, opts) {
     var nameEl = document.getElementById('chartName');
     if (nameEl) nameEl.textContent = mktName(sym);
 
+    var catEl = document.getElementById('chartCat');
+    if (catEl) catEl.textContent = mktCategoryLabel(mktCategoryOf(sym));
+
     var cp = document.getElementById('chartPrice');
     if (cp && prevPrices[sym] !== undefined) {
         cp.textContent = prevPrices[sym].toFixed(mktDP(sym));
@@ -228,4 +231,13 @@ function mktSelectSymbol(sym, opts) {
 
 if (typeof window.botRefreshUI === 'function') {
     window.botRefreshUI();
+}
+if (window.innerWidth <= 900 && typeof uiCloseTraderPanels === 'function') {
+    uiCloseTraderPanels();
+}
+function mktCategoryLabel(cat) {
+    if (cat === 'synthetic') return 'Synthetic indices';
+    if (cat === 'forex') return 'Forex';
+    if (cat === 'commodities') return 'Commodities';
+    return 'Markets';
 }

@@ -180,6 +180,7 @@ function uiBindChrome() {
         if (e.key === 'Escape') {
             uiCloseAccDD();
             uiCloseMob();
+            uiCloseTraderPanels();
         }
     });
 }
@@ -283,6 +284,7 @@ function uiUpdateBal(bal, cur) {
 function uiOnAuth(acct) {
     uiShowApp();
     uiBindChrome();
+    uiBindTraderFoundation();
     uiUpdateBal(acct.balance, acct.currency);
 
     var tag = document.getElementById('apTag');
@@ -306,4 +308,52 @@ function uiUpdateCashier() {
     if (authAccount) {
         uiUpdateBal(authAccount.balance, authAccount.currency);
     }
+}
+var traderFoundationBound = false;
+
+function uiOpenTraderPanel(which) {
+    var side = document.getElementById('trdSide');
+    var panel = document.getElementById('trdPanel');
+    var backdrop = document.getElementById('tradeBackdrop');
+
+    if (which === 'markets' && side) {
+        side.classList.add('open');
+    }
+
+    if (which === 'trade' && panel) {
+        panel.classList.add('open');
+    }
+
+    if (backdrop) backdrop.classList.add('open');
+    uiSetBodyLock(true);
+}
+
+function uiCloseTraderPanels() {
+    var side = document.getElementById('trdSide');
+    var panel = document.getElementById('trdPanel');
+    var backdrop = document.getElementById('tradeBackdrop');
+
+    if (side) side.classList.remove('open');
+    if (panel) panel.classList.remove('open');
+    if (backdrop) backdrop.classList.remove('open');
+    uiSetBodyLock(false);
+}
+
+function uiBindTraderFoundation() {
+    if (traderFoundationBound) return;
+    traderFoundationBound = true;
+
+    document.addEventListener('click', function (e) {
+        if (e.target.closest('#openMarketsBtn')) {
+            uiOpenTraderPanel('markets');
+        }
+
+        if (e.target.closest('#openTradeBtn')) {
+            uiOpenTraderPanel('trade');
+        }
+
+        if (e.target.closest('#mktCloseBtn') || e.target.closest('#tradeCloseBtn') || e.target.closest('#tradeBackdrop')) {
+            uiCloseTraderPanels();
+        }
+    });
 }
