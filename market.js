@@ -253,3 +253,10 @@ function mktSelectSymbol(sym, opts) {
         uiCloseTraderPanels();
     }
 }
+if (window.innerWidth > 900) {
+    var root = document.querySelector('.trader-foundation');
+    if (root) {
+        root.classList.add('markets-collapsed');
+        if (typeof uiSyncTraderCollapseUI === 'function') uiSyncTraderCollapseUI();
+    }
+}

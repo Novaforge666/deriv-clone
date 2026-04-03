@@ -216,6 +216,12 @@ function tradeSetMode(key) {
     tradeRenderDigitUI();
     tradeSubProposals();
 }
+var panel = document.getElementById('trdPanel');
+if (panel && (window.innerWidth > 900)) {
+    panel.classList.add('strategy-focused');
+    var icon = document.querySelector('#tradeFocusBtn i');
+    if (icon) icon.className = 'fas fa-expand-alt';
+}
 
 function tradeCurrentBarrier(type) {
     var val = tradeDigit;
