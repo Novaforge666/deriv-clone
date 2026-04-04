@@ -83,7 +83,6 @@ function onLoggedIn(acct) {
         }
 
         bindAppNav();
-
         appBootstrapped = true;
     }
 
@@ -101,74 +100,54 @@ function bindAppNav() {
     if (appNavBound) return;
     appNavBound = true;
 
-    document.querySelectorAll('.anav').forEach(function (a) {
-        a.addEventListener('click', function (e) {
+    document.addEventListener('click', function (e) {
+        var navLink = e.target.closest('.anav[data-page], .mnav[data-page]');
+        if (navLink) {
             e.preventDefault();
-            uiGoPage(a.dataset.page);
-        });
-    });
+            uiGoPage(navLink.dataset.page);
+            return;
+        }
 
-    var appLogo = document.getElementById('appLogo');
-    if (appLogo) {
-        appLogo.addEventListener('click', function (e) {
+        if (e.target.closest('#appLogo')) {
             e.preventDefault();
             uiGoPage('dashboard');
-        });
-    }
+            return;
+        }
 
-    var dashTrade = document.getElementById('dashTrade');
-    if (dashTrade) {
-        dashTrade.addEventListener('click', function () {
+        if (e.target.closest('#dashTrade')) {
             uiGoPage('trading');
-        });
-    }
+            return;
+        }
 
-    var mwBody = document.getElementById('mwBody');
-    if (mwBody) {
-        mwBody.addEventListener('click', function (e) {
-            var row = e.target.closest('.mw-row');
-            if (!row) return;
+        var row = e.target.closest('#mwBody .mw-row');
+        if (row) {
             mktSelectSymbol(row.dataset.symbol, { goTrading: true });
-        });
-    }
+            return;
+        }
 
-    var appMobBtn = document.getElementById('appMobBtn');
-    if (appMobBtn) {
-        appMobBtn.addEventListener('click', function () {
+        if (e.target.closest('#appMobBtn')) {
             uiCloseAccDD();
             var mobOverlay = document.getElementById('mobOverlay');
             if (mobOverlay) mobOverlay.classList.add('open');
             uiSetBodyLock(true);
-        });
-    }
+            return;
+        }
 
-    var mobClose = document.getElementById('mobClose');
-    if (mobClose) {
-        mobClose.addEventListener('click', function () {
+        if (e.target.closest('#mobClose')) {
             uiCloseMob();
-        });
-    }
+            return;
+        }
 
-    document.querySelectorAll('.mnav[data-page]').forEach(function (a) {
-        a.addEventListener('click', function () {
-            uiGoPage(a.dataset.page);
-        });
-    });
-
-    var appLogout = document.getElementById('appLogout');
-    if (appLogout) {
-        appLogout.addEventListener('click', function () {
+        if (e.target.closest('#appLogout')) {
             uiCloseMob();
             uiCloseAccDD();
             authLogout();
-        });
-    }
+            return;
+        }
 
-    var mobLogout = document.getElementById('mobLogout');
-    if (mobLogout) {
-        mobLogout.addEventListener('click', function () {
+        if (e.target.closest('#mobLogout')) {
             uiCloseMob();
             authLogout();
-        });
-    }
+        }
+    });
 }

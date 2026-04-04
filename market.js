@@ -196,10 +196,6 @@ function mktOnTick(sym, tick) {
             window.tradeOnDigitTick(sym, tick);
         }
     }
-
-    if (typeof window.botOnMarketTick === 'function') {
-        window.botOnMarketTick(sym, tick);
-    }
 }
 
 function mktSelectSymbol(sym, opts) {

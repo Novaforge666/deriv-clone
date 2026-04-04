@@ -168,34 +168,6 @@ function uiBindChrome() {
             if (!dd.contains(e.target) && !(pill && pill.contains(e.target))) {
                 uiCloseAccDD();
             }
-
-            if (e.target.closest('#tradeFocusBtn')) {
-                var panel = document.getElementById('trdPanel');
-                if (panel) {
-                    panel.classList.toggle('strategy-focused');
-
-                    var icon = document.querySelector('#tradeFocusBtn i');
-                    if (icon) {
-                        icon.className = panel.classList.contains('strategy-focused')
-                            ? 'fas fa-expand-alt'
-                            : 'fas fa-compress-alt';
-                    }
-                }
-                return;
-            }
-
-            var tpHead = e.target.closest('.foundation-panel .tp-head');
-            if (tpHead && window.innerWidth <= 900 && !e.target.closest('button')) {
-                var panel2 = document.getElementById('trdPanel');
-                var backdrop = document.getElementById('tradeBackdrop');
-
-                if (panel2) {
-                    panel2.classList.toggle('open');
-                    if (backdrop) backdrop.classList.toggle('open', panel2.classList.contains('open'));
-                    uiSetBodyLock(panel2.classList.contains('open'));
-                }
-            }
-
         }
     });
 
@@ -306,28 +278,15 @@ function uiSyncTraderCollapseUI() {
     var root = document.querySelector('.trader-foundation');
     if (!root) return;
 
-    var marketsCollapsed = root.classList.contains('markets-collapsed');
-    var tradeCollapsed = root.classList.contains('trade-collapsed');
-
     var mktExpandBtn = document.getElementById('mktExpandBtn');
     var tradeExpandBtn = document.getElementById('tradeExpandBtn');
-    var mktToggleBtn = document.getElementById('mktToggleBtn');
-    var tradeToggleBtn = document.getElementById('tradeToggleBtn');
 
     if (mktExpandBtn) {
-        mktExpandBtn.classList.toggle('hidden', !marketsCollapsed);
+        mktExpandBtn.classList.toggle('hidden', !root.classList.contains('markets-collapsed'));
     }
 
     if (tradeExpandBtn) {
-        tradeExpandBtn.classList.toggle('hidden', !tradeCollapsed);
-    }
-
-    if (mktToggleBtn) {
-        mktToggleBtn.innerHTML = '<i class="fas fa-chevron-left"></i>';
-    }
-
-    if (tradeToggleBtn) {
-        tradeToggleBtn.innerHTML = '<i class="fas fa-chevron-right"></i>';
+        tradeExpandBtn.classList.toggle('hidden', !root.classList.contains('trade-collapsed'));
     }
 }
 
@@ -377,18 +336,51 @@ function uiBindTraderFoundation() {
     document.addEventListener('click', function (e) {
         if (e.target.closest('#openMarketsBtn')) {
             uiOpenTraderPanel('markets');
+            return;
         }
 
-        if (e.target.closest('#tradeStrategyToggleBtn')) {
+        if (e.target.closest('#openTradeBtn')) {
+            uiOpenTraderPanel('trade');
+            return;
+        }
+
+        if (e.target.closest('#tradeBackdrop')) {
+            uiCloseTraderPanels();
+            return;
+        }
+
+        if (e.target.closest('#mktToggleBtn')) {
+            if (window.innerWidth <= 900) uiCloseTraderPanels();
+            else uiToggleDesktopPanel('markets');
+            return;
+        }
+
+        if (e.target.closest('#tradeToggleBtn')) {
+            if (window.innerWidth <= 900) uiCloseTraderPanels();
+            else uiToggleDesktopPanel('trade');
+            return;
+        }
+
+        if (e.target.closest('#mktExpandBtn')) {
+            uiToggleDesktopPanel('markets', true);
+            return;
+        }
+
+        if (e.target.closest('#tradeExpandBtn')) {
+            uiToggleDesktopPanel('trade', true);
+            return;
+        }
+
+        if (e.target.closest('#tradeFocusBtn')) {
             var panel = document.getElementById('trdPanel');
             if (panel) {
-                panel.classList.toggle('strategy-collapsed');
+                panel.classList.toggle('strategy-focused');
 
-                var icon = document.querySelector('#tradeStrategyToggleBtn i');
+                var icon = document.querySelector('#tradeFocusBtn i');
                 if (icon) {
-                    icon.className = panel.classList.contains('strategy-collapsed')
-                        ? 'fas fa-chevron-down'
-                        : 'fas fa-chevron-up';
+                    icon.className = panel.classList.contains('strategy-focused')
+                        ? 'fas fa-expand-alt'
+                        : 'fas fa-compress-alt';
                 }
             }
             return;
@@ -404,32 +396,6 @@ function uiBindTraderFoundation() {
                 if (backdrop) backdrop.classList.toggle('open', panel2.classList.contains('open'));
                 uiSetBodyLock(panel2.classList.contains('open'));
             }
-        }
-
-        if (e.target.closest('#openTradeBtn')) {
-            uiOpenTraderPanel('trade');
-        }
-
-        if (e.target.closest('#mktCloseBtn') || e.target.closest('#tradeCloseBtn') || e.target.closest('#tradeBackdrop')) {
-            uiCloseTraderPanels();
-        }
-
-        if (e.target.closest('#mktToggleBtn')) {
-            if (window.innerWidth <= 900) uiCloseTraderPanels();
-            else uiToggleDesktopPanel('markets');
-        }
-
-        if (e.target.closest('#tradeToggleBtn')) {
-            if (window.innerWidth <= 900) uiCloseTraderPanels();
-            else uiToggleDesktopPanel('trade');
-        }
-
-        if (e.target.closest('#mktExpandBtn')) {
-            uiToggleDesktopPanel('markets', true);
-        }
-
-        if (e.target.closest('#tradeExpandBtn')) {
-            uiToggleDesktopPanel('trade', true);
         }
     });
 
@@ -455,6 +421,7 @@ function uiShowLanding() {
     if (landing) landing.classList.remove('hidden');
     if (app) app.classList.add('hidden');
 }
+
 function uiGoPage(pg) {
     document.querySelectorAll('.anav').forEach(function (a) {
         a.classList.remove('active');
@@ -489,7 +456,6 @@ function uiGoPage(pg) {
 
     if (pg === 'bot') {
         if (typeof botInit === 'function') botInit();
-        if (typeof botEnsurePage === 'function') botEnsurePage();
     }
 
     var el = document.getElementById(map[pg]);
@@ -524,6 +490,7 @@ function uiGoPage(pg) {
         uiUpdateCashier();
     }
 }
+
 function uiUpdateBal(bal, cur) {
     var f = (+bal || 0).toLocaleString('en-US', {
         minimumFractionDigits: 2,
@@ -556,9 +523,7 @@ function uiOnAuth(acct) {
     }
 
     var ct = document.getElementById('cashType');
-    if (ct) {
-        ct.textContent = acct.is_virtual ? 'Demo Account' : 'Real Account';
-    }
+    if (ct) ct.textContent = acct.is_virtual ? 'Demo Account' : 'Real Account';
 
     var stkCur = document.getElementById('stkCur');
     if (stkCur) stkCur.textContent = acct.currency || 'USD';

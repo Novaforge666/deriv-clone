@@ -1,13 +1,36 @@
-var botReady = false;
-
 function botInit() {
-    botEnsurePage();
-    botReady = true;
-}
+    var appNav = document.getElementById('appNav');
+    if (appNav && !appNav.querySelector('[data-page="bot"]')) {
+        var reports = appNav.querySelector('[data-page="reports"]');
+        var link = document.createElement('a');
+        link.className = 'anav';
+        link.dataset.page = 'bot';
+        link.innerHTML = '<i class="fas fa-robot"></i> Bot';
+        if (reports) appNav.insertBefore(link, reports);
+        else appNav.appendChild(link);
+    }
 
-function botEnsurePage() {
+    var mobPanel = document.querySelector('.mob-panel');
+    if (mobPanel && !mobPanel.querySelector('.mnav[data-page="bot"]')) {
+        var reportsMob = mobPanel.querySelector('.mnav[data-page="reports"]');
+        var m = document.createElement('a');
+        m.className = 'mnav';
+        m.dataset.page = 'bot';
+        m.innerHTML = '<i class="fas fa-robot"></i> Bot';
+        if (reportsMob) mobPanel.insertBefore(m, reportsMob);
+        else mobPanel.appendChild(m);
+    }
+
+    var appBody = document.querySelector('.app-body');
+    if (!appBody) return;
+
     var page = document.getElementById('pgBot');
-    if (!page) return;
+    if (!page) {
+        page = document.createElement('div');
+        page.className = 'pg';
+        page.id = 'pgBot';
+        appBody.appendChild(page);
+    }
 
     page.innerHTML = `
         <div class="botbuilder-shell">
@@ -20,13 +43,13 @@ function botEnsurePage() {
                 </div>
 
                 <div class="bbs-runbar">
-                    <button class="bbs-run" id="bbsRunBtn" type="button">
+                    <button class="bbs-run" type="button">
                         <i class="fas fa-play"></i> Run
                     </button>
                     <div class="bbs-status">
                         <span class="bbs-status-label">Bot status</span>
                         <div class="bbs-status-track">
-                            <div class="bbs-status-fill" id="bbsStatusFill"></div>
+                            <div class="bbs-status-fill" style="width:0%"></div>
                         </div>
                     </div>
                 </div>

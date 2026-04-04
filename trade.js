@@ -145,8 +145,14 @@ function tradeEnsureModeUI() {
         else form.appendChild(basis);
     }
 
+    var rightContracts = document.querySelector('#trdPanel .tp-contracts');
+    if (rightContracts) rightContracts.style.display = 'none';
+
+    var poCardHide = document.querySelector('#trdPanel .po-card');
+    if (poCardHide) poCardHide.style.display = 'none';
+
     tradeRenderClassifier();
-    tradeEnsureDigitOverlay();
+    tradeEnsureDigitPanel();
     tradeEnsureSideOpenContracts();
     tradeRenderDigitUI();
 }
@@ -590,7 +596,7 @@ wsOn('poc', function (c) {
     tradeUpdateSummary();
 });
 
-/* ========= DIGITS ========= */
+/* DIGITS */
 
 function tradeDigitState(sym) {
     if (!tradeDigitStats[sym]) {
@@ -693,11 +699,11 @@ function tradeClampPct(v) {
     return Math.max(0, Math.min(100, +v || 0));
 }
 
-function tradeDigitCircleHTML(d, count, snap, isBoard) {
+function tradeDigitCircleHTML(d, count, snap) {
     var pctText = tradeDigitPct(count, snap.total);
     var pctNum = tradeDigitPctNum(count, snap.total);
 
-    var cls = [isBoard ? 'digit-btn' : 'digit-strip-item', 'circle-digit-pro'];
+    var cls = ['digit-btn', 'circle-digit-pro'];
 
     if (snap.current === d) cls.push('live');
     if (snap.most.indexOf(d) >= 0) cls.push('most');
@@ -705,18 +711,12 @@ function tradeDigitCircleHTML(d, count, snap, isBoard) {
     if (d % 2 === 0) cls.push('even');
     else cls.push('odd');
 
-    if (isBoard && (tradeModeKey === 'over_under' || tradeModeKey === 'matches_differs') && tradeDigit === d) {
+    if ((tradeModeKey === 'over_under' || tradeModeKey === 'matches_differs') && tradeDigit === d) {
         cls.push('active');
     }
 
-    var tagOpen = isBoard
-        ? '<button class="' + cls.join(' ') + '" type="button" data-digit="' + d + '">'
-        : '<div class="' + cls.join(' ') + '">';
-
-    var tagClose = isBoard ? '</button>' : '</div>';
-
     return '' +
-        tagOpen +
+        '<button class="' + cls.join(' ') + '" type="button" data-digit="' + d + '">' +
         '   <svg class="digit-ring-svg" viewBox="0 0 44 44" aria-hidden="true">' +
         '       <circle class="digit-ring-bg" cx="22" cy="22" r="18"></circle>' +
         '       <circle class="digit-ring-fill" cx="22" cy="22" r="18" pathLength="100" style="stroke-dasharray:' + pctNum + ' 100"></circle>' +
@@ -725,7 +725,7 @@ function tradeDigitCircleHTML(d, count, snap, isBoard) {
         '       <span class="digit-num">' + d + '</span>' +
         '       <span class="digit-pct">' + pctText + '</span>' +
         '   </span>' +
-        tagClose;
+        '</button>';
 }
 
 function tradeDigitHeatHTML(label, pct, cls) {
@@ -760,7 +760,7 @@ function tradeModeHeatHTML(snap) {
     return html;
 }
 
-function tradeEnsureDigitOverlay() {
+function tradeEnsureDigitPanel() {
     var chartOverlay = document.getElementById('digitOverlay');
     if (chartOverlay) chartOverlay.remove();
 
@@ -790,8 +790,7 @@ function tradeEnsureDigitOverlay() {
         var boardWrap = document.createElement('div');
         boardWrap.className = 'digit-board-wrap-inner';
         boardWrap.id = 'digitBoardWrapInner';
-        boardWrap.innerHTML =
-            '<div class="digit-live-cursor panel-cursor" id="digitLiveCursorPanel">LIVE</div>';
+        boardWrap.innerHTML = '<div class="digit-live-cursor panel-cursor" id="digitLiveCursorPanel">LIVE</div>';
         board.parentNode.insertBefore(boardWrap, board);
         boardWrap.appendChild(board);
     }
@@ -832,7 +831,7 @@ window.addEventListener('resize', function () {
 });
 
 function tradeRenderDigitUI() {
-    tradeEnsureDigitOverlay();
+    tradeEnsureDigitPanel();
 
     var snap = tradeDigitSnapshot(curSymbol);
     var showDigits = (
@@ -857,7 +856,7 @@ function tradeRenderDigitUI() {
     var board = document.getElementById('digitBoard');
     if (board) {
         board.innerHTML = snap.counts.map(function (count, d) {
-            return tradeDigitCircleHTML(d, count, snap, true);
+            return tradeDigitCircleHTML(d, count, snap);
         }).join('');
     }
 
@@ -985,38 +984,6 @@ function tradeBindAll() {
         if (el) el.addEventListener('change', tradeSubProposals);
     });
 
-    document.querySelectorAll('.tgb[data-g]').forEach(function (b) {
-        b.addEventListener('click', function () {
-            document.querySelectorAll('#tfGrp .tgb').forEach(function (x) {
-                x.classList.remove('active');
-            });
-            b.classList.add('active');
-            curGranularity = +b.dataset.g;
-            chartLoad(curSymbol, curGranularity);
-        });
-    });
-
-    var tsBody = document.getElementById('tsBody');
-    if (tsBody) {
-        tsBody.addEventListener('click', function (e) {
-            var it = e.target.closest('.ts-item');
-            if (!it) return;
-            mktSelectSymbol(it.dataset.symbol, { rebuildSidebar: false });
-        });
-    }
-
-    document.querySelectorAll('.tstab').forEach(function (t) {
-        t.addEventListener('click', function () {
-            mktSetActiveTab(t.dataset.cat);
-            mktBuildSidebar(t.dataset.cat);
-        });
-    });
-
-    var mktSearch = document.getElementById('mktSearch');
-    if (mktSearch) {
-        mktSearch.addEventListener('input', mktApplySearchFilter);
-    }
-
     document.addEventListener('click', function (e) {
         var catBtn = e.target.closest('.contract-cat');
         if (catBtn) {
@@ -1061,11 +1028,4 @@ function tradeBindAll() {
     tradeRenderOpenContracts();
     tradeRenderHistory();
     tradeUpdateSummary();
-}
-
-function setChartBtn(el) {
-    document.querySelectorAll('#chCandle,#chLine,#chArea,#chBar,#chBase').forEach(function (x) {
-        x.classList.remove('active');
-    });
-    if (el) el.classList.add('active');
 }
