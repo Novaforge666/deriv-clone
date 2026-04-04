@@ -191,10 +191,10 @@ function mktOnTick(sym, tick) {
             pctEl.textContent = (pct >= 0 ? '+' : '') + pct.toFixed(2) + '%';
             pctEl.className = 'tc-pct ' + (pct >= 0 ? 'up' : 'dn');
         }
-    }
 
-    if (typeof window.tradeOnDigitTick === 'function') {
-        window.tradeOnDigitTick(sym, tick);
+        if (typeof window.tradeOnDigitTick === 'function') {
+            window.tradeOnDigitTick(sym, tick);
+        }
     }
 
     if (typeof window.botOnMarketTick === 'function') {
@@ -216,8 +216,10 @@ function mktSelectSymbol(sym, opts) {
     if (catEl) catEl.textContent = mktCategoryLabel(cat);
 
     var cp = document.getElementById('chartPrice');
-    if (cp && prevPrices[sym] !== undefined) {
-        cp.textContent = prevPrices[sym].toFixed(mktDP(sym));
+    if (cp) {
+        cp.textContent = prevPrices[sym] !== undefined
+            ? prevPrices[sym].toFixed(mktDP(sym))
+            : '--';
     }
 
     if (opts.rebuildSidebar === false) {
@@ -231,6 +233,17 @@ function mktSelectSymbol(sym, opts) {
         tradePrimeDigits(sym);
     }
 
+    if (opts.goTrading) {
+        uiGoPage('trading');
+    } else {
+        var tradingPage = document.getElementById('pgTrading');
+        if (tradingPage && tradingPage.classList.contains('active')) {
+            chartLoad(curSymbol, curGranularity);
+            if (authAccount && typeof tradeSubProposals === 'function') tradeSubProposals();
+            if (typeof tradeRenderDigitUI === 'function') tradeRenderDigitUI();
+        }
+    }
+
     if (window.innerWidth > 900) {
         var root = document.querySelector('.trader-foundation');
         if (root) {
@@ -239,24 +252,7 @@ function mktSelectSymbol(sym, opts) {
         }
     }
 
-    if (opts.goTrading) {
-        uiGoPage('trading');
-    } else {
-        var tradingPage = document.getElementById('pgTrading');
-        if (tradingPage && tradingPage.classList.contains('active')) {
-            chartLoad(curSymbol, curGranularity);
-            if (authAccount) tradeSubProposals();
-        }
-    }
-
     if (window.innerWidth <= 900 && typeof uiCloseTraderPanels === 'function') {
         uiCloseTraderPanels();
-    }
-}
-if (window.innerWidth > 900) {
-    var root = document.querySelector('.trader-foundation');
-    if (root) {
-        root.classList.add('markets-collapsed');
-        if (typeof uiSyncTraderCollapseUI === 'function') uiSyncTraderCollapseUI();
     }
 }
