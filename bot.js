@@ -2,7 +2,6 @@
     var BOT_PAGE_ID = 'pgBot';
 
     var botState = {
-        booted: false,
         running: false,
         activePanel: 'summary',
         leftCollapsed: false,
@@ -16,12 +15,7 @@
             won: 0,
             lost: 0,
             profit: 0
-        },
-        activeContracts: {},
-        subscribedSymbols: {},
-        wsBound: false,
-        lastActionAt: 0,
-        tickBuffer: []
+        }
     };
 
     function $(sel, root) {
@@ -37,11 +31,11 @@
         return (+v || 0).toFixed(2) + ' ' + cur;
     }
 
-    function logTime() {
+    function nowText() {
         return new Date().toLocaleTimeString();
     }
 
-    function ensureStyles() {
+    function ensureBotStyles() {
         if (document.getElementById('bot-builder-style')) return;
 
         var style = document.createElement('style');
@@ -91,7 +85,6 @@
                 font-size: 12px;
                 font-weight: 700;
                 font-family: inherit;
-                cursor: default;
             }
 
             .bbs-tab.active {
@@ -232,7 +225,6 @@
                 font-size: 11px;
                 font-weight: 700;
                 margin: 10px auto 0;
-                letter-spacing: .3px;
             }
 
             .botbuilder-body.left-collapsed .bbs-side-collapsed-label {
@@ -295,7 +287,6 @@
                 padding: 10px 12px;
                 font-family: inherit;
                 font-size: 12px;
-                cursor: pointer;
             }
 
             .bbs-menu-item.active,
@@ -378,12 +369,6 @@
                 font-weight: 700;
             }
 
-            .bbs-block-title {
-                display: flex;
-                align-items: center;
-                gap: 8px;
-            }
-
             .bbs-block-actions {
                 display: flex;
                 align-items: center;
@@ -432,7 +417,6 @@
                 font-size: 11px;
                 font-weight: 700;
                 margin-bottom: 6px;
-                opacity: .95;
             }
 
             .bbs-block select,
@@ -645,646 +629,8 @@
         document.head.appendChild(style);
     }
 
-    function getMarketsByGroup(group) {
-        if (typeof MARKETS === 'undefined') {
-            return [{ s: 'R_100', n: 'Volatility 100 Index' }];
-        }
-        return MARKETS[group] || [];
-    }
-
-    function fillSelect(el, items, valueKey, textKey, selected) {
-        if (!el) return;
-        el.innerHTML = items.map(function (item) {
-            var value = item[valueKey];
-            var text = item[textKey];
-            var sel = value === selected ? ' selected' : '';
-            return '<option value="' + value + '"' + sel + '>' + text + '</option>';
-        }).join('');
-    }
-
-    function families() {
-        return [
-            { v: 'updown', t: 'Up/Down' },
-            { v: 'digits', t: 'Digits' }
-        ];
-    }
-
-    function contracts(family) {
-        if (family === 'digits') {
-            return [
-                { v: 'even_odd', t: 'Even/Odd' },
-                { v: 'matches_differs', t: 'Matches/Differs' },
-                { v: 'over_under', t: 'Over/Under' }
-            ];
-        }
-
-        return [
-            { v: 'rise_fall', t: 'Rise/Fall' },
-            { v: 'higher_lower', t: 'Higher/Lower' }
-        ];
-    }
-
-    function directions(contract) {
-        if (contract === 'rise_fall') {
-            return [{ v: 'CALL', t: 'Rise' }, { v: 'PUT', t: 'Fall' }];
-        }
-        if (contract === 'higher_lower') {
-            return [{ v: 'CALL', t: 'Higher' }, { v: 'PUT', t: 'Lower' }];
-        }
-        if (contract === 'even_odd') {
-            return [{ v: 'DIGITEVEN', t: 'Even' }, { v: 'DIGITODD', t: 'Odd' }];
-        }
-        if (contract === 'matches_differs') {
-            return [{ v: 'DIGITMATCH', t: 'Matches' }, { v: 'DIGITDIFF', t: 'Differs' }];
-        }
-        return [{ v: 'DIGITOVER', t: 'Over' }, { v: 'DIGITUNDER', t: 'Under' }];
-    }
-
-    function strategies(contract) {
-        if (contract === 'rise_fall' || contract === 'higher_lower') {
-            return [
-                { v: 'every_5_ticks', t: 'Every 5 ticks' },
-                { v: 'momentum_3', t: 'Momentum (3 ticks)' },
-                { v: 'reversal_3', t: 'Reversal (3 ticks)' }
-            ];
-        }
-
-        return [
-            { v: 'every_5_ticks', t: 'Every 5 ticks' },
-            { v: 'digit_equals_prediction', t: 'Digit equals prediction' },
-            { v: 'digit_not_prediction', t: 'Digit differs from prediction' }
-        ];
-    }
-
-    function contractNeedsPrediction(contract) {
-        return contract === 'matches_differs' || contract === 'over_under';
-    }
-
-    function renderTabs() {
-        $all('.bbs-rtab').forEach(function (btn) {
-            btn.classList.toggle('active', btn.dataset.panel === botState.activePanel);
-        });
-
-        $all('.bbs-panel').forEach(function (panel) {
-            panel.classList.toggle('active', panel.dataset.panelBody === botState.activePanel);
-        });
-    }
-
-    function pushLog(msg, kind) {
-        botState.logs.unshift({
-            text: '[' + logTime() + '] ' + msg,
-            kind: kind || 'muted'
-        });
-        botState.logs = botState.logs.slice(0, 100);
-        renderLogs();
-    }
-
-    function pushTransaction(msg, kind) {
-        botState.transactions.unshift({
-            text: '[' + logTime() + '] ' + msg,
-            kind: kind || 'muted'
-        });
-        botState.transactions = botState.transactions.slice(0, 100);
-        renderTransactions();
-    }
-
-    function renderLogs() {
-        var log = $('#bbsLog');
-        if (!log) return;
-
-        log.innerHTML = botState.logs.length
-            ? botState.logs.map(function (l) {
-                return '<div class="bbs-log-line ' + l.kind + '">' + l.text + '</div>';
-            }).join('')
-            : '<div class="bbs-log-line muted">No journal entries yet.</div>';
-    }
-
-    function renderTransactions() {
-        var log = $('#bbsTransactions');
-        if (!log) return;
-
-        log.innerHTML = botState.transactions.length
-            ? botState.transactions.map(function (l) {
-                return '<div class="bbs-log-line ' + l.kind + '">' + l.text + '</div>';
-            }).join('')
-            : '<div class="bbs-log-line muted">No transactions yet.</div>';
-    }
-
-    function readConfig() {
-        return {
-            marketGroup: $('#botMarketGroup') ? $('#botMarketGroup').value : 'synthetic',
-            symbol: $('#botSymbol') ? $('#botSymbol').value : 'R_100',
-            family: $('#botTradeFamily') ? $('#botTradeFamily').value : 'digits',
-            contract: $('#botContract') ? $('#botContract').value : 'over_under',
-            direction: $('#botDirection') ? $('#botDirection').value : 'DIGITUNDER',
-            strategy: $('#botStrategy') ? $('#botStrategy').value : 'every_5_ticks',
-            prediction: $('#botPrediction') ? (+$('#botPrediction').value || 5) : 5,
-            durationUnit: $('#botDurationUnit') ? $('#botDurationUnit').value : 't',
-            duration: $('#botDuration') ? (+$('#botDuration').value || 1) : 1,
-            stake: $('#botStake') ? (+$('#botStake').value || 1) : 1,
-            currency: $('#botCurrency') ? $('#botCurrency').value : ((window.authAccount && authAccount.currency) ? authAccount.currency : 'USD'),
-            cooldown: ($('#botCooldown') ? (+$('#botCooldown').value || 5) : 5) * 1000,
-            maxOpen: $('#botMaxOpen') ? (+$('#botMaxOpen').value || 3) : 3,
-            restart: $('#botRestart') ? $('#botRestart').value : 'yes',
-            bulkPurchase: $('#botBulkPurchase') ? $('#botBulkPurchase').value : 'no',
-            numTrades: $('#botNumTrades') ? (+$('#botNumTrades').value || 1) : 1
-        };
-    }
-
-    function updateSummary() {
-        var c = readConfig();
-
-        var fill = $('#bbsStatusFill');
-        if (fill) fill.style.width = botState.running ? '100%' : '0%';
-
-        var statusText = $('#bbsStatusText');
-        if (statusText) {
-            statusText.textContent = botState.running ? 'Running' : 'Stopped';
-            statusText.className = botState.running ? 'bbs-status-live' : 'bbs-status-stop';
-        }
-
-        var symbolText = $('#bbsSymbolText');
-        if (symbolText) symbolText.textContent = c.symbol;
-
-        var typeText = $('#bbsTypeText');
-        if (typeText) typeText.textContent = c.contract;
-
-        var runs = $('#bbsRuns');
-        if (runs) runs.textContent = String(botState.metrics.runs);
-
-        var stakeTotal = $('#bbsStakeTotal');
-        if (stakeTotal) stakeTotal.textContent = botState.metrics.totalStake.toFixed(2);
-
-        var payoutTotal = $('#bbsPayoutTotal');
-        if (payoutTotal) payoutTotal.textContent = botState.metrics.totalPayout.toFixed(2);
-
-        var won = $('#bbsWon');
-        if (won) won.textContent = String(botState.metrics.won);
-
-        var lost = $('#bbsLost');
-        if (lost) lost.textContent = String(botState.metrics.lost);
-
-        var profit = $('#bbsProfitTotal');
-        if (profit) profit.textContent = botState.metrics.profit.toFixed(2);
-
-        var runBtn = $('#bbsRunBtn');
-        if (runBtn) {
-            runBtn.textContent = botState.running ? 'Stop' : 'Run';
-            runBtn.classList.toggle('stop', botState.running);
-        }
-    }
-
-    function renderAll() {
-        renderTabs();
-        renderLogs();
-        renderTransactions();
-        updateSummary();
-    }
-
-    function fillControls() {
-        var group = $('#botMarketGroup');
-        var symbol = $('#botSymbol');
-        var family = $('#botTradeFamily');
-        var contract = $('#botContract');
-        var direction = $('#botDirection');
-        var strategy = $('#botStrategy');
-        var prediction = $('#botPrediction');
-        var currency = $('#botCurrency');
-
-        fillSelect(group, [
-            { v: 'synthetic', t: 'Synthetic' },
-            { v: 'forex', t: 'Forex' },
-            { v: 'commodities', t: 'Commodities' }
-        ], 'v', 't', group && group.value ? group.value : 'synthetic');
-
-        fillSelect(family, families(), 'v', 't', family && family.value ? family.value : 'digits');
-
-        var contractItems = contracts(family ? family.value : 'digits');
-        fillSelect(contract, contractItems, 'v', 't', contract && contract.value ? contract.value : contractItems[0].v);
-
-        var directionItems = directions(contract ? contract.value : contractItems[0].v);
-        fillSelect(direction, directionItems, 'v', 't', direction && direction.value ? direction.value : directionItems[0].v);
-
-        var stratItems = strategies(contract ? contract.value : contractItems[0].v);
-        fillSelect(strategy, stratItems, 'v', 't', strategy && strategy.value ? strategy.value : stratItems[0].v);
-
-        var symbols = getMarketsByGroup(group ? group.value : 'synthetic');
-        fillSelect(symbol, symbols.map(function (m) {
-            return { v: m.s, t: m.n };
-        }), 'v', 't', symbol && symbol.value ? symbol.value : (symbols[0] ? symbols[0].s : 'R_100'));
-
-        if (prediction) {
-            prediction.parentElement.style.display = contractNeedsPrediction(contract.value) ? '' : 'none';
-        }
-
-        if (currency) {
-            currency.value = (window.authAccount && authAccount.currency) ? authAccount.currency : 'USD';
-        }
-
-        updateSummary();
-    }
-
-    function placeBlocks() {
-        $all('.bbs-block').forEach(function (block) {
-            block.style.left = (+block.dataset.x || 0) + 'px';
-            block.style.top = (+block.dataset.y || 0) + 'px';
-            block.style.zIndex = '1';
-        });
-    }
-
-    function bindTabs() {
-        $all('.bbs-rtab').forEach(function (btn) {
-            btn.onclick = function () {
-                botState.activePanel = btn.dataset.panel;
-                renderTabs();
-            };
-        });
-    }
-
-    function bindDrag() {
-        if (document.body.dataset.botDragBound === '1') return;
-        document.body.dataset.botDragBound = '1';
-
-        document.addEventListener('pointerdown', function (e) {
-            var head = e.target.closest('.bbs-block-head');
-            if (!head) return;
-
-            var block = head.closest('.bbs-block');
-            var workspace = $('#bbsWorkspace');
-            if (!block || !workspace) return;
-
-            var rect = block.getBoundingClientRect();
-            var wrect = workspace.getBoundingClientRect();
-
-            botState.drag = {
-                block: block,
-                startX: e.clientX,
-                startY: e.clientY,
-                origLeft: rect.left - wrect.left + workspace.scrollLeft,
-                origTop: rect.top - wrect.top + workspace.scrollTop
-            };
-
-            block.style.zIndex = '99';
-        });
-
-        document.addEventListener('pointermove', function (e) {
-            if (!botState.drag) return;
-
-            var d = botState.drag;
-            var dx = e.clientX - d.startX;
-            var dy = e.clientY - d.startY;
-
-            d.block.style.left = (d.origLeft + dx) + 'px';
-            d.block.style.top = (d.origTop + dy) + 'px';
-        });
-
-        document.addEventListener('pointerup', function () {
-            if (!botState.drag) return;
-            botState.drag.block.style.zIndex = '1';
-            botState.drag = null;
-        });
-    }
-
-    function getLastDigit(symbol, quote) {
-        var dp = 2;
-        if (typeof mktDP === 'function') dp = mktDP(symbol);
-        var fixed = Number(quote).toFixed(dp);
-        var digits = fixed.replace(/\D/g, '');
-        return digits ? +digits.charAt(digits.length - 1) : 0;
-    }
-
-    function shouldTrigger(conf, quote) {
-        botState.tickBuffer.push(+quote);
-        if (botState.tickBuffer.length > 10) botState.tickBuffer.shift();
-
-        if (conf.strategy === 'every_5_ticks') {
-            return botState.tickBuffer.length % 5 === 0;
-        }
-
-        if (conf.strategy === 'momentum_3' && botState.tickBuffer.length >= 4) {
-            var a = botState.tickBuffer.slice(-4);
-            return (a[0] < a[1] && a[1] < a[2] && a[2] < a[3]) ||
-                (a[0] > a[1] && a[1] > a[2] && a[2] > a[3]);
-        }
-
-        if (conf.strategy === 'reversal_3' && botState.tickBuffer.length >= 4) {
-            var b = botState.tickBuffer.slice(-4);
-            return (b[0] < b[1] && b[1] < b[2] && b[2] < b[3]) ||
-                (b[0] > b[1] && b[1] > b[2] && b[2] > b[3]);
-        }
-
-        var digit = getLastDigit(conf.symbol, quote);
-
-        if (conf.strategy === 'digit_equals_prediction') {
-            return digit === conf.prediction;
-        }
-
-        if (conf.strategy === 'digit_not_prediction') {
-            return digit !== conf.prediction;
-        }
-
-        return false;
-    }
-
-    function buildProposalReq(conf, contractType) {
-        var req = {
-            proposal: 1,
-            amount: conf.stake,
-            basis: 'stake',
-            contract_type: contractType,
-            currency: conf.currency,
-            duration: conf.duration,
-            duration_unit: conf.durationUnit,
-            symbol: conf.symbol
-        };
-
-        if (
-            contractType === 'DIGITMATCH' ||
-            contractType === 'DIGITDIFF' ||
-            contractType === 'DIGITOVER' ||
-            contractType === 'DIGITUNDER'
-        ) {
-            req.barrier = String(conf.prediction);
-        }
-
-        return req;
-    }
-
-    function canTrade(conf) {
-        if (!window.authAccount) {
-            pushLog('Please log in first.', 'err');
-            return false;
-        }
-
-        if (!window.wsSend) {
-            pushLog('WebSocket API unavailable.', 'err');
-            return false;
-        }
-
-        if (Object.keys(botState.activeContracts).length >= conf.maxOpen) return false;
-        if (Date.now() - botState.lastActionAt < conf.cooldown) return false;
-        return true;
-    }
-
-    function executeTrade(conf) {
-        if (!canTrade(conf)) return;
-
-        var tradesToOpen = (conf.bulkPurchase === 'yes') ? Math.max(1, conf.numTrades) : 1;
-        var allowed = Math.max(0, conf.maxOpen - Object.keys(botState.activeContracts).length);
-        tradesToOpen = Math.min(tradesToOpen, allowed);
-        if (!tradesToOpen) return;
-
-        botState.lastActionAt = Date.now();
-
-        var seq = Promise.resolve();
-
-        for (var i = 0; i < tradesToOpen; i++) {
-            seq = seq.then(function () {
-                return wsSend(buildProposalReq(conf, conf.direction))
-                    .then(function (res) {
-                        return wsSend({
-                            buy: res.proposal.id,
-                            price: res.proposal.ask_price
-                        }).then(function (buyRes) {
-                            return {
-                                proposal: res.proposal,
-                                buy: buyRes.buy
-                            };
-                        });
-                    })
-                    .then(function (res) {
-                        if (!res || !res.buy) return;
-
-                        var id = res.buy.contract_id;
-                        botState.activeContracts[id] = {
-                            symbol: conf.symbol,
-                            direction: conf.direction,
-                            buy_price: +res.buy.buy_price || conf.stake
-                        };
-
-                        botState.metrics.runs += 1;
-                        botState.metrics.totalStake += (+res.buy.buy_price || conf.stake || 0);
-                        botState.metrics.totalPayout += (+res.proposal.payout || 0);
-
-                        if (window.wsRaw) {
-                            wsRaw({
-                                proposal_open_contract: 1,
-                                contract_id: id,
-                                subscribe: 1
-                            });
-                        }
-
-                        pushTransaction('Opened #' + id + ' on ' + conf.symbol + ' (' + conf.direction + ')', 'ok');
-                        pushLog('Opened #' + id + ' on ' + conf.symbol, 'ok');
-                        updateSummary();
-                    })
-                    .catch(function (err) {
-                        pushLog('Trade failed: ' + (err && (err.message || err.code) ? (err.message || err.code) : 'Unknown'), 'err');
-                    });
-            });
-        }
-    }
-
-    function ensureSymbolSubscription(symbol) {
-        if (!window.wsSubTick) return;
-        if (botState.subscribedSymbols[symbol]) return;
-
-        botState.subscribedSymbols[symbol] = true;
-
-        wsSubTick(symbol, function (tick) {
-            if (!botState.running) return;
-
-            var conf = readConfig();
-            if (tick.symbol !== conf.symbol) return;
-
-            if (shouldTrigger(conf, tick.quote)) {
-                executeTrade(conf);
-            }
-        });
-    }
-
-    function bindTradeEvents() {
-        if (botState.wsBound) return;
-        botState.wsBound = true;
-
-        if (window.wsOn) {
-            wsOn('poc', function (c) {
-                if (!c || !c.contract_id) return;
-                if (!botState.activeContracts[c.contract_id]) return;
-                if (!c.is_sold) return;
-
-                var pnl = +c.profit || 0;
-                delete botState.activeContracts[c.contract_id];
-
-                botState.metrics.profit += pnl;
-                if (pnl >= 0) botState.metrics.won += 1;
-                else botState.metrics.lost += 1;
-
-                pushTransaction(
-                    '#' + c.contract_id + ' closed: ' + (pnl >= 0 ? 'WIN ' : 'LOSS ') + fmtMoney(Math.abs(pnl)),
-                    pnl >= 0 ? 'ok' : 'err'
-                );
-
-                pushLog(
-                    '#' + c.contract_id + ' closed: ' + (pnl >= 0 ? 'WIN ' : 'LOSS ') + fmtMoney(Math.abs(pnl)),
-                    pnl >= 0 ? 'ok' : 'err'
-                );
-
-                updateSummary();
-
-                var conf = readConfig();
-                if (conf.restart === 'no') {
-                    stopBot();
-                }
-            });
-        }
-    }
-
-    function startBot() {
-        var conf = readConfig();
-
-        if (!window.authAccount) {
-            pushLog('Login first before starting the bot.', 'err');
-            return;
-        }
-
-        botState.running = true;
-        botState.tickBuffer = [];
-        botState.lastActionAt = 0;
-
-        ensureSymbolSubscription(conf.symbol);
-        updateSummary();
-        pushLog('Bot started on ' + conf.symbol + ' with ' + conf.contract + ' / ' + conf.direction, 'ok');
-    }
-
-    function stopBot() {
-        botState.running = false;
-        updateSummary();
-        pushLog('Bot stopped.', 'muted');
-    }
-
-    function resetBot() {
-        botState.running = false;
-        botState.activePanel = 'summary';
-        botState.leftCollapsed = false;
-        botState.drag = null;
-        botState.logs = [];
-        botState.transactions = [];
-        botState.metrics = {
-            runs: 0,
-            totalStake: 0,
-            totalPayout: 0,
-            won: 0,
-            lost: 0,
-            profit: 0
-        };
-        botState.activeContracts = {};
-        botState.tickBuffer = [];
-        botState.lastActionAt = 0;
-        renderAll();
-        pushLog('Bot reset.', 'muted');
-    }
-
-    function bindControls() {
-        var body = $('#bbsBody');
-        if (!body) return;
-
-        var sideToggle = $('#bbsSideToggle');
-        if (sideToggle && !sideToggle.dataset.bound) {
-            sideToggle.dataset.bound = '1';
-            sideToggle.addEventListener('click', function () {
-                botState.leftCollapsed = !botState.leftCollapsed;
-                body.classList.toggle('left-collapsed', botState.leftCollapsed);
-                var icon = sideToggle.querySelector('i');
-                if (icon) icon.className = botState.leftCollapsed ? 'fas fa-chevron-right' : 'fas fa-chevron-left';
-            });
-        }
-
-        var quickBtn = $('#bbsQuickBtn');
-        if (quickBtn && !quickBtn.dataset.bound) {
-            quickBtn.dataset.bound = '1';
-            quickBtn.addEventListener('click', function () {
-                var fam = $('#botTradeFamily');
-                var contract = $('#botContract');
-                var direction = $('#botDirection');
-                var strat = $('#botStrategy');
-                var pred = $('#botPrediction');
-                var durUnit = $('#botDurationUnit');
-                var dur = $('#botDuration');
-                var stake = $('#botStake');
-                var bulk = $('#botBulkPurchase');
-                var trades = $('#botNumTrades');
-
-                if (fam) fam.value = 'digits';
-                fillControls();
-                if (contract) contract.value = 'over_under';
-                fillControls();
-                if (direction) direction.value = 'DIGITUNDER';
-                if (strat) strat.value = 'every_5_ticks';
-                if (pred) pred.value = '5';
-                if (durUnit) durUnit.value = 't';
-                if (dur) dur.value = '1';
-                if (stake) stake.value = '100';
-                if (bulk) bulk.value = 'yes';
-                if (trades) trades.value = '3';
-
-                fillControls();
-                updateSummary();
-                pushLog('Quick strategy applied.', 'muted');
-            });
-        }
-
-        $all('[data-collapse]').forEach(function (btn) {
-            if (btn.dataset.bound) return;
-            btn.dataset.bound = '1';
-
-            btn.addEventListener('click', function (e) {
-                e.stopPropagation();
-                var block = btn.closest('.bbs-block');
-                if (!block) return;
-                block.classList.toggle('collapsed');
-                btn.textContent = block.classList.contains('collapsed') ? '+' : '−';
-            });
-        });
-
-        ['botMarketGroup', 'botTradeFamily', 'botContract', 'botDirection', 'botStrategy', 'botPrediction', 'botDurationUnit', 'botDuration', 'botStake', 'botCooldown', 'botMaxOpen', 'botRestart', 'botBulkPurchase', 'botNumTrades', 'botSymbol'].forEach(function (id) {
-            var el = document.getElementById(id);
-            if (!el || el.dataset.bound) return;
-            el.dataset.bound = '1';
-
-            el.addEventListener('change', function () {
-                fillControls();
-                updateSummary();
-
-                if (id === 'botSymbol' && botState.running) {
-                    ensureSymbolSubscription(readConfig().symbol);
-                }
-            });
-        });
-
-        var runBtn = $('#bbsRunBtn');
-        if (runBtn && !runBtn.dataset.bound) {
-            runBtn.dataset.bound = '1';
-            runBtn.addEventListener('click', function () {
-                if (botState.running) stopBot();
-                else startBot();
-            });
-        }
-
-        var resetBtn = $('#bbsResetBtn');
-        if (resetBtn && !resetBtn.dataset.bound) {
-            resetBtn.dataset.bound = '1';
-            resetBtn.addEventListener('click', function () {
-                resetBot();
-            });
-        }
-    }
-
-    function activatePage() {
-        var page = document.getElementById(BOT_PAGE_ID);
-        if (!page) return;
-
-        page.innerHTML = `
+    function botMarkup() {
+        return `
             <div class="botbuilder-shell">
                 <div class="botbuilder-top">
                     <div class="botbuilder-subnav">
@@ -1366,33 +712,33 @@
                                     <div class="bbs-row-grid">
                                         <div class="bbs-field">
                                             <label>Market group</label>
-                                            <select id="botMarketGroup" aria-label="Market group"></select>
+                                            <select id="botMarketGroup"></select>
                                         </div>
                                         <div class="bbs-field">
                                             <label>Symbol</label>
-                                            <select id="botSymbol" aria-label="Symbol"></select>
+                                            <select id="botSymbol"></select>
                                         </div>
                                     </div>
 
                                     <div class="bbs-row-grid">
                                         <div class="bbs-field">
                                             <label>Trade family</label>
-                                            <select id="botTradeFamily" aria-label="Trade family"></select>
+                                            <select id="botTradeFamily"></select>
                                         </div>
                                         <div class="bbs-field">
                                             <label>Contract</label>
-                                            <select id="botContract" aria-label="Contract"></select>
+                                            <select id="botContract"></select>
                                         </div>
                                     </div>
 
                                     <div class="bbs-row-grid">
                                         <div class="bbs-field">
                                             <label>Direction</label>
-                                            <select id="botDirection" aria-label="Direction"></select>
+                                            <select id="botDirection"></select>
                                         </div>
                                         <div class="bbs-field">
                                             <label>Default candle interval</label>
-                                            <select id="botCandle" aria-label="Default candle interval">
+                                            <select id="botCandle">
                                                 <option>1 minute</option>
                                                 <option>5 minutes</option>
                                                 <option>15 minutes</option>
@@ -1403,11 +749,11 @@
                                     <div class="bbs-row-grid">
                                         <div class="bbs-field">
                                             <label>Strategy</label>
-                                            <select id="botStrategy" aria-label="Strategy"></select>
+                                            <select id="botStrategy"></select>
                                         </div>
                                         <div class="bbs-field">
                                             <label>Prediction</label>
-                                            <input id="botPrediction" type="number" min="0" max="9" value="5" aria-label="Prediction">
+                                            <input id="botPrediction" type="number" min="0" max="9" value="5">
                                         </div>
                                     </div>
 
@@ -1416,19 +762,19 @@
                                             <label>Trade options</label>
                                             <div class="bbs-inline-wrap">
                                                 <span>Duration</span>
-                                                <select id="botDurationUnit" aria-label="Duration unit">
+                                                <select id="botDurationUnit">
                                                     <option value="t">Ticks</option>
                                                     <option value="s">Seconds</option>
                                                     <option value="m" selected>Minutes</option>
                                                 </select>
 
-                                                <input id="botDuration" type="number" min="1" value="1" aria-label="Duration">
+                                                <input id="botDuration" type="number" min="1" value="1">
 
                                                 <span>Stake</span>
-                                                <input id="botStake" type="number" min="0.35" step="0.01" value="100" aria-label="Stake">
+                                                <input id="botStake" type="number" min="0.35" step="0.01" value="100">
 
                                                 <span>Currency</span>
-                                                <input id="botCurrency" type="text" value="USD" readonly aria-label="Currency">
+                                                <input id="botCurrency" type="text" value="USD" readonly>
                                             </div>
                                         </div>
                                     </div>
@@ -1446,14 +792,14 @@
                                     <div class="bbs-row-grid">
                                         <div class="bbs-field full">
                                             <label>Cooldown (seconds)</label>
-                                            <input id="botCooldown" type="number" min="1" value="2" aria-label="Cooldown seconds">
+                                            <input id="botCooldown" type="number" min="1" value="2">
                                         </div>
                                     </div>
 
                                     <div class="bbs-row-grid">
                                         <div class="bbs-field full">
                                             <label>Allow bulk purchase</label>
-                                            <select id="botBulkPurchase" aria-label="Allow bulk purchase">
+                                            <select id="botBulkPurchase">
                                                 <option value="yes" selected>Yes</option>
                                                 <option value="no">No</option>
                                             </select>
@@ -1463,14 +809,14 @@
                                     <div class="bbs-row-grid">
                                         <div class="bbs-field full">
                                             <label>No. of trades</label>
-                                            <input id="botNumTrades" type="number" min="1" value="1" aria-label="Number of trades">
+                                            <input id="botNumTrades" type="number" min="1" value="1">
                                         </div>
                                     </div>
 
                                     <div class="bbs-row-grid">
                                         <div class="bbs-field full">
                                             <label>Max open bot trades</label>
-                                            <input id="botMaxOpen" type="number" min="1" value="10" aria-label="Max open bot trades">
+                                            <input id="botMaxOpen" type="number" min="1" value="10">
                                         </div>
                                     </div>
                                 </div>
@@ -1487,7 +833,7 @@
                                     <div class="bbs-row-grid">
                                         <div class="bbs-field full">
                                             <label>If</label>
-                                            <input type="text" value="Sell is available then" readonly aria-label="Sell condition">
+                                            <input type="text" value="Sell is available then" readonly>
                                         </div>
                                     </div>
                                 </div>
@@ -1504,7 +850,7 @@
                                     <div class="bbs-row-grid">
                                         <div class="bbs-field full">
                                             <label>Restart after sell</label>
-                                            <select id="botRestart" aria-label="Restart after sell">
+                                            <select id="botRestart">
                                                 <option value="yes">Trade again</option>
                                                 <option value="no">Stop after sell</option>
                                             </select>
@@ -1566,469 +912,6 @@
         `;
     }
 
-    function renderIntoPage() {
-        var page = document.getElementById(BOT_PAGE_ID);
-        if (!page) return;
-        page.innerHTML = botMarkup();
-    }
-
-    function placeBlocks() {
-        $all('.bbs-block').forEach(function (block) {
-            block.style.left = (+block.dataset.x || 0) + 'px';
-            block.style.top = (+block.dataset.y || 0) + 'px';
-            block.style.zIndex = '1';
-        });
-    }
-
-    function fillControls() {
-        var group = $('#botMarketGroup');
-        var symbol = $('#botSymbol');
-        var family = $('#botTradeFamily');
-        var contract = $('#botContract');
-        var direction = $('#botDirection');
-        var strategy = $('#botStrategy');
-        var prediction = $('#botPrediction');
-        var currency = $('#botCurrency');
-
-        fillSelect(group, [
-            { v: 'synthetic', t: 'Synthetic' },
-            { v: 'forex', t: 'Forex' },
-            { v: 'commodities', t: 'Commodities' }
-        ], 'v', 't', group && group.value ? group.value : 'synthetic');
-
-        fillSelect(family, families(), 'v', 't', family && family.value ? family.value : 'digits');
-
-        var contractItems = contracts(family ? family.value : 'digits');
-        fillSelect(contract, contractItems, 'v', 't', contract && contract.value ? contract.value : contractItems[0].v);
-
-        var directionItems = directions(contract ? contract.value : contractItems[0].v);
-        fillSelect(direction, directionItems, 'v', 't', direction && direction.value ? direction.value : directionItems[0].v);
-
-        var stratItems = strategies(contract ? contract.value : contractItems[0].v);
-        fillSelect(strategy, stratItems, 'v', 't', strategy && strategy.value ? strategy.value : stratItems[0].v);
-
-        var symbols = getMarketsByGroup(group ? group.value : 'synthetic');
-        fillSelect(symbol, symbols.map(function (m) {
-            return { v: m.s, t: m.n };
-        }), 'v', 't', symbol && symbol.value ? symbol.value : (symbols[0] ? symbols[0].s : 'R_100'));
-
-        if (prediction) {
-            prediction.parentElement.style.display = contractNeedsPrediction(contract.value) ? '' : 'none';
-        }
-
-        if (currency) {
-            currency.value = (window.authAccount && authAccount.currency) ? authAccount.currency : 'USD';
-        }
-
-        updateSummary();
-    }
-
-    function bindTabs() {
-        $all('.bbs-rtab').forEach(function (btn) {
-            btn.onclick = function () {
-                botState.activePanel = btn.dataset.panel;
-                renderTabs();
-            };
-        });
-    }
-
-    function bindLocalControls() {
-        var body = $('#bbsBody');
-        if (!body) return;
-
-        var sideToggle = $('#bbsSideToggle');
-        if (sideToggle) {
-            sideToggle.onclick = function () {
-                botState.leftCollapsed = !botState.leftCollapsed;
-                body.classList.toggle('left-collapsed', botState.leftCollapsed);
-                var icon = sideToggle.querySelector('i');
-                if (icon) icon.className = botState.leftCollapsed ? 'fas fa-chevron-right' : 'fas fa-chevron-left';
-            };
-        }
-
-        var quickBtn = $('#bbsQuickBtn');
-        if (quickBtn) {
-            quickBtn.onclick = function () {
-                var fam = $('#botTradeFamily');
-                var contract = $('#botContract');
-                var direction = $('#botDirection');
-                var strat = $('#botStrategy');
-                var pred = $('#botPrediction');
-                var durUnit = $('#botDurationUnit');
-                var dur = $('#botDuration');
-                var stake = $('#botStake');
-                var bulk = $('#botBulkPurchase');
-                var trades = $('#botNumTrades');
-
-                if (fam) fam.value = 'digits';
-                fillControls();
-                if (contract) contract.value = 'over_under';
-                fillControls();
-                if (direction) direction.value = 'DIGITUNDER';
-                if (strat) strat.value = 'every_5_ticks';
-                if (pred) pred.value = '5';
-                if (durUnit) durUnit.value = 't';
-                if (dur) dur.value = '1';
-                if (stake) stake.value = '100';
-                if (bulk) bulk.value = 'yes';
-                if (trades) trades.value = '3';
-
-                fillControls();
-                updateSummary();
-                pushLog('Quick strategy applied.', 'muted');
-            };
-        }
-
-        $all('[data-collapse]').forEach(function (btn) {
-            btn.onclick = function (e) {
-                e.stopPropagation();
-                var block = btn.closest('.bbs-block');
-                if (!block) return;
-                block.classList.toggle('collapsed');
-                btn.textContent = block.classList.contains('collapsed') ? '+' : '−';
-            };
-        });
-
-        ['botMarketGroup', 'botTradeFamily', 'botContract', 'botDirection', 'botStrategy', 'botPrediction', 'botDurationUnit', 'botDuration', 'botStake', 'botCooldown', 'botMaxOpen', 'botRestart', 'botBulkPurchase', 'botNumTrades', 'botSymbol'].forEach(function (id) {
-            var el = document.getElementById(id);
-            if (!el) return;
-
-            el.onchange = function () {
-                fillControls();
-                updateSummary();
-
-                if (id === 'botSymbol' && botState.running) {
-                    ensureSymbolSubscription(readConfig().symbol);
-                }
-            };
-        });
-
-        var runBtn = $('#bbsRunBtn');
-        if (runBtn) {
-            runBtn.onclick = function () {
-                if (botState.running) stopBot();
-                else startBot();
-            };
-        }
-
-        var resetBtn = $('#bbsResetBtn');
-        if (resetBtn) {
-            resetBtn.onclick = function () {
-                resetBot();
-            };
-        }
-    }
-
-    function bindDrag() {
-        if (document.body.dataset.botDragBound === '1') return;
-        document.body.dataset.botDragBound = '1';
-
-        document.addEventListener('pointerdown', function (e) {
-            var head = e.target.closest('.bbs-block-head');
-            if (!head) return;
-
-            var block = head.closest('.bbs-block');
-            var workspace = $('#bbsWorkspace');
-            if (!block || !workspace) return;
-
-            var rect = block.getBoundingClientRect();
-            var wrect = workspace.getBoundingClientRect();
-
-            botState.drag = {
-                block: block,
-                startX: e.clientX,
-                startY: e.clientY,
-                origLeft: rect.left - wrect.left + workspace.scrollLeft,
-                origTop: rect.top - wrect.top + workspace.scrollTop
-            };
-
-            block.style.zIndex = '99';
-        });
-
-        document.addEventListener('pointermove', function (e) {
-            if (!botState.drag) return;
-
-            var d = botState.drag;
-            var dx = e.clientX - d.startX;
-            var dy = e.clientY - d.startY;
-
-            d.block.style.left = (d.origLeft + dx) + 'px';
-            d.block.style.top = (d.origTop + dy) + 'px';
-        });
-
-        document.addEventListener('pointerup', function () {
-            if (!botState.drag) return;
-            botState.drag.block.style.zIndex = '1';
-            botState.drag = null;
-        });
-    }
-
-    function readConfig() {
-        return {
-            marketGroup: $('#botMarketGroup') ? $('#botMarketGroup').value : 'synthetic',
-            symbol: $('#botSymbol') ? $('#botSymbol').value : 'R_100',
-            family: $('#botTradeFamily') ? $('#botTradeFamily').value : 'digits',
-            contract: $('#botContract') ? $('#botContract').value : 'over_under',
-            direction: $('#botDirection') ? $('#botDirection').value : 'DIGITUNDER',
-            strategy: $('#botStrategy') ? $('#botStrategy').value : 'every_5_ticks',
-            prediction: $('#botPrediction') ? (+$('#botPrediction').value || 5) : 5,
-            durationUnit: $('#botDurationUnit') ? $('#botDurationUnit').value : 't',
-            duration: $('#botDuration') ? (+$('#botDuration').value || 1) : 1,
-            stake: $('#botStake') ? (+$('#botStake').value || 1) : 1,
-            currency: $('#botCurrency') ? $('#botCurrency').value : ((window.authAccount && authAccount.currency) ? authAccount.currency : 'USD'),
-            cooldown: ($('#botCooldown') ? (+$('#botCooldown').value || 5) : 5) * 1000,
-            maxOpen: $('#botMaxOpen') ? (+$('#botMaxOpen').value || 3) : 3,
-            restart: $('#botRestart') ? $('#botRestart').value : 'yes',
-            bulkPurchase: $('#botBulkPurchase') ? $('#botBulkPurchase').value : 'yes',
-            numTrades: $('#botNumTrades') ? (+$('#botNumTrades').value || 1) : 1
-        };
-    }
-
-    function getLastDigit(symbol, quote) {
-        var dp = 2;
-        if (typeof mktDP === 'function') dp = mktDP(symbol);
-        var fixed = Number(quote).toFixed(dp);
-        var digits = fixed.replace(/\D/g, '');
-        return digits ? +digits.charAt(digits.length - 1) : 0;
-    }
-
-    function shouldTrigger(conf, quote) {
-        botState.tickBuffer.push(+quote);
-        if (botState.tickBuffer.length > 10) botState.tickBuffer.shift();
-
-        if (conf.strategy === 'every_5_ticks') {
-            return botState.tickBuffer.length % 5 === 0;
-        }
-
-        if (conf.strategy === 'momentum_3' && botState.tickBuffer.length >= 4) {
-            var a = botState.tickBuffer.slice(-4);
-            return (a[0] < a[1] && a[1] < a[2] && a[2] < a[3]) ||
-                (a[0] > a[1] && a[1] > a[2] && a[2] > a[3]);
-        }
-
-        if (conf.strategy === 'reversal_3' && botState.tickBuffer.length >= 4) {
-            var b = botState.tickBuffer.slice(-4);
-            return (b[0] < b[1] && b[1] < b[2] && b[2] < b[3]) ||
-                (b[0] > b[1] && b[1] > b[2] && b[2] > b[3]);
-        }
-
-        var digit = getLastDigit(conf.symbol, quote);
-
-        if (conf.strategy === 'digit_equals_prediction') {
-            return digit === conf.prediction;
-        }
-
-        if (conf.strategy === 'digit_not_prediction') {
-            return digit !== conf.prediction;
-        }
-
-        return false;
-    }
-
-    function buildProposalReq(conf, contractType) {
-        var req = {
-            proposal: 1,
-            amount: conf.stake,
-            basis: 'stake',
-            contract_type: contractType,
-            currency: conf.currency,
-            duration: conf.duration,
-            duration_unit: conf.durationUnit,
-            symbol: conf.symbol
-        };
-
-        if (
-            contractType === 'DIGITMATCH' ||
-            contractType === 'DIGITDIFF' ||
-            contractType === 'DIGITOVER' ||
-            contractType === 'DIGITUNDER'
-        ) {
-            req.barrier = String(conf.prediction);
-        }
-
-        return req;
-    }
-
-    function canTrade(conf) {
-        if (!window.authAccount) {
-            pushLog('Please log in first.', 'err');
-            return false;
-        }
-
-        if (!window.wsSend) {
-            pushLog('WebSocket API unavailable.', 'err');
-            return false;
-        }
-
-        if (Object.keys(botState.activeContracts).length >= conf.maxOpen) return false;
-        if (Date.now() - botState.lastActionAt < conf.cooldown) return false;
-        return true;
-    }
-
-    function executeTrade(conf) {
-        if (!canTrade(conf)) return;
-
-        var tradesToOpen = (conf.bulkPurchase === 'yes') ? Math.max(1, conf.numTrades) : 1;
-        var allowed = Math.max(0, conf.maxOpen - Object.keys(botState.activeContracts).length);
-        tradesToOpen = Math.min(tradesToOpen, allowed);
-        if (!tradesToOpen) return;
-
-        botState.lastActionAt = Date.now();
-
-        var seq = Promise.resolve();
-
-        for (var i = 0; i < tradesToOpen; i++) {
-            seq = seq.then(function () {
-                return wsSend(buildProposalReq(conf, conf.direction))
-                    .then(function (res) {
-                        return wsSend({
-                            buy: res.proposal.id,
-                            price: res.proposal.ask_price
-                        }).then(function (buyRes) {
-                            return {
-                                proposal: res.proposal,
-                                buy: buyRes.buy
-                            };
-                        });
-                    })
-                    .then(function (res) {
-                        if (!res || !res.buy) return;
-
-                        var id = res.buy.contract_id;
-                        botState.activeContracts[id] = {
-                            symbol: conf.symbol,
-                            direction: conf.direction,
-                            buy_price: +res.buy.buy_price || conf.stake
-                        };
-
-                        botState.metrics.runs += 1;
-                        botState.metrics.totalStake += (+res.buy.buy_price || conf.stake || 0);
-                        botState.metrics.totalPayout += (+res.proposal.payout || 0);
-
-                        if (window.wsRaw) {
-                            wsRaw({
-                                proposal_open_contract: 1,
-                                contract_id: id,
-                                subscribe: 1
-                            });
-                        }
-
-                        pushTransaction('Opened #' + id + ' on ' + conf.symbol + ' (' + conf.direction + ')', 'ok');
-                        pushLog('Opened #' + id + ' on ' + conf.symbol, 'ok');
-                        updateSummary();
-                    })
-                    .catch(function (err) {
-                        pushLog('Trade failed: ' + (err && (err.message || err.code) ? (err.message || err.code) : 'Unknown'), 'err');
-                    });
-            });
-        }
-    }
-
-    function ensureSymbolSubscription(symbol) {
-        if (!window.wsSubTick) return;
-        if (botState.subscribedSymbols[symbol]) return;
-
-        botState.subscribedSymbols[symbol] = true;
-
-        wsSubTick(symbol, function (tick) {
-            if (!botState.running) return;
-
-            var conf = readConfig();
-            if (tick.symbol !== conf.symbol) return;
-
-            if (shouldTrigger(conf, tick.quote)) {
-                executeTrade(conf);
-            }
-        });
-    }
-
-    function bindTradeEvents() {
-        if (botState.wsBound) return;
-        botState.wsBound = true;
-
-        if (window.wsOn) {
-            wsOn('poc', function (c) {
-                if (!c || !c.contract_id) return;
-                if (!botState.activeContracts[c.contract_id]) return;
-                if (!c.is_sold) return;
-
-                var pnl = +c.profit || 0;
-                delete botState.activeContracts[c.contract_id];
-
-                botState.metrics.profit += pnl;
-                if (pnl >= 0) botState.metrics.won += 1;
-                else botState.metrics.lost += 1;
-
-                pushTransaction(
-                    '#' + c.contract_id + ' closed: ' + (pnl >= 0 ? 'WIN ' : 'LOSS ') + fmtMoney(Math.abs(pnl)),
-                    pnl >= 0 ? 'ok' : 'err'
-                );
-
-                pushLog(
-                    '#' + c.contract_id + ' closed: ' + (pnl >= 0 ? 'WIN ' : 'LOSS ') + fmtMoney(Math.abs(pnl)),
-                    pnl >= 0 ? 'ok' : 'err'
-                );
-
-                updateSummary();
-
-                var conf = readConfig();
-                if (conf.restart === 'no') {
-                    stopBot();
-                }
-            });
-        }
-    }
-
-    function startBot() {
-        var conf = readConfig();
-
-        if (!window.authAccount) {
-            pushLog('Login first before starting the bot.', 'err');
-            return;
-        }
-
-        botState.running = true;
-        botState.tickBuffer = [];
-        botState.lastActionAt = 0;
-
-        ensureSymbolSubscription(conf.symbol);
-        updateSummary();
-        pushLog('Bot started on ' + conf.symbol + ' with ' + conf.contract + ' / ' + conf.direction, 'ok');
-    }
-
-    function stopBot() {
-        botState.running = false;
-        updateSummary();
-        pushLog('Bot stopped.', 'muted');
-    }
-
-    function resetBot() {
-        botState.running = false;
-        botState.activePanel = 'summary';
-        botState.logs = [];
-        botState.transactions = [];
-        botState.metrics = {
-            runs: 0,
-            totalStake: 0,
-            totalPayout: 0,
-            won: 0,
-            lost: 0,
-            profit: 0
-        };
-        botState.activeContracts = {};
-        botState.tickBuffer = [];
-        botState.lastActionAt = 0;
-        renderAll();
-        pushLog('Bot reset.', 'muted');
-    }
-
-    function renderAll() {
-        renderTabs();
-        renderLogs();
-        renderTransactions();
-        updateSummary();
-    }
-
     function activatePage() {
         var page = document.getElementById(BOT_PAGE_ID);
         if (!page) return;
@@ -2047,6 +930,7 @@
 
         var d = $('.anav[data-page="bot"]');
         if (d) d.classList.add('active');
+
         var m = $('.mnav[data-page="bot"]');
         if (m) m.classList.add('active');
 

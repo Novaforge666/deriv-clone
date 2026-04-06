@@ -77,10 +77,14 @@ function onLoggedIn(acct) {
         if (typeof mktBuildSidebar === 'function') mktBuildSidebar('synthetic');
         if (typeof mktSubscribe === 'function') mktSubscribe();
         if (typeof tradeBindAll === 'function') tradeBindAll();
-        if (typeof botInit === 'function') botInit();
+
+        try {
+            if (typeof botInit === 'function') botInit();
+        } catch (err) {
+            console.error('Bot init failed:', err);
+        }
 
         bindAppNav();
-
         appBootstrapped = true;
     }
 
