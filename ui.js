@@ -240,20 +240,13 @@ function uiOpenTraderPanel(which) {
     var panel = document.getElementById('trdPanel');
     var backdrop = document.getElementById('tradeBackdrop');
 
-    if (which === 'markets' && side) {
-        side.classList.add('open');
-    }
+    if (which === 'markets' && side) side.classList.add('open');
 
     if (which === 'trade' && panel) {
         panel.classList.add('open');
-
         if (typeof tradeEnsureModeUI === 'function') tradeEnsureModeUI();
         if (typeof tradeRenderClassifier === 'function') tradeRenderClassifier();
         if (typeof tradeRenderDigitUI === 'function') tradeRenderDigitUI();
-
-        panel.scrollTop = 0;
-        var form = panel.querySelector('.tp-form');
-        if (form) form.scrollTop = 0;
     }
 
     if (backdrop) backdrop.classList.add('open');
@@ -304,7 +297,6 @@ function uiToggleDesktopPanel(which, forceOpen) {
         var willCollapse = typeof forceOpen === 'boolean'
             ? !forceOpen
             : !root.classList.contains('markets-collapsed');
-
         root.classList.toggle('markets-collapsed', willCollapse);
     }
 
@@ -312,7 +304,6 @@ function uiToggleDesktopPanel(which, forceOpen) {
         var willCollapseTrade = typeof forceOpen === 'boolean'
             ? !forceOpen
             : !root.classList.contains('trade-collapsed');
-
         root.classList.toggle('trade-collapsed', willCollapseTrade);
     }
 
@@ -375,7 +366,6 @@ function uiBindTraderFoundation() {
             var panel = document.getElementById('trdPanel');
             if (panel) {
                 panel.classList.toggle('strategy-focused');
-
                 var icon = document.querySelector('#tradeFocusBtn i');
                 if (icon) {
                     icon.className = panel.classList.contains('strategy-focused')
@@ -454,8 +444,8 @@ function uiGoPage(pg) {
         cashier: 'pgCashier'
     };
 
-    if (pg === 'bot') {
-        if (typeof botInit === 'function') botInit();
+    if (pg === 'bot' && typeof botInit === 'function') {
+        botInit();
     }
 
     var el = document.getElementById(map[pg]);
