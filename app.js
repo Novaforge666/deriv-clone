@@ -73,16 +73,14 @@ function onLoggedIn(acct) {
             }
         });
 
-        mktBuildDashboard();
-        mktBuildSidebar('synthetic');
-        mktSubscribe();
-        tradeBindAll();
-
-        if (typeof botInit === 'function') {
-            botInit();
-        }
+        if (typeof mktBuildDashboard === 'function') mktBuildDashboard();
+        if (typeof mktBuildSidebar === 'function') mktBuildSidebar('synthetic');
+        if (typeof mktSubscribe === 'function') mktSubscribe();
+        if (typeof tradeBindAll === 'function') tradeBindAll();
+        if (typeof botInit === 'function') botInit();
 
         bindAppNav();
+
         appBootstrapped = true;
     }
 
@@ -120,13 +118,12 @@ function bindAppNav() {
         }
 
         var row = e.target.closest('#mwBody .mw-row');
-        if (row) {
+        if (row && typeof mktSelectSymbol === 'function') {
             mktSelectSymbol(row.dataset.symbol, { goTrading: true });
             return;
         }
 
         if (e.target.closest('#appMobBtn')) {
-            uiCloseAccDD();
             var mobOverlay = document.getElementById('mobOverlay');
             if (mobOverlay) mobOverlay.classList.add('open');
             uiSetBodyLock(true);
@@ -139,14 +136,11 @@ function bindAppNav() {
         }
 
         if (e.target.closest('#appLogout')) {
-            uiCloseMob();
-            uiCloseAccDD();
             authLogout();
             return;
         }
 
         if (e.target.closest('#mobLogout')) {
-            uiCloseMob();
             authLogout();
         }
     });
