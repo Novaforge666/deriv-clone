@@ -275,8 +275,7 @@
                     </div>
                     <div class="dcard">
                         <div class="dcard-i g"><i class="fas fa-chart-line"></i></div>
-                        <div><span class="dcard-l">P/L Today</span><span class="dcard-v gn" id="dPnl">+$0.00</span>
-                        </div>
+                        <div><span class="dcard-l">P/L Today</span><span class="dcard-v gn" id="dPnl">+$0.00</span></div>
                     </div>
                     <div class="dcard">
                         <div class="dcard-i b"><i class="fas fa-receipt"></i></div>
@@ -286,16 +285,17 @@
                         <div class="dcard-i y"><i class="fas fa-spinner"></i></div>
                         <div><span class="dcard-l">Open</span><span class="dcard-v" id="dOpen">0</span></div>
                     </div>
-
+        
                     <div class="card c2">
                         <div class="card-h">
-                            <h3><i class="fas fa-globe"></i> Market Watch</h3><button class="card-act" id="dashTrade"
-                                type="button">Trade <i class="fas fa-arrow-right"></i></button>
+                            <h3><i class="fas fa-globe"></i> Market Watch</h3>
+                            <button class="card-act" id="dashTrade" type="button">Trade <i
+                                    class="fas fa-arrow-right"></i></button>
                         </div>
                         <div class="mw-hdr"><span>Market</span><span>Price</span><span>Change</span></div>
                         <div id="mwBody"></div>
                     </div>
-
+        
                     <div class="card c2">
                         <div class="card-h">
                             <h3><i class="fas fa-layer-group"></i> Open Positions</h3>
@@ -308,410 +308,360 @@
                     </div>
                 </div>
             </div>
-
+        
             <!-- TRADING -->
-        <div class="pg" id="pgTrading">
-            <div class="trade-backdrop" id="tradeBackdrop"></div>
+            <div class="pg" id="pgTrading">
+                <div class="trade-backdrop" id="tradeBackdrop"></div>
         
-            <div class="trd-layout trader-foundation">
-
-                <div class="pg" id="pgBot"></div>
-
-                
-                
-                <!-- MARKETS -->
-                <aside class="trd-side" id="trdSide">
-                    <div class="side-top">
-                        <div>
-                            <span class="side-kicker">Markets</span>
-                            <h3>Market watch</h3>
+                <div class="trd-layout trader-foundation">
+                    <aside class="trd-side" id="trdSide">
+                        <div class="side-top">
+                            <div>
+                                <span class="side-kicker">Markets</span>
+                                <h3>Market watch</h3>
+                            </div>
                         </div>
-                    <button class="side-close panel-toggle-btn" id="mktToggleBtn" type="button" aria-label="Toggle markets">
-                        <i class="fas fa-chevron-left"></i>
-                    </button>
-                    </div>
         
-                    <div class="ts-srch">
-                        <i class="fas fa-search"></i>
-                        <input type="text" id="mktSearch" placeholder="Search market...">
-                    </div>
+                        <div class="ts-srch">
+                            <i class="fas fa-search"></i>
+                            <input type="text" id="mktSearch" placeholder="Search market...">
+                        </div>
         
-                    <div class="ts-tabs" id="tsTabs">
-                        <button class="tstab active" data-cat="synthetic" type="button">Synthetic</button>
-                        <button class="tstab" data-cat="forex" type="button">Forex</button>
-                        <button class="tstab" data-cat="commodities" type="button">Commodities</button>
-                    </div>
+                        <div class="ts-tabs" id="tsTabs">
+                            <button class="tstab active" data-cat="synthetic" type="button">Synthetic</button>
+                            <button class="tstab" data-cat="forex" type="button">Forex</button>
+                            <button class="tstab" data-cat="commodities" type="button">Commodities</button>
+                        </div>
         
-                    <div class="ts-body" id="tsBody"></div>
-                </aside>
+                        <div class="ts-body" id="tsBody"></div>
+                    </aside>
         
-                <!-- CHART -->
-                <div class="trd-chart">
-                    <div class="tc-toolbar foundation-toolbar">
-                        <div class="foundation-left">
-                            <button class="mob-pill" id="openMarketsBtn" type="button">
-                                <i class="fas fa-bars"></i>
-                                <span>Markets</span>
-                            </button>
-        
-                            <div class="symbol-card">
-                                <span class="symbol-kicker" id="chartCat">Synthetic indices</span>
-                                <div class="symbol-main">
-                                    <h2 id="chartName">Volatility 100 Index</h2>
-                                    <span class="tc-pct up" id="chartPct">+0.00%</span>
-                                </div>
-                                <div class="symbol-sub">
-                                    <span class="tc-price" id="chartPrice">--</span>
+                    <div class="trd-chart">
+                        <div class="tc-toolbar foundation-toolbar">
+                            <div class="foundation-left">
+                                <div class="symbol-card">
+                                    <span class="symbol-kicker" id="chartCat">Synthetic indices</span>
+                                    <div class="symbol-main">
+                                        <h2 id="chartName">Volatility 100 Index</h2>
+                                        <span class="tc-pct up" id="chartPct">+0.00%</span>
+                                    </div>
+                                    <div class="symbol-sub">
+                                        <span class="tc-price" id="chartPrice">--</span>
+                                    </div>
                                 </div>
                             </div>
+        
+                            <div class="tc-right">
+                                <div class="tc-grp" id="tfGrp">
+                                    <button class="tgb" data-g="60" type="button">1m</button>
+                                    <button class="tgb active" data-g="300" type="button">5m</button>
+                                    <button class="tgb" data-g="900" type="button">15m</button>
+                                    <button class="tgb" data-g="3600" type="button">1H</button>
+                                    <button class="tgb" data-g="14400" type="button">4H</button>
+                                    <button class="tgb" data-g="86400" type="button">1D</button>
+                                </div>
+        
+                                <div class="tc-grp chart-type-grp">
+                                    <button class="tgb active" id="chCandle" data-chart-type="candle" type="button"
+                                        title="Candles">
+                                        <i class="fas fa-chart-bar"></i>
+                                    </button>
+                                    <button class="tgb" id="chLine" data-chart-type="line" type="button" title="Line">
+                                        <i class="fas fa-chart-line"></i>
+                                    </button>
+                                    <button class="tgb" id="chArea" data-chart-type="area" type="button" title="Area">
+                                        <i class="fas fa-chart-area"></i>
+                                    </button>
+                                    <button class="tgb" id="chBar" data-chart-type="bar" type="button" title="Bars">
+                                        <i class="fas fa-chart-column"></i>
+                                    </button>
+                                    <button class="tgb" id="chBase" data-chart-type="baseline" type="button" title="Baseline">
+                                        <i class="fas fa-wave-square"></i>
+                                    </button>
+                                </div>
+                            </div>
                         </div>
         
-                        <div class="tc-right">
-                            <div class="tc-grp" id="tfGrp">
-                                <button class="tgb" data-g="60" type="button">1m</button>
-                                <button class="tgb active" data-g="300" type="button">5m</button>
-                                <button class="tgb" data-g="900" type="button">15m</button>
-                                <button class="tgb" data-g="3600" type="button">1H</button>
-                                <button class="tgb" data-g="14400" type="button">4H</button>
-                                <button class="tgb" data-g="86400" type="button">1D</button>
-                            </div>
+                        <div class="chart-shell">
+                            <aside class="draw-rail">
+                                <div class="draw-tools" id="drawTools">
+                                    <button class="draw-btn active" type="button" data-tool="cursor" title="Cursor">
+                                        <i class="fas fa-mouse-pointer"></i>
+                                    </button>
+                                    <button class="draw-btn" type="button" data-tool="hline" title="Horizontal line">
+                                        <i class="fas fa-minus"></i>
+                                    </button>
+                                    <button class="draw-btn" type="button" data-tool="vline" title="Vertical line">
+                                        <i class="fas fa-grip-lines-vertical"></i>
+                                    </button>
+                                    <button class="draw-btn" type="button" data-tool="trend" title="Trend line">
+                                        <i class="fas fa-slash"></i>
+                                    </button>
+                                    <button class="draw-btn" type="button" data-tool="rect" title="Rectangle">
+                                        <i class="far fa-square"></i>
+                                    </button>
+                                    <button class="draw-btn" type="button" id="drawClear" title="Clear drawings">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </div>
+                            </aside>
         
-                            <div class="tc-grp chart-type-grp">
-                                <button class="tgb active" id="chCandle" data-chart-type="candle" type="button" title="Candles">
-                                    <i class="fas fa-chart-bar"></i>
-                                </button>
-                                <button class="tgb" id="chLine" data-chart-type="line" type="button" title="Line">
-                                    <i class="fas fa-chart-line"></i>
-                                </button>
-                                <button class="tgb" id="chArea" data-chart-type="area" type="button" title="Area">
-                                    <i class="fas fa-chart-area"></i>
-                                </button>
-                                <button class="tgb" id="chBar" data-chart-type="bar" type="button" title="Bars">
-                                    <i class="fas fa-chart-column"></i>
-                                </button>
-                                <button class="tgb" id="chBase" data-chart-type="baseline" type="button" title="Baseline">
-                                    <i class="fas fa-wave-square"></i>
-                                </button>
+                            <div class="chart-stage">
+                                <div class="tc-box" id="chartBox"></div>
                             </div>
-                        </div>
-        
-                        <div class="foundation-right">
-                            <button class="mob-pill trade-pill" id="openTradeBtn" type="button">
-                                <i class="fas fa-bolt"></i>
-                                <span>Trade</span>
-                            </button>
                         </div>
                     </div>
         
-                    <div class="chart-shell">
-                        <aside class="draw-rail">
-                            <div class="draw-tools" id="drawTools">
-                                <button class="draw-btn active" type="button" data-tool="cursor" title="Cursor">
-                                    <i class="fas fa-mouse-pointer"></i>
+                    <aside class="trd-panel foundation-panel" id="trdPanel">
+                        <div class="panel-handle"></div>
+        
+                        <div class="tp-head">
+                            <div>
+                                <span class="side-kicker">Trade</span>
+                                <h3>Trade controls</h3>
+                            </div>
+                        </div>
+        
+                        <div class="tp-tabs"></div>
+        
+                        <div class="tp-form">
+                            <div class="tpf-sec">
+                                <label class="tpf-lbl"><i class="fas fa-clock"></i> Duration</label>
+                                <div class="dur-row">
+                                    <select class="dur-sel" id="durType" aria-label="Duration type">
+                                        <option value="t">Ticks</option>
+                                        <option value="s">Seconds</option>
+                                        <option value="m" selected>Minutes</option>
+                                        <option value="h">Hours</option>
+                                    </select>
+        
+                                    <div class="dur-spin">
+                                        <button type="button" id="durDn" aria-label="Less">−</button>
+                                        <input type="number" id="durVal" value="5" min="1" aria-label="Duration value">
+                                        <button type="button" id="durUp" aria-label="More">+</button>
+                                    </div>
+                                </div>
+                            </div>
+        
+                            <div class="tpf-sec">
+                                <label class="tpf-lbl"><i class="fas fa-coins"></i> Stake</label>
+                                <div class="stake-row">
+                                    <span class="stk-c" id="stkCur">USD</span>
+                                    <input type="number" id="stakeVal" value="10" min="0.35" step="0.01" aria-label="Stake">
+                                </div>
+        
+                                <div class="qk-row">
+                                    <button class="qk" data-v="1" type="button">$1</button>
+                                    <button class="qk" data-v="5" type="button">$5</button>
+                                    <button class="qk active" data-v="10" type="button">$10</button>
+                                    <button class="qk" data-v="25" type="button">$25</button>
+                                    <button class="qk" data-v="50" type="button">$50</button>
+                                    <button class="qk" data-v="100" type="button">$100</button>
+                                </div>
+                            </div>
+        
+                            <div class="po-card">
+                                <div class="po-r"><span>Payout</span><span class="po-v" id="poVal">--</span></div>
+                                <div class="po-r"><span>Profit</span><span class="po-v gn" id="prVal">--</span></div>
+                            </div>
+        
+                            <div class="act-row">
+                                <button class="actb rise" id="riseBtn" type="button">
+                                    <div class="actb-t">
+                                        <i class="fas fa-arrow-up"></i>
+                                        <strong>Rise</strong>
+                                    </div>
+                                    <span class="actb-p" id="risePay">--</span>
                                 </button>
-                                <button class="draw-btn" type="button" data-tool="hline" title="Horizontal line">
-                                    <i class="fas fa-minus"></i>
+        
+                                <button class="actb fall" id="fallBtn" type="button">
+                                    <div class="actb-t">
+                                        <i class="fas fa-arrow-down"></i>
+                                        <strong>Fall</strong>
+                                    </div>
+                                    <span class="actb-p" id="fallPay">--</span>
                                 </button>
-                                <button class="draw-btn" type="button" data-tool="vline" title="Vertical line">
-                                    <i class="fas fa-grip-lines-vertical"></i>
-                                </button>
-                                <button class="draw-btn" type="button" data-tool="trend" title="Trend line">
-                                    <i class="fas fa-slash"></i>
-                                </button>
-                                <button class="draw-btn" type="button" data-tool="rect" title="Rectangle">
-                                    <i class="far fa-square"></i>
-                                </button>
-                                <button class="draw-btn" type="button" id="drawClear" title="Clear drawings">
-                                    <i class="fas fa-trash"></i>
-                                </button>
+                            </div>
+                        </div>
+        
+                        <div class="tp-contracts">
+                            <div class="tpc-h">
+                                <span><i class="fas fa-file-contract"></i> Open contracts</span>
+                                <span class="tpc-n" id="cCount">0</span>
+                            </div>
+                            <div id="cList"></div>
+                        </div>
+                    </aside>
+                </div>
+            </div>
+        
+            <!-- BOT -->
+            <div class="pg" id="pgBot">
+                <div class="botbuilder-shell">
+                    <div class="botbuilder-top">
+                        <div class="botbuilder-subnav">
+                            <button class="bbs-tab">Dashboard</button>
+                            <button class="bbs-tab active">Bot Builder</button>
+                            <button class="bbs-tab">Charts</button>
+                            <button class="bbs-tab">Tutorials</button>
+                        </div>
+        
+                        <div class="bbs-runbar">
+                            <button class="bbs-run" id="bbsRunBtn" type="button">
+                                <i class="fas fa-play"></i> Run
+                            </button>
+                            <div class="bbs-status">
+                                <span class="bbs-status-label">Bot status</span>
+                                <div class="bbs-status-track">
+                                    <div class="bbs-status-fill" id="bbsStatusFill"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+        
+                    <div class="botbuilder-body">
+                        <aside class="bbs-left">
+                            <button class="bbs-quick">Quick strategy</button>
+        
+                            <div class="bbs-menu-box">
+                                <div class="bbs-menu-head">
+                                    <span>Blocks menu</span>
+                                    <i class="fas fa-chevron-up"></i>
+                                </div>
+        
+                                <div class="bbs-search">
+                                    <i class="fas fa-search"></i>
+                                    <input type="text" placeholder="Search">
+                                </div>
+        
+                                <div class="bbs-menu-list">
+                                    <button class="bbs-menu-item active">Trade parameters</button>
+                                    <button class="bbs-menu-item">Purchase conditions</button>
+                                    <button class="bbs-menu-item">Sell conditions</button>
+                                    <button class="bbs-menu-item">Restart conditions</button>
+                                    <button class="bbs-menu-item">Analysis</button>
+                                    <button class="bbs-menu-item">Utility</button>
+                                </div>
                             </div>
                         </aside>
-                        <button class="edge-toggle left hidden" id="mktExpandBtn" type="button" aria-label="Expand markets">
-                            <i class="fas fa-chevron-right"></i>
-                        </button>
-                        
-                        <button class="edge-toggle right hidden" id="tradeExpandBtn" type="button" aria-label="Expand trade panel">
-                            <i class="fas fa-chevron-left"></i>
-                        </button>
         
-                        <div class="chart-stage">
-                            <div class="tc-box" id="chartBox"></div>
-                        </div>
+                        <main class="bbs-center">
+                            <div class="bbs-toolbar">
+                                <button class="bbs-tool" type="button" title="Refresh"><i class="fas fa-sync"></i></button>
+                                <button class="bbs-tool" type="button" title="Open"><i class="far fa-folder-open"></i></button>
+                                <button class="bbs-tool" type="button" title="Save"><i class="far fa-save"></i></button>
+                                <button class="bbs-tool" type="button" title="Flag"><i class="fas fa-flag"></i></button>
+                                <button class="bbs-tool" type="button" title="Chart"><i class="fas fa-chart-line"></i></button>
+                                <button class="bbs-tool" type="button" title="Undo"><i class="fas fa-undo"></i></button>
+                                <button class="bbs-tool" type="button" title="Redo"><i class="fas fa-redo"></i></button>
+                                <button class="bbs-tool" type="button" title="Zoom in"><i
+                                        class="fas fa-search-plus"></i></button>
+                                <button class="bbs-tool" type="button" title="Zoom out"><i
+                                        class="fas fa-search-minus"></i></button>
+                            </div>
+        
+                            <div class="bbs-workspace">
+                                <div class="bbs-block bbs-block-blue">
+                                    <div class="bbs-block-title">1. Trade parameters</div>
+                                    <div class="bbs-row-grid">
+                                        <select aria-label="Provider">
+                                            <option>Deriv</option>
+                                        </select>
+                                        <select aria-label="Market type">
+                                            <option>Continuous Indices</option>
+                                        </select>
+                                        <select aria-label="Symbol">
+                                            <option>Volatility 10 (1s) Index</option>
+                                        </select>
+                                    </div>
+                                    <div class="bbs-row-grid">
+                                        <select aria-label="Trade type">
+                                            <option>Digits</option>
+                                        </select>
+                                        <select aria-label="Contract type">
+                                            <option>Over/Under</option>
+                                        </select>
+                                    </div>
+                                    <div class="bbs-row-grid">
+                                        <select aria-label="Direction">
+                                            <option>Under</option>
+                                        </select>
+                                        <select aria-label="Candle interval">
+                                            <option>1 minute</option>
+                                        </select>
+                                    </div>
+                                </div>
+        
+                                <div class="bbs-block bbs-block-blue small">
+                                    <div class="bbs-block-title">2. Purchase conditions</div>
+                                    <div class="bbs-inline">
+                                        <span>Purchase</span>
+                                        <select aria-label="Purchase option">
+                                            <option>Under</option>
+                                        </select>
+                                    </div>
+                                </div>
+        
+                                <div class="bbs-block bbs-block-blue small right">
+                                    <div class="bbs-block-title">3. Sell conditions</div>
+                                    <div class="bbs-inline">
+                                        <span>If sell is available then</span>
+                                    </div>
+                                </div>
+        
+                                <div class="bbs-block bbs-block-blue small right">
+                                    <div class="bbs-block-title">4. Restart trading conditions</div>
+                                    <div class="bbs-inline">
+                                        <span>Trade again</span>
+                                    </div>
+                                </div>
+        
+                                <div class="bbs-block bbs-block-blue wide">
+                                    <div class="bbs-block-title">Trade options</div>
+                                    <div class="bbs-inline-wrap">
+                                        <span>Duration</span>
+                                        <select aria-label="Bot duration unit">
+                                            <option>Ticks</option>
+                                        </select>
+                                        <input type="number" value="1" aria-label="Bot duration">
+                                        <span>Stake</span>
+                                        <input type="number" value="0.35" aria-label="Bot stake">
+                                        <span>Prediction</span>
+                                        <input type="number" value="5" aria-label="Bot prediction">
+                                    </div>
+                                </div>
+                            </div>
+                        </main>
+        
+                        <aside class="bbs-right">
+                            <div class="bbs-right-tabs">
+                                <button class="bbs-rtab active" type="button">Summary</button>
+                                <button class="bbs-rtab" type="button">Transactions</button>
+                                <button class="bbs-rtab" type="button">Journal</button>
+                            </div>
+        
+                            <div class="bbs-summary-box">
+                                <div class="bbs-summary-empty" id="bbsSummaryText">
+                                    Bot builder shell ready.<br>
+                                    Next step is wiring the block logic.
+                                </div>
+        
+                                <div class="bbs-metrics">
+                                    <div><span>Total stake</span><strong>0.00 USD</strong></div>
+                                    <div><span>Total payout</span><strong>0.00 USD</strong></div>
+                                    <div><span>No. of runs</span><strong id="bbsRuns">0</strong></div>
+                                    <div><span>Contracts lost</span><strong>0</strong></div>
+                                    <div><span>Contracts won</span><strong>0</strong></div>
+                                    <div><span>Total profit/loss</span><strong>0.00 USD</strong></div>
+                                </div>
+        
+                                <button class="bbs-reset" id="bbsResetBtn" type="button">Reset</button>
+                            </div>
+                        </aside>
                     </div>
-                </div>
-        
-                <!-- TRADE PANEL -->
-                <aside class="trd-panel foundation-panel" id="trdPanel">
-                    <div class="panel-handle"></div>
-                    <div class="tp-head">
-                        <div>
-                            <span class="side-kicker">Trade</span>
-                            <h3>Trade controls</h3>
-                        </div>
-                        <button class="side-close" id="tradeCloseBtn" type="button" aria-label="Close trade panel">
-                            <i class="fas fa-chevron-right"></i>
-                        </button>
-                    </div>
-        
-                    <div class="tp-tabs"></div>
-        
-                    <div class="tp-form">
-                        <div class="tpf-sec">
-                            <label class="tpf-lbl"><i class="fas fa-clock"></i> Duration</label>
-                            <div class="dur-row">
-                                <select class="dur-sel" id="durType" aria-label="Duration type">
-                                    <option value="t">Ticks</option>
-                                    <option value="s">Seconds</option>
-                                    <option value="m" selected>Minutes</option>
-                                    <option value="h">Hours</option>
-                                </select>
-
-        
-                                <div class="dur-spin">
-                                    <button type="button" id="durDn" aria-label="Less">−</button>
-                                    <input type="number" id="durVal" value="5" min="1" aria-label="Duration value">
-                                    <button type="button" id="durUp" aria-label="More">+</button>
-                                </div>
-                            </div>
-                        </div>
-        
-                        <div class="tpf-sec">
-                            <label class="tpf-lbl"><i class="fas fa-coins"></i> Stake</label>
-                            <div class="stake-row">
-                                <span class="stk-c" id="stkCur">USD</span>
-                                <input type="number" id="stakeVal" value="10" min="0.35" step="0.01" aria-label="Stake">
-                            </div>
-        
-                            <div class="qk-row">
-                                <button class="qk" data-v="1" type="button">$1</button>
-                                <button class="qk" data-v="5" type="button">$5</button>
-                                <button class="qk active" data-v="10" type="button">$10</button>
-                                <button class="qk" data-v="25" type="button">$25</button>
-                                <button class="qk" data-v="50" type="button">$50</button>
-                                <button class="qk" data-v="100" type="button">$100</button>
-                            </div>
-                        </div>
-
-                        <div class="digit-board-wrap hidden" id="digitBoardWrap">
-                            <label class="tpf-lbl"><i class="fas fa-hashtag"></i> Last digit prediction</label>
-                            <div class="digit-board" id="digitBoard">
-                                <button class="digit-btn" type="button" data-digit="0">0</button>
-                                <button class="digit-btn" type="button" data-digit="1">1</button>
-                                <button class="digit-btn active" type="button" data-digit="2">2</button>
-                                <button class="digit-btn" type="button" data-digit="3">3</button>
-                                <button class="digit-btn" type="button" data-digit="4">4</button>
-                                <button class="digit-btn" type="button" data-digit="5">5</button>
-                                <button class="digit-btn" type="button" data-digit="6">6</button>
-                                <button class="digit-btn" type="button" data-digit="7">7</button>
-                                <button class="digit-btn" type="button" data-digit="8">8</button>
-                                <button class="digit-btn" type="button" data-digit="9">9</button>
-                            </div>
-                        </div>
-                        
-                        <div class="basis-switch" id="amtBasisTabs">
-                            <button class="basis-tab active" type="button" data-basis="stake">Stake</button>
-                            <button class="basis-tab" type="button" data-basis="payout">Payout</button>
-                        </div>
-        
-                        <div class="po-card">
-                            <div class="po-r"><span>Payout</span><span class="po-v" id="poVal">--</span></div>
-                            <div class="po-r"><span>Profit</span><span class="po-v gn" id="prVal">--</span></div>
-                        </div>
-        
-                        <div class="act-row">
-                            <button class="actb rise" id="riseBtn" type="button">
-                                <div class="actb-t">
-                                    <i class="fas fa-arrow-up"></i>
-                                    <strong>Rise</strong>
-                                </div>
-                                <span class="actb-p" id="risePay">--</span>
-                            </button>
-        
-                            <button class="actb fall" id="fallBtn" type="button">
-                                <div class="actb-t">
-                                    <i class="fas fa-arrow-down"></i>
-                                    <strong>Fall</strong>
-                                </div>
-                                <span class="actb-p" id="fallPay">--</span>
-                            </button>
-                        </div>
-                    </div>
-        
-                    <div class="tp-contracts">
-                        <div class="tpc-h">
-                            <span><i class="fas fa-file-contract"></i> Open contracts</span>
-                            <span class="tpc-n" id="cCount">0</span>
-                        </div>
-                        <div id="cList"></div>
-                    </div>
-                </aside>
-            </div>
-        </div>
-
-        <div class="pg" id="pgBot">
-            <div class="botbuilder-shell">
-                <div class="botbuilder-top">
-                    <div class="botbuilder-subnav">
-                        <button class="bbs-tab">Dashboard</button>
-                        <button class="bbs-tab active">Bot Builder</button>
-                        <button class="bbs-tab">Charts</button>
-                        <button class="bbs-tab">Tutorials</button>
-                    </div>
-        
-                    <div class="bbs-runbar">
-                        <button class="bbs-run" id="bbsRunBtn" type="button">
-                            <i class="fas fa-play"></i> Run
-                        </button>
-                        <div class="bbs-status">
-                            <span class="bbs-status-label">Bot status</span>
-                            <div class="bbs-status-track">
-                                <div class="bbs-status-fill" id="bbsStatusFill"></div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-        
-                <div class="botbuilder-body">
-                    <aside class="bbs-left">
-                        <button class="bbs-quick">Quick strategy</button>
-        
-                        <div class="bbs-menu-box">
-                            <div class="bbs-menu-head">
-                                <span>Blocks menu</span>
-                                <i class="fas fa-chevron-up"></i>
-                            </div>
-        
-                            <div class="bbs-search">
-                                <i class="fas fa-search"></i>
-                                <input type="text" placeholder="Search">
-                            </div>
-        
-                            <div class="bbs-menu-list">
-                                <button class="bbs-menu-item active">Trade parameters</button>
-                                <button class="bbs-menu-item">Purchase conditions</button>
-                                <button class="bbs-menu-item">Sell conditions</button>
-                                <button class="bbs-menu-item">Restart conditions</button>
-                                <button class="bbs-menu-item">Analysis</button>
-                                <button class="bbs-menu-item">Utility</button>
-                            </div>
-                        </div>
-                    </aside>
-        
-                    <main class="bbs-center">
-                        <div class="bbs-toolbar">
-                            <button class="bbs-tool"><i class="fas fa-sync"></i></button>
-                            <button class="bbs-tool"><i class="far fa-folder-open"></i></button>
-                            <button class="bbs-tool"><i class="far fa-save"></i></button>
-                            <button class="bbs-tool"><i class="fas fa-flag"></i></button>
-                            <button class="bbs-tool"><i class="fas fa-chart-line"></i></button>
-                            <button class="bbs-tool"><i class="fas fa-undo"></i></button>
-                            <button class="bbs-tool"><i class="fas fa-redo"></i></button>
-                            <button class="bbs-tool"><i class="fas fa-search-plus"></i></button>
-                            <button class="bbs-tool"><i class="fas fa-search-minus"></i></button>
-                        </div>
-        
-                        <div class="bbs-workspace">
-                            <div class="bbs-block bbs-block-blue">
-                                <div class="bbs-block-title">1. Trade parameters</div>
-                                <div class="bbs-row-grid">
-                                    <select>
-                                        <option>Deriv</option>
-                                    </select>
-                                    <select>
-                                        <option>Continuous Indices</option>
-                                    </select>
-                                    <select>
-                                        <option>Volatility 10 (1s) Index</option>
-                                    </select>
-                                </div>
-                                <div class="bbs-row-grid">
-                                    <select>
-                                        <option>Digits</option>
-                                    </select>
-                                    <select>
-                                        <option>Over/Under</option>
-                                    </select>
-                                </div>
-                                <div class="bbs-row-grid">
-                                    <select>
-                                        <option>Under</option>
-                                    </select>
-                                    <select>
-                                        <option>1 minute</option>
-                                    </select>
-                                </div>
-                            </div>
-        
-                            <div class="bbs-block bbs-block-blue small">
-                                <div class="bbs-block-title">2. Purchase conditions</div>
-                                <div class="bbs-inline">
-                                    <span>Purchase</span>
-                                    <select>
-                                        <option>Under</option>
-                                    </select>
-                                </div>
-                            </div>
-        
-                            <div class="bbs-block bbs-block-blue small right">
-                                <div class="bbs-block-title">3. Sell conditions</div>
-                                <div class="bbs-inline">
-                                    <span>If sell is available then</span>
-                                </div>
-                            </div>
-        
-                            <div class="bbs-block bbs-block-blue small right">
-                                <div class="bbs-block-title">4. Restart trading conditions</div>
-                                <div class="bbs-inline">
-                                    <span>Trade again</span>
-                                </div>
-                            </div>
-        
-                            <div class="bbs-block bbs-block-blue wide">
-                                <div class="bbs-block-title">Trade options</div>
-                                <div class="bbs-inline-wrap">
-                                    <span>Duration</span>
-                                    <select>
-                                        <option>Ticks</option>
-                                    </select>
-                                    <input type="number" value="1">
-                                    <span>Stake</span>
-                                    <input type="number" value="0.35">
-                                    <span>Prediction</span>
-                                    <input type="number" value="5">
-                                </div>
-                            </div>
-                        </div>
-                    </main>
-        
-                    <aside class="bbs-right">
-                        <div class="bbs-right-tabs">
-                            <button class="bbs-rtab active">Summary</button>
-                            <button class="bbs-rtab">Transactions</button>
-                            <button class="bbs-rtab">Journal</button>
-                        </div>
-        
-                        <div class="bbs-summary-box">
-                            <div class="bbs-summary-empty" id="bbsSummaryText">
-                                Bot builder shell ready.<br>
-                                Next step is wiring the block logic.
-                            </div>
-        
-                            <div class="bbs-metrics">
-                                <div><span>Total stake</span><strong>0.00 USD</strong></div>
-                                <div><span>Total payout</span><strong>0.00 USD</strong></div>
-                                <div><span>No. of runs</span><strong id="bbsRuns">0</strong></div>
-                                <div><span>Contracts lost</span><strong>0</strong></div>
-                                <div><span>Contracts won</span><strong>0</strong></div>
-                                <div><span>Total profit/loss</span><strong>0.00 USD</strong></div>
-                            </div>
-        
-                            <button class="bbs-reset" id="bbsResetBtn" type="button">Reset</button>
-                        </div>
-                    </aside>
                 </div>
             </div>
-        </div>
-
+        
             <!-- REPORTS -->
             <div class="pg" id="pgReports">
                 <div class="pg-head">
@@ -731,7 +681,7 @@
                     </div>
                 </div>
             </div>
-
+        
             <!-- CASHIER -->
             <div class="pg" id="pgCashier">
                 <div class="pg-head">
@@ -748,49 +698,25 @@
                         <div class="cash-act">
                             <div class="ca-i g"><i class="fas fa-plus-circle"></i></div>
                             <h3>Deposit</h3>
-                            <p>Add funds</p><a class="btn-sm green" href="https://app.deriv.com/cashier/deposit"
-                                target="_blank" rel="noopener noreferrer">Deposit</a>
+                            <p>Add funds</p>
+                            <a class="btn-sm green" href="https://app.deriv.com/cashier/deposit" target="_blank"
+                                rel="noopener noreferrer">Deposit</a>
                         </div>
                         <div class="cash-act">
                             <div class="ca-i r"><i class="fas fa-minus-circle"></i></div>
                             <h3>Withdraw</h3>
-                            <p>Withdraw funds</p><a class="btn-sm ghost" href="https://app.deriv.com/cashier/withdrawal"
-                                target="_blank" rel="noopener noreferrer">Withdraw</a>
+                            <p>Withdraw funds</p>
+                            <a class="btn-sm ghost" href="https://app.deriv.com/cashier/withdrawal" target="_blank"
+                                rel="noopener noreferrer">Withdraw</a>
                         </div>
                         <div class="cash-act">
                             <div class="ca-i b"><i class="fas fa-exchange-alt"></i></div>
                             <h3>Transfer</h3>
-                            <p>Between accounts</p><a class="btn-sm ghost"
-                                href="https://app.deriv.com/cashier/account-transfer" target="_blank"
+                            <p>Between accounts</p>
+                            <a class="btn-sm ghost" href="https://app.deriv.com/cashier/account-transfer" target="_blank"
                                 rel="noopener noreferrer">Transfer</a>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
-
-    <div class="toast-area" id="toastWrap"></div>
-
-    <script defer
-        src="https://cdn.jsdelivr.net/npm/lightweight-charts@4.1.0/dist/lightweight-charts.standalone.production.js"></script>
-    <script defer src="./ws.js"></script>
-    <script defer src="./auth.js"></script>
-    <script defer src="./ui.js"></script>
-    <script defer src="./market.js"></script>
-    <script defer src="./chart.js"></script>
-    <script defer src="./trade.js"></script>
-    <script defer src="./app.js"></script>
-</body>
-
-</html>
-<script defer
-    src="https://cdn.jsdelivr.net/npm/lightweight-charts@4.1.0/dist/lightweight-charts.standalone.production.js"></script>
-<script defer src="./ws.js"></script>
-<script defer src="./auth.js"></script>
-<script defer src="./ui.js"></script>
-<script defer src="./market.js"></script>
-<script defer src="./chart.js"></script>
-<script defer src="./trade.js"></script>
-<script defer src="./bot.js"></script>
-<script defer src="./app.js"></script>>

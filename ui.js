@@ -1,5 +1,4 @@
 var uiChromeBound = false;
-var traderFoundationBound = false;
 
 function toast(type, msg) {
     var w = document.getElementById('toastWrap');
@@ -18,9 +17,12 @@ function toast(type, msg) {
         '<span class="t-msg">' + msg + '</span>' +
         '<button class="t-x" aria-label="Close"><i class="fas fa-times"></i></button>';
 
-    el.querySelector('.t-x').onclick = function () {
-        el.remove();
-    };
+    var closeBtn = el.querySelector('.t-x');
+    if (closeBtn) {
+        closeBtn.onclick = function () {
+            el.remove();
+        };
+    }
 
     w.appendChild(el);
 
@@ -122,8 +124,7 @@ function uiBuildAccountDropdown() {
                     uiCloseAccDD();
                     onLoggedIn(acct);
                 })
-                .catch(function (err) {
-                    console.error('Account switch failed:', err);
+                .catch(function () {
                     toast('e', 'Could not switch account.');
                 })
                 .finally(function () {
@@ -175,221 +176,8 @@ function uiBindChrome() {
         if (e.key === 'Escape') {
             uiCloseAccDD();
             uiCloseMob();
-            uiCloseTraderPanels();
         }
     });
-}
-
-function uiEnsureTraderFoundationControls() {
-    var sideTop = document.querySelector('.trd-side .side-top');
-    if (sideTop && !document.getElementById('mktToggleBtn')) {
-        var btn = document.createElement('button');
-        btn.className = 'side-close panel-toggle-btn';
-        btn.id = 'mktToggleBtn';
-        btn.type = 'button';
-        btn.setAttribute('aria-label', 'Toggle markets');
-        btn.innerHTML = '<i class="fas fa-chevron-left"></i>';
-        sideTop.appendChild(btn);
-    }
-
-    var tradeTop = document.querySelector('.foundation-panel .tp-head');
-    if (tradeTop && !document.getElementById('tradeToggleBtn')) {
-        var btn2 = document.createElement('button');
-        btn2.className = 'side-close panel-toggle-btn';
-        btn2.id = 'tradeToggleBtn';
-        btn2.type = 'button';
-        btn2.setAttribute('aria-label', 'Toggle trade panel');
-        btn2.innerHTML = '<i class="fas fa-chevron-right"></i>';
-        tradeTop.appendChild(btn2);
-    }
-
-    if (tradeTop && !document.getElementById('tradeFocusBtn')) {
-        var btn3 = document.createElement('button');
-        btn3.className = 'trade-strategy-toggle';
-        btn3.id = 'tradeFocusBtn';
-        btn3.type = 'button';
-        btn3.setAttribute('aria-label', 'Focus strategy');
-        btn3.innerHTML = '<i class="fas fa-compress-alt"></i>';
-        tradeTop.insertBefore(btn3, tradeTop.firstChild);
-    }
-
-    var chartShell = document.querySelector('.chart-shell');
-    if (chartShell && !document.getElementById('mktExpandBtn')) {
-        var left = document.createElement('button');
-        left.className = 'edge-toggle left hidden';
-        left.id = 'mktExpandBtn';
-        left.type = 'button';
-        left.setAttribute('aria-label', 'Expand markets');
-        left.innerHTML = '<i class="fas fa-chevron-right"></i>';
-        chartShell.appendChild(left);
-    }
-
-    if (chartShell && !document.getElementById('tradeExpandBtn')) {
-        var right = document.createElement('button');
-        right.className = 'edge-toggle right hidden';
-        right.id = 'tradeExpandBtn';
-        right.type = 'button';
-        right.setAttribute('aria-label', 'Expand trade panel');
-        right.innerHTML = '<i class="fas fa-chevron-left"></i>';
-        chartShell.appendChild(right);
-    }
-}
-
-function uiOpenTraderPanel(which) {
-    var side = document.getElementById('trdSide');
-    var panel = document.getElementById('trdPanel');
-    var backdrop = document.getElementById('tradeBackdrop');
-
-    if (which === 'markets' && side) side.classList.add('open');
-
-    if (which === 'trade' && panel) {
-        panel.classList.add('open');
-        if (typeof tradeEnsureModeUI === 'function') tradeEnsureModeUI();
-        if (typeof tradeRenderClassifier === 'function') tradeRenderClassifier();
-        if (typeof tradeRenderDigitUI === 'function') tradeRenderDigitUI();
-    }
-
-    if (backdrop) backdrop.classList.add('open');
-    uiSetBodyLock(true);
-}
-
-function uiCloseTraderPanels() {
-    var side = document.getElementById('trdSide');
-    var panel = document.getElementById('trdPanel');
-    var backdrop = document.getElementById('tradeBackdrop');
-
-    if (side) side.classList.remove('open');
-    if (panel) panel.classList.remove('open');
-    if (backdrop) backdrop.classList.remove('open');
-
-    if (!document.getElementById('mobOverlay') || !document.getElementById('mobOverlay').classList.contains('open')) {
-        uiSetBodyLock(false);
-    }
-}
-
-function uiSyncTraderCollapseUI() {
-    var root = document.querySelector('.trader-foundation');
-    if (!root) return;
-
-    var mktExpandBtn = document.getElementById('mktExpandBtn');
-    var tradeExpandBtn = document.getElementById('tradeExpandBtn');
-
-    if (mktExpandBtn) {
-        mktExpandBtn.classList.toggle('hidden', !root.classList.contains('markets-collapsed'));
-    }
-
-    if (tradeExpandBtn) {
-        tradeExpandBtn.classList.toggle('hidden', !root.classList.contains('trade-collapsed'));
-    }
-}
-
-function uiToggleDesktopPanel(which, forceOpen) {
-    var root = document.querySelector('.trader-foundation');
-    if (!root) return;
-
-    if (window.innerWidth <= 900) {
-        if (which === 'markets') uiOpenTraderPanel('markets');
-        if (which === 'trade') uiOpenTraderPanel('trade');
-        return;
-    }
-
-    if (which === 'markets') {
-        var willCollapse = typeof forceOpen === 'boolean'
-            ? !forceOpen
-            : !root.classList.contains('markets-collapsed');
-        root.classList.toggle('markets-collapsed', willCollapse);
-    }
-
-    if (which === 'trade') {
-        var willCollapseTrade = typeof forceOpen === 'boolean'
-            ? !forceOpen
-            : !root.classList.contains('trade-collapsed');
-        root.classList.toggle('trade-collapsed', willCollapseTrade);
-    }
-
-    uiSyncTraderCollapseUI();
-
-    if (typeof chartInit === 'function') {
-        requestAnimationFrame(function () {
-            chartInit();
-            chartLoad(curSymbol, curGranularity);
-            if (typeof tradeRenderDigitUI === 'function') tradeRenderDigitUI();
-        });
-    }
-}
-
-function uiBindTraderFoundation() {
-    if (traderFoundationBound) return;
-    traderFoundationBound = true;
-
-    uiEnsureTraderFoundationControls();
-
-    document.addEventListener('click', function (e) {
-        if (e.target.closest('#openMarketsBtn')) {
-            uiOpenTraderPanel('markets');
-            return;
-        }
-
-        if (e.target.closest('#openTradeBtn')) {
-            uiOpenTraderPanel('trade');
-            return;
-        }
-
-        if (e.target.closest('#tradeBackdrop')) {
-            uiCloseTraderPanels();
-            return;
-        }
-
-        if (e.target.closest('#mktToggleBtn')) {
-            if (window.innerWidth <= 900) uiCloseTraderPanels();
-            else uiToggleDesktopPanel('markets');
-            return;
-        }
-
-        if (e.target.closest('#tradeToggleBtn')) {
-            if (window.innerWidth <= 900) uiCloseTraderPanels();
-            else uiToggleDesktopPanel('trade');
-            return;
-        }
-
-        if (e.target.closest('#mktExpandBtn')) {
-            uiToggleDesktopPanel('markets', true);
-            return;
-        }
-
-        if (e.target.closest('#tradeExpandBtn')) {
-            uiToggleDesktopPanel('trade', true);
-            return;
-        }
-
-        if (e.target.closest('#tradeFocusBtn')) {
-            var panel = document.getElementById('trdPanel');
-            if (panel) {
-                panel.classList.toggle('strategy-focused');
-                var icon = document.querySelector('#tradeFocusBtn i');
-                if (icon) {
-                    icon.className = panel.classList.contains('strategy-focused')
-                        ? 'fas fa-expand-alt'
-                        : 'fas fa-compress-alt';
-                }
-            }
-            return;
-        }
-
-        var tpHead = e.target.closest('.foundation-panel .tp-head');
-        if (tpHead && window.innerWidth <= 900 && !e.target.closest('button')) {
-            var panel2 = document.getElementById('trdPanel');
-            var backdrop = document.getElementById('tradeBackdrop');
-
-            if (panel2) {
-                panel2.classList.toggle('open');
-                if (backdrop) backdrop.classList.toggle('open', panel2.classList.contains('open'));
-                uiSetBodyLock(panel2.classList.contains('open'));
-            }
-        }
-    });
-
-    uiSyncTraderCollapseUI();
 }
 
 function uiShowApp() {
@@ -406,7 +194,6 @@ function uiShowLanding() {
 
     uiCloseMob();
     uiCloseAccDD();
-    uiCloseTraderPanels();
 
     if (landing) landing.classList.remove('hidden');
     if (app) app.classList.add('hidden');
@@ -429,7 +216,6 @@ function uiGoPage(pg) {
 
     uiCloseMob();
     uiCloseAccDD();
-    uiCloseTraderPanels();
 
     document.querySelectorAll('.pg').forEach(function (p) {
         p.classList.remove('active');
@@ -444,36 +230,21 @@ function uiGoPage(pg) {
         cashier: 'pgCashier'
     };
 
-    if (pg === 'bot' && typeof botInit === 'function') {
-        botInit();
-    }
-
     var el = document.getElementById(map[pg]);
     if (el) el.classList.add('active');
 
     if (pg === 'trading') {
-        var activeItem = document.querySelector('.ts-item[data-symbol="' + curSymbol + '"]');
-        document.querySelectorAll('.ts-item').forEach(function (x) {
-            x.classList.remove('active');
-        });
-        if (activeItem) activeItem.classList.add('active');
-
         requestAnimationFrame(function () {
             requestAnimationFrame(function () {
-                chartInit();
-                chartLoad(curSymbol, curGranularity);
-
-                if (typeof tradeEnsureModeUI === 'function') tradeEnsureModeUI();
+                if (typeof chartInit === 'function') chartInit();
+                if (typeof chartLoad === 'function') chartLoad(curSymbol, curGranularity);
                 if (authAccount && typeof tradeSubProposals === 'function') tradeSubProposals();
-                if (typeof tradeRenderDigitUI === 'function') tradeRenderDigitUI();
-                if (typeof uiSyncTraderCollapseUI === 'function') uiSyncTraderCollapseUI();
-
-                if (window.innerWidth <= 900) {
-                    var panel = document.getElementById('trdPanel');
-                    if (panel) panel.classList.remove('open');
-                }
             });
         });
+    }
+
+    if (pg === 'bot' && typeof botInit === 'function') {
+        botInit();
     }
 
     if (pg === 'cashier') {
@@ -503,7 +274,6 @@ function uiUpdateBal(bal, cur) {
 function uiOnAuth(acct) {
     uiShowApp();
     uiBindChrome();
-    uiBindTraderFoundation();
     uiUpdateBal(acct.balance, acct.currency);
 
     var tag = document.getElementById('apTag');
