@@ -2,66 +2,74 @@
 <html lang="en">
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>IT 666 Trader - Online Trading Platform</title>
+
     <link rel="icon" type="image/svg+xml"
         href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='6' fill='%23ff444f'/><text x='50%25' y='55%25' font-size='18' text-anchor='middle' dominant-baseline='middle' fill='white' font-family='sans-serif' font-weight='bold'>M</text></svg>">
+
     <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300;400;500;600;700&display=swap"
-        rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="./styles.css">
+        rel="stylesheet" />
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <link rel="stylesheet" href="./styles.css" />
 </head>
 
 <body>
-
     <!-- ============ LANDING PAGE ============ -->
     <div id="landingPage" class="landing">
-        <!-- Landing Header -->
         <header class="land-header">
             <div class="land-header-inner">
                 <a class="logo" href="#">
                     <div class="logo-box"><i class="fas fa-chart-line"></i></div>
                     <span class="logo-txt">IT 666 Trader</span>
                 </a>
+
                 <nav class="land-nav">
                     <a href="#features">Features</a>
                     <a href="#markets">Markets</a>
                     <a href="#about">About</a>
                 </nav>
+
                 <div class="land-actions">
-                    <button class="btn-land-ghost" id="landLogin">Log in</button>
-                    <button class="btn-land-red" id="landSignup">Create free account</button>
+                    <button class="btn-land-ghost" id="landLogin" type="button">Log in</button>
+                    <button class="btn-land-red" id="landSignup" type="button">Create free account</button>
                 </div>
-                <button class="land-mobile-btn" id="landMobBtn" aria-label="Menu" title="Menu">
+
+                <button class="land-mobile-btn" id="landMobBtn" aria-label="Menu" title="Menu" type="button">
                     <i class="fas fa-bars"></i>
                 </button>
             </div>
         </header>
 
-        <!-- Hero -->
         <section class="hero">
             <div class="hero-content">
                 <div class="hero-tag">Online Trading Platform</div>
                 <h1>Trade smarter.<br>Trade with <span class="hero-highlight">VOID REAPER Trader</span>.</h1>
-                <p>Access forex, synthetic indices, commodities, and more. Start with a free demo account — no deposit
-                    required.</p>
+                <p>
+                    Access forex, synthetic indices, commodities, and more. Start with a free demo account — no
+                    deposit required.
+                </p>
+
                 <div class="hero-btns">
-                    <button class="btn-hero-primary" id="heroSignup">
+                    <button class="btn-hero-primary" id="heroSignup" type="button">
                         <i class="fas fa-rocket"></i> Create free demo account
                     </button>
-                    <button class="btn-hero-outline" id="heroLogin">
+                    <button class="btn-hero-outline" id="heroLogin" type="button">
                         <i class="fas fa-sign-in-alt"></i> Log in
                     </button>
                 </div>
+
                 <div class="hero-stats">
                     <div class="hs"><strong>2.5M+</strong><span>Traders Cosmic-wide</span></div>
                     <div class="hs"><strong>24/7</strong><span>Trading available</span></div>
-                    <div class="hs"><strong>$100</strong><span>Minimum deposit </span></div>
-                    <div class="hs"><strong>$1000</strong><span>novice </span></div>
-                    <div class="hs"><strong>$+3000</strong><span>pro deposit </span></div>
+                    <div class="hs"><strong>$100</strong><span>Minimum deposit</span></div>
+                    <div class="hs"><strong>$1000</strong><span>Novice</span></div>
+                    <div class="hs"><strong>$+3000</strong><span>Pro deposit</span></div>
                 </div>
             </div>
+
             <div class="hero-visual">
                 <div class="hero-chart-mock">
                     <div class="hcm-header">
@@ -69,6 +77,7 @@
                         <span class="hcm-price">4,521.87</span>
                         <span class="hcm-change up">+2.34%</span>
                     </div>
+
                     <div class="hcm-body">
                         <svg viewBox="0 0 400 150" class="hcm-chart">
                             <polyline fill="none" stroke="#0dc49a" stroke-width="2"
@@ -81,6 +90,7 @@
                                 points="0,120 30,100 60,110 90,70 120,80 150,40 180,60 210,30 240,50 270,20 300,35 330,15 360,25 400,10 400,150 0,150" />
                         </svg>
                     </div>
+
                     <div class="hcm-footer">
                         <div class="hcm-btn rise-mock"><i class="fas fa-arrow-up"></i> Rise</div>
                         <div class="hcm-btn fall-mock"><i class="fas fa-arrow-down"></i> Fall</div>
@@ -89,37 +99,42 @@
             </div>
         </section>
 
-        <!-- Features -->
         <section class="features" id="features">
             <div class="section-inner">
                 <h2>Why choose IT 666 Trader?</h2>
                 <p class="section-sub">Everything you need to trade confidently</p>
+
                 <div class="feat-grid">
                     <div class="feat-card">
                         <div class="fc-icon"><i class="fas fa-chart-candlestick"></i></div>
                         <h3>Advanced Charts</h3>
                         <p>Professional candlestick charts with multiple timeframes and indicators</p>
                     </div>
+
                     <div class="feat-card">
                         <div class="fc-icon green"><i class="fas fa-bolt"></i></div>
                         <h3>Instant Execution</h3>
                         <p>Lightning-fast trade execution with no requotes or delays</p>
                     </div>
+
                     <div class="feat-card">
                         <div class="fc-icon blue"><i class="fas fa-shield-alt"></i></div>
                         <h3>Secure Platform</h3>
                         <p>Bank-grade security with encrypted connections and secure authentication</p>
                     </div>
+
                     <div class="feat-card">
                         <div class="fc-icon yellow"><i class="fas fa-clock"></i></div>
                         <h3>24/7 Markets</h3>
                         <p>Trade synthetic indices around the clock, even on weekends</p>
                     </div>
+
                     <div class="feat-card">
                         <div class="fc-icon purple"><i class="fas fa-wallet"></i></div>
                         <h3>Free Demo Account</h3>
                         <p>Practice trading with $10,000 virtual money, risk-free</p>
                     </div>
+
                     <div class="feat-card">
                         <div class="fc-icon orange"><i class="fas fa-mobile-alt"></i></div>
                         <h3>Trade Anywhere</h3>
@@ -129,11 +144,11 @@
             </div>
         </section>
 
-        <!-- Markets Preview -->
         <section class="markets-section" id="markets">
             <div class="section-inner">
                 <h2>Markets you can trade</h2>
                 <p class="section-sub">Access a wide range of global markets</p>
+
                 <div class="market-cards">
                     <div class="mkt-card">
                         <div class="mkc-icon"><i class="fas fa-robot"></i></div>
@@ -145,6 +160,7 @@
                             <li>Step Index</li>
                         </ul>
                     </div>
+
                     <div class="mkt-card">
                         <div class="mkc-icon green"><i class="fas fa-dollar-sign"></i></div>
                         <h3>Forex</h3>
@@ -155,6 +171,7 @@
                             <li>50+ pairs available</li>
                         </ul>
                     </div>
+
                     <div class="mkt-card">
                         <div class="mkc-icon yellow"><i class="fas fa-gem"></i></div>
                         <h3>Commodities</h3>
@@ -169,17 +186,17 @@
             </div>
         </section>
 
-        <!-- CTA -->
         <section class="cta-section" id="about">
             <div class="section-inner">
                 <div class="cta-box">
                     <h2>Ready to start trading?</h2>
                     <p>Create your free account in seconds. No deposit required for demo.</p>
+
                     <div class="cta-btns">
-                        <button class="btn-hero-primary" id="ctaSignup">
+                        <button class="btn-hero-primary" id="ctaSignup" type="button">
                             <i class="fas fa-user-plus"></i> Create free account
                         </button>
-                        <button class="btn-hero-outline" id="ctaLogin">
+                        <button class="btn-hero-outline" id="ctaLogin" type="button">
                             <i class="fas fa-sign-in-alt"></i> Log in
                         </button>
                     </div>
@@ -187,7 +204,6 @@
             </div>
         </section>
 
-        <!-- Footer -->
         <footer class="land-footer">
             <div class="section-inner">
                 <div class="footer-grid">
@@ -198,17 +214,20 @@
                         </div>
                         <p class="footer-desc">A third-party trading interface powered by the Deriv API.</p>
                     </div>
+
                     <div class="footer-col">
                         <h4>Platform</h4>
                         <a href="#features">Features</a>
                         <a href="#markets">Markets</a>
                     </div>
+
                     <div class="footer-col">
                         <h4>Resources</h4>
                         <a href="https://api.deriv.com" target="_blank" rel="noopener noreferrer">Deriv API</a>
                         <a href="https://deriv.com" target="_blank" rel="noopener noreferrer">Deriv.com</a>
                     </div>
                 </div>
+
                 <div class="footer-bottom">
                     <p>&copy; 2024 IT 666 Trader. Powered by Deriv API. Not affiliated with Deriv.</p>
                 </div>
@@ -216,51 +235,63 @@
         </footer>
     </div>
 
-    <!-- ============ MAIN APP (hidden until login) ============ -->
+    <!-- ============ MAIN APP ============ -->
     <div id="appShell" class="app-shell hidden">
-        <!-- App Header -->
         <header class="app-hdr">
             <div class="app-hdr-l">
                 <a class="logo" href="#" id="appLogo">
                     <div class="logo-box"><i class="fas fa-chart-line"></i></div>
                     <span class="logo-txt">IT 666 Trader</span>
                 </a>
-            <nav class="app-nav" id="appNav">
-                <a class="anav" data-page="dashboard"><i class="fas fa-th-large"></i> Dashboard</a>
-                <a class="anav active" data-page="trading"><i class="fas fa-exchange-alt"></i> Trade</a>
-                <a class="anav" data-page="bot"><i class="fas fa-robot"></i> Bot</a>
-                <a class="anav" data-page="reports"><i class="fas fa-chart-pie"></i> Reports</a>
-                <a class="anav" data-page="cashier"><i class="fas fa-wallet"></i> Cashier</a>
-            </nav>
+
+                <nav class="app-nav" id="appNav">
+                    <a class="anav" data-page="dashboard"><i class="fas fa-th-large"></i> Dashboard</a>
+                    <a class="anav active" data-page="trading"><i class="fas fa-exchange-alt"></i> Trade</a>
+                    <a class="anav" data-page="bot"><i class="fas fa-robot"></i> Bot</a>
+                    <a class="anav" data-page="reports"><i class="fas fa-chart-pie"></i> Reports</a>
+                    <a class="anav" data-page="cashier"><i class="fas fa-wallet"></i> Cashier</a>
+                </nav>
             </div>
+
             <div class="app-hdr-r">
                 <div class="acc-pill" id="accPill">
                     <span class="ap-tag" id="apTag">Demo</span>
                     <span class="ap-bal" id="apBal">0.00 USD</span>
                     <i class="fas fa-chevron-down ap-arr"></i>
                 </div>
+
                 <div class="acc-dd" id="accDD"></div>
-                <button class="hbtn" id="appLogout" aria-label="Logout" title="Logout">
+
+                <button class="hbtn" id="appLogout" aria-label="Logout" title="Logout" type="button">
                     <i class="fas fa-sign-out-alt"></i>
                 </button>
             </div>
-            <button class="mob-btn" id="appMobBtn" aria-label="Menu"><i class="fas fa-bars"></i></button>
+
+            <button class="mob-btn" id="appMobBtn" aria-label="Menu" type="button">
+                <i class="fas fa-bars"></i>
+            </button>
         </header>
 
-        <!-- Mobile Nav -->
         <div class="mob-overlay" id="mobOverlay">
             <div class="mob-panel">
-                <div class="mob-top"><span>Menu</span><button id="mobClose" aria-label="Close"><i
-                            class="fas fa-times"></i></button></div>
-        <a class="mnav active" data-page="dashboard"><i class="fas fa-th-large"></i> Dashboard</a>
-        <a class="mnav" data-page="trading"><i class="fas fa-exchange-alt"></i> Trade</a>
-        <a class="mnav" data-page="bot"><i class="fas fa-robot"></i> Bot</a>
-        <a class="mnav" data-page="reports"><i class="fas fa-chart-pie"></i> Reports</a>
-        <a class="mnav" data-page="cashier"><i class="fas fa-wallet"></i> Cashier</a>
+                <div class="mob-top">
+                    <span>Menu</span>
+                    <button id="mobClose" aria-label="Close" type="button">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+
+                <a class="mnav active" data-page="dashboard"><i class="fas fa-th-large"></i> Dashboard</a>
+                <a class="mnav" data-page="trading"><i class="fas fa-exchange-alt"></i> Trade</a>
+                <a class="mnav" data-page="bot"><i class="fas fa-robot"></i> Bot</a>
+                <a class="mnav" data-page="reports"><i class="fas fa-chart-pie"></i> Reports</a>
+                <a class="mnav" data-page="cashier"><i class="fas fa-wallet"></i> Cashier</a>
+
+                <div class="mob-div"></div>
+                <a class="mnav" id="mobLogout"><i class="fas fa-sign-out-alt"></i> Log out</a>
             </div>
         </div>
 
-        <!-- Pages Container -->
         <div class="app-body">
             <!-- DASHBOARD -->
             <div class="pg active" id="pgDashboard">
@@ -268,51 +299,69 @@
                     <h1>Dashboard</h1>
                     <p>Your trading overview</p>
                 </div>
+
                 <div class="dash">
                     <div class="dcard">
                         <div class="dcard-i"><i class="fas fa-wallet"></i></div>
-                        <div><span class="dcard-l">Balance</span><span class="dcard-v" id="dBal">$0.00</span></div>
+                        <div>
+                            <span class="dcard-l">Balance</span>
+                            <span class="dcard-v" id="dBal">$0.00</span>
+                        </div>
                     </div>
+
                     <div class="dcard">
                         <div class="dcard-i g"><i class="fas fa-chart-line"></i></div>
-                        <div><span class="dcard-l">P/L Today</span><span class="dcard-v gn" id="dPnl">+$0.00</span></div>
+                        <div>
+                            <span class="dcard-l">P/L Today</span>
+                            <span class="dcard-v gn" id="dPnl">+$0.00</span>
+                        </div>
                     </div>
+
                     <div class="dcard">
                         <div class="dcard-i b"><i class="fas fa-receipt"></i></div>
-                        <div><span class="dcard-l">Trades</span><span class="dcard-v" id="dTrades">0</span></div>
+                        <div>
+                            <span class="dcard-l">Trades</span>
+                            <span class="dcard-v" id="dTrades">0</span>
+                        </div>
                     </div>
+
                     <div class="dcard">
                         <div class="dcard-i y"><i class="fas fa-spinner"></i></div>
-                        <div><span class="dcard-l">Open</span><span class="dcard-v" id="dOpen">0</span></div>
+                        <div>
+                            <span class="dcard-l">Open</span>
+                            <span class="dcard-v" id="dOpen">0</span>
+                        </div>
                     </div>
-        
+
                     <div class="card c2">
                         <div class="card-h">
                             <h3><i class="fas fa-globe"></i> Market Watch</h3>
-                            <button class="card-act" id="dashTrade" type="button">Trade <i
-                                    class="fas fa-arrow-right"></i></button>
+                            <button class="card-act" id="dashTrade" type="button">
+                                Trade <i class="fas fa-arrow-right"></i>
+                            </button>
                         </div>
                         <div class="mw-hdr"><span>Market</span><span>Price</span><span>Change</span></div>
                         <div id="mwBody"></div>
                     </div>
-        
+
                     <div class="card c2">
                         <div class="card-h">
                             <h3><i class="fas fa-layer-group"></i> Open Positions</h3>
                         </div>
                         <div id="dashPos">
-                            <div class="empty"><i class="fas fa-inbox"></i>
+                            <div class="empty">
+                                <i class="fas fa-inbox"></i>
                                 <p>No open positions</p>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
-        
+
             <!-- TRADING -->
             <div class="pg" id="pgTrading">
                 <div class="trade-backdrop" id="tradeBackdrop"></div>
-        
+
                 <div class="trd-layout trader-foundation">
                     <aside class="trd-side" id="trdSide">
                         <div class="side-top">
@@ -321,21 +370,21 @@
                                 <h3>Market watch</h3>
                             </div>
                         </div>
-        
+
                         <div class="ts-srch">
                             <i class="fas fa-search"></i>
-                            <input type="text" id="mktSearch" placeholder="Search market...">
+                            <input type="text" id="mktSearch" placeholder="Search market..." />
                         </div>
-        
+
                         <div class="ts-tabs" id="tsTabs">
                             <button class="tstab active" data-cat="synthetic" type="button">Synthetic</button>
                             <button class="tstab" data-cat="forex" type="button">Forex</button>
                             <button class="tstab" data-cat="commodities" type="button">Commodities</button>
                         </div>
-        
+
                         <div class="ts-body" id="tsBody"></div>
                     </aside>
-        
+
                     <div class="trd-chart">
                         <div class="tc-toolbar foundation-toolbar">
                             <div class="foundation-left">
@@ -350,7 +399,7 @@
                                     </div>
                                 </div>
                             </div>
-        
+
                             <div class="tc-right">
                                 <div class="tc-grp" id="tfGrp">
                                     <button class="tgb" data-g="60" type="button">1m</button>
@@ -360,7 +409,7 @@
                                     <button class="tgb" data-g="14400" type="button">4H</button>
                                     <button class="tgb" data-g="86400" type="button">1D</button>
                                 </div>
-        
+
                                 <div class="tc-grp chart-type-grp">
                                     <button class="tgb active" id="chCandle" data-chart-type="candle" type="button"
                                         title="Candles">
@@ -375,13 +424,14 @@
                                     <button class="tgb" id="chBar" data-chart-type="bar" type="button" title="Bars">
                                         <i class="fas fa-chart-column"></i>
                                     </button>
-                                    <button class="tgb" id="chBase" data-chart-type="baseline" type="button" title="Baseline">
+                                    <button class="tgb" id="chBase" data-chart-type="baseline" type="button"
+                                        title="Baseline">
                                         <i class="fas fa-wave-square"></i>
                                     </button>
                                 </div>
                             </div>
                         </div>
-        
+
                         <div class="chart-shell">
                             <aside class="draw-rail">
                                 <div class="draw-tools" id="drawTools">
@@ -405,25 +455,25 @@
                                     </button>
                                 </div>
                             </aside>
-        
+
                             <div class="chart-stage">
                                 <div class="tc-box" id="chartBox"></div>
                             </div>
                         </div>
                     </div>
-        
+
                     <aside class="trd-panel foundation-panel" id="trdPanel">
                         <div class="panel-handle"></div>
-        
+
                         <div class="tp-head">
                             <div>
                                 <span class="side-kicker">Trade</span>
                                 <h3>Trade controls</h3>
                             </div>
                         </div>
-        
+
                         <div class="tp-tabs"></div>
-        
+
                         <div class="tp-form">
                             <div class="tpf-sec">
                                 <label class="tpf-lbl"><i class="fas fa-clock"></i> Duration</label>
@@ -434,22 +484,24 @@
                                         <option value="m" selected>Minutes</option>
                                         <option value="h">Hours</option>
                                     </select>
-        
+
                                     <div class="dur-spin">
                                         <button type="button" id="durDn" aria-label="Less">−</button>
-                                        <input type="number" id="durVal" value="5" min="1" aria-label="Duration value">
+                                        <input type="number" id="durVal" value="5" min="1"
+                                            aria-label="Duration value" />
                                         <button type="button" id="durUp" aria-label="More">+</button>
                                     </div>
                                 </div>
                             </div>
-        
+
                             <div class="tpf-sec">
                                 <label class="tpf-lbl"><i class="fas fa-coins"></i> Stake</label>
                                 <div class="stake-row">
                                     <span class="stk-c" id="stkCur">USD</span>
-                                    <input type="number" id="stakeVal" value="10" min="0.35" step="0.01" aria-label="Stake">
+                                    <input type="number" id="stakeVal" value="10" min="0.35" step="0.01"
+                                        aria-label="Stake" />
                                 </div>
-        
+
                                 <div class="qk-row">
                                     <button class="qk" data-v="1" type="button">$1</button>
                                     <button class="qk" data-v="5" type="button">$5</button>
@@ -459,12 +511,12 @@
                                     <button class="qk" data-v="100" type="button">$100</button>
                                 </div>
                             </div>
-        
+
                             <div class="po-card">
                                 <div class="po-r"><span>Payout</span><span class="po-v" id="poVal">--</span></div>
                                 <div class="po-r"><span>Profit</span><span class="po-v gn" id="prVal">--</span></div>
                             </div>
-        
+
                             <div class="act-row">
                                 <button class="actb rise" id="riseBtn" type="button">
                                     <div class="actb-t">
@@ -473,7 +525,7 @@
                                     </div>
                                     <span class="actb-p" id="risePay">--</span>
                                 </button>
-        
+
                                 <button class="actb fall" id="fallBtn" type="button">
                                     <div class="actb-t">
                                         <i class="fas fa-arrow-down"></i>
@@ -483,7 +535,7 @@
                                 </button>
                             </div>
                         </div>
-        
+
                         <div class="tp-contracts">
                             <div class="tpc-h">
                                 <span><i class="fas fa-file-contract"></i> Open contracts</span>
@@ -494,42 +546,47 @@
                     </aside>
                 </div>
             </div>
-        
+
             <!-- BOT -->
-        <div class="pg" id="pgBot"></div>
-        
+            <div class="pg" id="pgBot"></div>
+
             <!-- REPORTS -->
             <div class="pg" id="pgReports">
                 <div class="pg-head">
                     <h1>Reports</h1>
                     <p>Trade history &amp; performance</p>
                 </div>
+
                 <div class="rpt-wrap">
                     <div class="card">
                         <div class="card-h">
                             <h3><i class="fas fa-history"></i> Trade History</h3>
                         </div>
                         <div id="rptBody">
-                            <div class="empty"><i class="fas fa-chart-pie"></i>
-                                <p>No trade history yet</p><span>Complete some trades to see your history</span>
+                            <div class="empty">
+                                <i class="fas fa-chart-pie"></i>
+                                <p>No trade history yet</p>
+                                <span>Complete some trades to see your history</span>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
-        
+
             <!-- CASHIER -->
             <div class="pg" id="pgCashier">
                 <div class="pg-head">
                     <h1>Cashier</h1>
                     <p>Manage your funds</p>
                 </div>
+
                 <div class="cash-wrap">
                     <div class="cash-bal-card">
                         <div class="cbl">Available Balance</div>
                         <div class="cba" id="cashBal">$0.00</div>
                         <div class="cbt" id="cashType">Demo Account</div>
                     </div>
+
                     <div class="cash-grid">
                         <div class="cash-act">
                             <div class="ca-i g"><i class="fas fa-plus-circle"></i></div>
@@ -538,6 +595,7 @@
                             <a class="btn-sm green" href="https://app.deriv.com/cashier/deposit" target="_blank"
                                 rel="noopener noreferrer">Deposit</a>
                         </div>
+
                         <div class="cash-act">
                             <div class="ca-i r"><i class="fas fa-minus-circle"></i></div>
                             <h3>Withdraw</h3>
@@ -545,22 +603,32 @@
                             <a class="btn-sm ghost" href="https://app.deriv.com/cashier/withdrawal" target="_blank"
                                 rel="noopener noreferrer">Withdraw</a>
                         </div>
+
                         <div class="cash-act">
                             <div class="ca-i b"><i class="fas fa-exchange-alt"></i></div>
                             <h3>Transfer</h3>
                             <p>Between accounts</p>
-                            <a class="btn-sm ghost" href="https://app.deriv.com/cashier/account-transfer" target="_blank"
-                                rel="noopener noreferrer">Transfer</a>
+                            <a class="btn-sm ghost" href="https://app.deriv.com/cashier/account-transfer"
+                                target="_blank" rel="noopener noreferrer">Transfer</a>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-        <script defer src="./ws.js"></script>
-        <script defer src="./auth.js"></script>
-        <script defer src="./ui.js"></script>
-        <script defer src="./market.js"></script>
-        <script defer src="./chart.js"></script>
-        <script defer src="./trade.js"></script>
-        <script defer src="./bot.js"></script>
-        <script defer src="./app.js"></script>
+    </div>
+
+    <div class="toast-area" id="toastWrap"></div>
+
+    <script defer
+        src="https://cdn.jsdelivr.net/npm/lightweight-charts@4.1.0/dist/lightweight-charts.standalone.production.js"></script>
+    <script defer src="./ws.js"></script>
+    <script defer src="./auth.js"></script>
+    <script defer src="./ui.js"></script>
+    <script defer src="./market.js"></script>
+    <script defer src="./chart.js"></script>
+    <script defer src="./trade.js"></script>
+    <script defer src="./bot.js"></script>
+    <script defer src="./app.js"></script>
+</body>
+
+</html>
