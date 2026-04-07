@@ -7,8 +7,12 @@
         activePanel: 'summary',
         leftCollapsed: false,
         drag: null,
-        logs: [],
-        transactions: [],
+        wsBound: false,
+        lastActionAt: 0,
+        tickBuffer: [],
+        lastQuoteBySymbol: {},
+        subscribedSymbols: {},
+        activeContracts: {},
         metrics: {
             runs: 0,
             totalStake: 0,
@@ -17,11 +21,27 @@
             lost: 0,
             profit: 0
         },
-        activeContracts: {},
-        subscribedSymbols: {},
-        wsBound: false,
-        lastActionAt: 0,
-        tickBuffer: []
+        logs: [],
+        transactions: [],
+        config: {
+            market: 'synthetic',
+            symbol: 'R_100',
+            tradeType: 'digits',
+            contractType: 'over_under',
+            purchase: 'DIGITUNDER',
+            strategy: 'every_5_ticks',
+            prediction: 5,
+            candle: '1 minute',
+            durationUnit: 't',
+            duration: 1,
+            stake: 100,
+            currency: 'USD',
+            cooldown: 2,
+            bulkPurchase: 'yes',
+            numTrades: 1,
+            maxOpen: 10,
+            restart: 'yes'
+        }
     };
 
     function $(sel, root) {
@@ -32,105 +52,13 @@
         return Array.prototype.slice.call((root || document).querySelectorAll(sel));
     }
 
-    function money(v) {
-        var cur = (window.authAccount && authAccount.currency) ? authAccount.currency : 'USD';
-        return (+v || 0).toFixed(2) + ' ' + cur;
-    }
-
-    function timeNow() {
+    function nowText() {
         return new Date().toLocaleTimeString();
     }
 
-    function getMarketsByGroup(group) {
-        if (typeof MARKETS === 'undefined') {
-            return [{ s: 'R_100', n: 'Volatility 100 Index', d: 2 }];
-        }
-        return MARKETS[group] || [];
-    }
-
-    function fillSelect(el, items, selected) {
-        if (!el) return;
-        el.innerHTML = items.map(function (item) {
-            var sel = item.value === selected ? ' selected' : '';
-            return '<option value="' + item.value + '"' + sel + '>' + item.label + '</option>';
-        }).join('');
-    }
-
-    function tradeTypeOptions() {
-        return [
-            { value: 'updown', label: 'Up/Down' },
-            { value: 'digits', label: 'Digits' }
-        ];
-    }
-
-    function contractTypeOptions(type) {
-        if (type === 'digits') {
-            return [
-                { value: 'over_under', label: 'Over/Under' },
-                { value: 'even_odd', label: 'Even/Odd' },
-                { value: 'matches_differs', label: 'Matches/Differs' }
-            ];
-        }
-
-        return [
-            { value: 'rise_fall', label: 'Rise/Fall' },
-            { value: 'higher_lower', label: 'Higher/Lower' }
-        ];
-    }
-
-    function purchaseOptions(contractType) {
-        if (contractType === 'over_under') {
-            return [
-                { value: 'DIGITOVER', label: 'Over' },
-                { value: 'DIGITUNDER', label: 'Under' }
-            ];
-        }
-
-        if (contractType === 'even_odd') {
-            return [
-                { value: 'DIGITEVEN', label: 'Even' },
-                { value: 'DIGITODD', label: 'Odd' }
-            ];
-        }
-
-        if (contractType === 'matches_differs') {
-            return [
-                { value: 'DIGITMATCH', label: 'Matches' },
-                { value: 'DIGITDIFF', label: 'Differs' }
-            ];
-        }
-
-        if (contractType === 'higher_lower') {
-            return [
-                { value: 'CALL', label: 'Higher' },
-                { value: 'PUT', label: 'Lower' }
-            ];
-        }
-
-        return [
-            { value: 'CALL', label: 'Rise' },
-            { value: 'PUT', label: 'Fall' }
-        ];
-    }
-
-    function strategyOptions(contractType) {
-        if (contractType === 'rise_fall' || contractType === 'higher_lower') {
-            return [
-                { value: 'every_5_ticks', label: 'Every 5 ticks' },
-                { value: 'momentum_3', label: 'Momentum (3 ticks)' },
-                { value: 'reversal_3', label: 'Reversal (3 ticks)' }
-            ];
-        }
-
-        return [
-            { value: 'every_5_ticks', label: 'Every 5 ticks' },
-            { value: 'digit_equals_prediction', label: 'Digit equals prediction' },
-            { value: 'digit_not_prediction', label: 'Digit differs from prediction' }
-        ];
-    }
-
-    function contractNeedsPrediction(contractType) {
-        return contractType === 'over_under' || contractType === 'matches_differs';
+    function money(v) {
+        var cur = (window.authAccount && authAccount.currency) ? authAccount.currency : 'USD';
+        return (+v || 0).toFixed(2) + ' ' + cur;
     }
 
     function ensureStyles() {
@@ -199,7 +127,7 @@
 
             .bbs-run {
                 height: 34px;
-                min-width: 92px;
+                min-width: 96px;
                 padding: 0 16px;
                 border: 0;
                 border-radius: 6px;
@@ -257,11 +185,11 @@
                 flex: 1;
                 min-height: 0;
                 display: grid;
-                grid-template-columns: 190px minmax(0, 1fr) 310px;
+                grid-template-columns: 190px minmax(0, 1fr) 320px;
             }
 
             .botbuilder-body.left-collapsed {
-                grid-template-columns: 46px minmax(0, 1fr) 310px;
+                grid-template-columns: 46px minmax(0, 1fr) 320px;
             }
 
             .bbs-left {
@@ -592,6 +520,7 @@
                 flex: 1;
                 min-height: 0;
                 padding: 14px;
+                overflow: hidden;
             }
 
             .bbs-panel.active {
@@ -641,27 +570,9 @@
                 color: #ff444f;
             }
 
-            .bbs-summary-grid {
-                display: grid;
-                grid-template-columns: 1fr 1fr;
-                gap: 10px;
-            }
-
-            .bbs-metric span {
-                display: block;
-                font-size: 10px;
-                color: #6e7575;
-                margin-bottom: 4px;
-            }
-
-            .bbs-metric strong {
-                font-size: 13px;
-                color: #fff;
-            }
-
             .bbs-log-wrap {
                 flex: 1;
-                min-height: 220px;
+                min-height: 120px;
                 border: 1px solid #2a2d2d;
                 background: #111214;
                 border-radius: 10px;
@@ -694,6 +605,51 @@
 
             .bbs-log-line.muted {
                 border-left-color: #6e7575;
+            }
+
+            .bbs-transaction-table {
+                width: 100%;
+                border-collapse: collapse;
+                font-size: 11px;
+            }
+
+            .bbs-transaction-table th,
+            .bbs-transaction-table td {
+                padding: 8px 4px;
+                border-bottom: 1px solid #262a2c;
+                text-align: left;
+                vertical-align: top;
+            }
+
+            .bbs-transaction-table th {
+                color: #6e7575;
+                font-weight: 700;
+                font-size: 10px;
+                text-transform: uppercase;
+            }
+
+            .bbs-performance-footer {
+                border-top: 1px solid #262a2c;
+                padding: 14px;
+                background: #111214;
+            }
+
+            .bbs-performance-grid {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 10px;
+            }
+
+            .bbs-perf-item span {
+                display: block;
+                font-size: 10px;
+                color: #6e7575;
+                margin-bottom: 4px;
+            }
+
+            .bbs-perf-item strong {
+                font-size: 12px;
+                color: #fff;
             }
 
             @media (max-width: 1100px) {
@@ -779,10 +735,9 @@
                             </div>
 
                             <div class="bbs-menu-list">
-                                <button class="bbs-menu-item active" type="button">Logics 🔥</button>
-                                <button class="bbs-menu-item" type="button">Trade parameters</button>
+                                <button class="bbs-menu-item active" type="button">Trade parameters</button>
                                 <button class="bbs-menu-item" type="button">Purchase conditions</button>
-                                <button class="bbs-menu-item" type="button">Sell conditions (optional)</button>
+                                <button class="bbs-menu-item" type="button">Sell conditions</button>
                                 <button class="bbs-menu-item" type="button">Restart trading conditions</button>
                                 <button class="bbs-menu-item" type="button">Analysis</button>
                                 <button class="bbs-menu-item" type="button">Utility</button>
@@ -817,7 +772,7 @@
                                     <div class="bbs-row-grid">
                                         <div class="bbs-field">
                                             <label>Market</label>
-                                            <select id="botMarketGroup"></select>
+                                            <select id="botMarket"></select>
                                         </div>
                                         <div class="bbs-field">
                                             <label>Symbol</label>
@@ -878,7 +833,7 @@
                                     <div class="bbs-row-grid">
                                         <div class="bbs-field full">
                                             <label>Cooldown (seconds)</label>
-                                            <input id="botCooldown" type="number" min="1" value="2">
+                                            <input id="botCooldown" type="number" min="0" value="0">
                                         </div>
                                     </div>
 
@@ -989,30 +944,31 @@
                                     </div>
                                 </div>
 
-                                <div class="bbs-summary-card">
-                                    <div class="bbs-summary-title">Performance</div>
-                                    <div class="bbs-summary-grid">
-                                        <div class="bbs-metric"><span>Runs</span><strong id="bbsRuns">0</strong></div>
-                                        <div class="bbs-metric"><span>Total stake</span><strong id="bbsStakeTotal">0.00</strong></div>
-                                        <div class="bbs-metric"><span>Total payout</span><strong id="bbsPayoutTotal">0.00</strong></div>
-                                        <div class="bbs-metric"><span>Won</span><strong id="bbsWon">0</strong></div>
-                                        <div class="bbs-metric"><span>Lost</span><strong id="bbsLost">0</strong></div>
-                                        <div class="bbs-metric"><span>P/L</span><strong id="bbsProfitTotal">0.00</strong></div>
+                                <div class="bbs-log-wrap">
+                                    <div class="bbs-log">
+                                        <div class="bbs-log-line muted">When you're ready to trade, hit Run. You'll be able to track your bot's performance here.</div>
                                     </div>
                                 </div>
                             </div>
 
                             <div class="bbs-panel" data-panel-body="transactions">
-                                <div class="bbs-log-wrap">
-                                    <div class="bbs-summary-title">Transactions</div>
-                                    <div class="bbs-log" id="bbsTransactions"></div>
-                                </div>
+                                <div class="bbs-log-wrap" id="bbsTransactionsWrap"></div>
                             </div>
 
                             <div class="bbs-panel" data-panel-body="journal">
                                 <div class="bbs-log-wrap">
-                                    <div class="bbs-summary-title">Journal</div>
                                     <div class="bbs-log" id="bbsLog"></div>
+                                </div>
+                            </div>
+
+                            <div class="bbs-performance-footer">
+                                <div class="bbs-performance-grid">
+                                    <div class="bbs-perf-item"><span>Total stake</span><strong id="bbsStakeTotal">0.00</strong></div>
+                                    <div class="bbs-perf-item"><span>Total payout</span><strong id="bbsPayoutTotal">0.00</strong></div>
+                                    <div class="bbs-perf-item"><span>No. of runs</span><strong id="bbsRuns">0</strong></div>
+                                    <div class="bbs-perf-item"><span>Contracts lost</span><strong id="bbsLost">0</strong></div>
+                                    <div class="bbs-perf-item"><span>Contracts won</span><strong id="bbsWon">0</strong></div>
+                                    <div class="bbs-perf-item"><span>Total profit/loss</span><strong id="bbsProfitTotal">0.00</strong></div>
                                 </div>
                             </div>
                         </div>
@@ -1020,6 +976,99 @@
                 </div>
             </div>
         `;
+    }
+
+    function getMarketsByGroup(group) {
+        if (typeof MARKETS === 'undefined') {
+            return [{ s: 'R_100', n: 'Volatility 100 Index' }];
+        }
+        return MARKETS[group] || [];
+    }
+
+    function fillSelect(el, items, selected) {
+        if (!el) return;
+        el.innerHTML = items.map(function (item) {
+            var sel = item.value === selected ? ' selected' : '';
+            return '<option value="' + item.value + '"' + sel + '>' + item.label + '</option>';
+        }).join('');
+    }
+
+    function tradeTypeOptions() {
+        return [
+            { value: 'updown', label: 'Up/Down' },
+            { value: 'digits', label: 'Digits' }
+        ];
+    }
+
+    function contractTypeOptions(type) {
+        if (type === 'digits') {
+            return [
+                { value: 'over_under', label: 'Over/Under' },
+                { value: 'even_odd', label: 'Even/Odd' },
+                { value: 'matches_differs', label: 'Matches/Differs' }
+            ];
+        }
+
+        return [
+            { value: 'rise_fall', label: 'Rise/Fall' },
+            { value: 'higher_lower', label: 'Higher/Lower' }
+        ];
+    }
+
+    function purchaseOptions(contractType) {
+        if (contractType === 'over_under') {
+            return [
+                { value: 'DIGITOVER', label: 'Over' },
+                { value: 'DIGITUNDER', label: 'Under' }
+            ];
+        }
+
+        if (contractType === 'even_odd') {
+            return [
+                { value: 'DIGITEVEN', label: 'Even' },
+                { value: 'DIGITODD', label: 'Odd' }
+            ];
+        }
+
+        if (contractType === 'matches_differs') {
+            return [
+                { value: 'DIGITMATCH', label: 'Matches' },
+                { value: 'DIGITDIFF', label: 'Differs' }
+            ];
+        }
+
+        if (contractType === 'higher_lower') {
+            return [
+                { value: 'CALL', label: 'Higher' },
+                { value: 'PUT', label: 'Lower' }
+            ];
+        }
+
+        return [
+            { value: 'CALL', label: 'Rise' },
+            { value: 'PUT', label: 'Fall' }
+        ];
+    }
+
+    function strategyOptions(contractType) {
+        if (contractType === 'rise_fall' || contractType === 'higher_lower') {
+            return [
+                { value: 'every_5_ticks', label: 'Every 5 ticks' },
+                { value: 'momentum_3', label: 'Momentum (3 ticks)' },
+                { value: 'reversal_3', label: 'Reversal (3 ticks)' }
+            ];
+        }
+
+        return [
+            { value: 'manual_entry', label: 'Manual entry' },
+            { value: 'every_5_ticks', label: 'Every 5 ticks' },
+            { value: 'digit_equals_prediction', label: 'Digit equals prediction' },
+            { value: 'digit_not_prediction', label: 'Digit differs from prediction' }
+        ];
+    }
+
+    function contractNeedsPrediction(contractType) {
+        return contractType === 'over_under' || contractType === 'matches_differs';
     }
 
     function renderTabs() {
@@ -1037,16 +1086,13 @@
             text: '[' + timeNow() + '] ' + msg,
             kind: kind || 'muted'
         });
-        botState.logs = botState.logs.slice(0, 100);
+        botState.logs = botState.logs.slice(0, 120);
         renderJournal();
     }
 
-    function pushTransaction(msg, kind) {
-        botState.transactions.unshift({
-            text: '[' + timeNow() + '] ' + msg,
-            kind: kind || 'muted'
-        });
-        botState.transactions = botState.transactions.slice(0, 100);
+    function pushTransaction(entry) {
+        botState.transactions.unshift(entry);
+        botState.transactions = botState.transactions.slice(0, 120);
         renderTransactions();
     }
 
@@ -1062,30 +1108,53 @@
     }
 
     function renderTransactions() {
-        var log = $('#bbsTransactions');
-        if (!log) return;
+        var wrap = $('#bbsTransactionsWrap');
+        if (!wrap) return;
 
-        log.innerHTML = botState.transactions.length
-            ? botState.transactions.map(function (l) {
-                return '<div class="bbs-log-line ' + l.kind + '">' + l.text + '</div>';
-            }).join('')
-            : '<div class="bbs-log-line muted">No transactions yet.</div>';
+        if (!botState.transactions.length) {
+            wrap.innerHTML = '<div class="bbs-log-line muted">No transactions yet.</div>';
+            return;
+        }
+
+        wrap.innerHTML =
+            '<table class="bbs-transaction-table">' +
+            '   <thead>' +
+            '       <tr>' +
+            '           <th>Type</th>' +
+            '           <th>Entry/Exit spot</th>' +
+            '           <th>Buy price and P/L</th>' +
+            '       </tr>' +
+            '   </thead>' +
+            '   <tbody>' +
+            botState.transactions.map(function (t) {
+                return '' +
+                    '<tr>' +
+                    '   <td>' + t.type + '</td>' +
+                    '   <td>' + (t.entry || '-') + '<br>' + (t.exit || '-') + '</td>' +
+                    '   <td>' + money(t.buyPrice || 0) + '<br>' +
+                    '       <span style="color:' + ((+t.profit || 0) >= 0 ? '#18bca0' : '#ff444f') + '">' + money(t.profit || 0) + '</span>' +
+                    '   </td>' +
+                    '</tr>';
+            }).join('') +
+            '   </tbody>' +
+            '</table>';
     }
 
     function readConfig() {
         return {
-            market: $('#botMarketGroup') ? $('#botMarketGroup').value : 'synthetic',
+            market: $('#botMarket') ? $('#botMarket').value : 'synthetic',
             symbol: $('#botSymbol') ? $('#botSymbol').value : 'R_100',
             tradeType: $('#botTradeType') ? $('#botTradeType').value : 'digits',
             contractType: $('#botContractType') ? $('#botContractType').value : 'over_under',
             purchase: $('#botPurchase') ? $('#botPurchase').value : 'DIGITUNDER',
-            strategy: $('#botStrategy') ? $('#botStrategy').value : 'every_5_ticks',
+            strategy: $('#botStrategy') ? $('#botStrategy').value : 'manual_entry',
             prediction: $('#botPrediction') ? (+$('#botPrediction').value || 5) : 5,
-            durationUnit: $('#botDurationUnit') ? $('#botDurationUnit').value : 'm',
+            candle: $('#botCandle') ? $('#botCandle').value : '1 minute',
+            durationUnit: $('#botDurationUnit') ? $('#botDurationUnit').value : 't',
             duration: $('#botDuration') ? (+$('#botDuration').value || 1) : 1,
             stake: $('#botStake') ? (+$('#botStake').value || 100) : 100,
             currency: $('#botCurrency') ? $('#botCurrency').value : ((window.authAccount && authAccount.currency) ? authAccount.currency : 'USD'),
-            cooldown: ($('#botCooldown') ? (+$('#botCooldown').value || 2) : 2) * 1000,
+            cooldown: ($('#botCooldown') ? (+$('#botCooldown').value || 0) : 0) * 1000,
             bulkPurchase: $('#botBulkPurchase') ? $('#botBulkPurchase').value : 'yes',
             numTrades: $('#botNumTrades') ? (+$('#botNumTrades').value || 1) : 1,
             maxOpen: $('#botMaxOpen') ? (+$('#botMaxOpen').value || 10) : 10,
@@ -1144,7 +1213,7 @@
     }
 
     function fillControls() {
-        var marketEl = $('#botMarketGroup');
+        var marketEl = $('#botMarket');
         var symbolEl = $('#botSymbol');
         var tradeTypeEl = $('#botTradeType');
         var contractEl = $('#botContractType');
@@ -1157,20 +1226,17 @@
             { value: 'synthetic', label: 'Synthetic' },
             { value: 'forex', label: 'Forex' },
             { value: 'commodities', label: 'Commodities' }
-        ], marketEl && marketEl.value ? marketEl.value : 'synthetic');
+        ], botState.config.market);
 
-        fillSelect(tradeTypeEl, tradeTypeOptions(), tradeTypeEl && tradeTypeEl.value ? tradeTypeEl.value : 'digits');
+        fillSelect(tradeTypeEl, tradeTypeOptions(), botState.config.tradeType);
+        fillSelect(contractEl, contractTypeOptions(tradeTypeEl.value), botState.config.contractType);
+        fillSelect(purchaseEl, purchaseOptions(contractEl.value), botState.config.purchase);
+        fillSelect(strategyEl, strategyOptions(contractEl.value), botState.config.strategy);
 
-        fillSelect(contractEl, contractTypeOptions(tradeTypeEl.value), contractEl && contractEl.value ? contractEl.value : contractTypeOptions(tradeTypeEl.value)[0].value);
-
-        fillSelect(purchaseEl, purchaseOptions(contractEl.value), purchaseEl && purchaseEl.value ? purchaseEl.value : purchaseOptions(contractEl.value)[0].value);
-
-        fillSelect(strategyEl, strategyOptions(contractEl.value), strategyEl && strategyEl.value ? strategyEl.value : strategyOptions(contractEl.value)[0].value);
-
-        var marketItems = getMarketsByGroup(marketEl.value);
-        fillSelect(symbolEl, marketItems.map(function (m) {
+        var items = getMarketsByGroup(marketEl.value);
+        fillSelect(symbolEl, items.map(function (m) {
             return { value: m.s, label: m.n };
-        }), symbolEl && symbolEl.value ? symbolEl.value : (marketItems[0] ? marketItems[0].s : 'R_100'));
+        }), botState.config.symbol);
 
         if (predictionRow) {
             predictionRow.style.display = contractNeedsPrediction(contractEl.value) ? '' : 'none';
@@ -1180,7 +1246,13 @@
             currencyEl.value = (window.authAccount && authAccount.currency) ? authAccount.currency : 'USD';
         }
 
+        syncConfigFromDom();
         updateSummary();
+    }
+
+    function syncConfigFromDom() {
+        var conf = readConfig();
+        botState.config = Object.assign({}, botState.config, conf);
     }
 
     function placeBlocks() {
@@ -1253,6 +1325,8 @@
     }
 
     function shouldTrigger(conf, quote) {
+        if (conf.strategy === 'manual_entry') return false;
+
         botState.tickBuffer.push(+quote);
         if (botState.tickBuffer.length > 10) botState.tickBuffer.shift();
 
@@ -1325,64 +1399,83 @@
         return true;
     }
 
-    function executeTrade(conf) {
+    function openSingleTrade(conf) {
+        return wsSend(buildProposalReq(conf))
+            .then(function (proposalRes) {
+                return wsSend({
+                    buy: proposalRes.proposal.id,
+                    price: proposalRes.proposal.ask_price
+                }).then(function (buyRes) {
+                    return {
+                        proposal: proposalRes.proposal,
+                        buy: buyRes.buy
+                    };
+                });
+            })
+            .then(function (res) {
+                if (!res || !res.buy) return null;
+
+                var id = res.buy.contract_id;
+                var entrySpot = botState.lastQuoteBySymbol[conf.symbol] != null
+                    ? botState.lastQuoteBySymbol[conf.symbol]
+                    : '-';
+
+                botState.activeContracts[id] = {
+                    symbol: conf.symbol,
+                    type: conf.purchase,
+                    buyPrice: +res.buy.buy_price || conf.stake
+                };
+
+                botState.metrics.runs += 1;
+                botState.metrics.totalStake += (+res.buy.buy_price || conf.stake || 0);
+                botState.metrics.totalPayout += (+res.proposal.payout || 0);
+
+                pushTransaction({
+                    id: id,
+                    type: conf.purchase,
+                    entry: entrySpot,
+                    exit: '-',
+                    buyPrice: +res.buy.buy_price || conf.stake,
+                    profit: 0
+                });
+
+                pushJournal('Opened #' + id + ' on ' + conf.symbol + ' (' + conf.purchase + ')', 'ok');
+
+                if (window.wsRaw) {
+                    wsRaw({
+                        proposal_open_contract: 1,
+                        contract_id: id,
+                        subscribe: 1
+                    });
+                }
+
+                updateSummary();
+                return id;
+            });
+    }
+
+    function executeTrade(conf, reason) {
         if (!canTrade(conf)) return;
 
-        var tradesToOpen = conf.bulkPurchase === 'yes' ? Math.max(1, conf.numTrades) : 1;
+        var requested = conf.bulkPurchase === 'yes' ? Math.max(1, conf.numTrades) : 1;
         var allowed = Math.max(0, conf.maxOpen - Object.keys(botState.activeContracts).length);
-        tradesToOpen = Math.min(tradesToOpen, allowed);
-        if (!tradesToOpen) return;
+        var totalToOpen = Math.min(requested, allowed);
+
+        if (!totalToOpen) return;
 
         botState.lastActionAt = Date.now();
 
         var sequence = Promise.resolve();
 
-        for (var i = 0; i < tradesToOpen; i++) {
+        for (var i = 0; i < totalToOpen; i++) {
             sequence = sequence.then(function () {
-                return wsSend(buildProposalReq(conf))
-                    .then(function (proposalRes) {
-                        return wsSend({
-                            buy: proposalRes.proposal.id,
-                            price: proposalRes.proposal.ask_price
-                        }).then(function (buyRes) {
-                            return {
-                                proposal: proposalRes.proposal,
-                                buy: buyRes.buy
-                            };
-                        });
-                    })
-                    .then(function (res) {
-                        if (!res || !res.buy) return;
-
-                        var id = res.buy.contract_id;
-
-                        botState.activeContracts[id] = {
-                            symbol: conf.symbol,
-                            purchase: conf.purchase,
-                            buy_price: +res.buy.buy_price || conf.stake
-                        };
-
-                        botState.metrics.runs += 1;
-                        botState.metrics.totalStake += (+res.buy.buy_price || conf.stake || 0);
-                        botState.metrics.totalPayout += (+res.proposal.payout || 0);
-
-                        if (window.wsRaw) {
-                            wsRaw({
-                                proposal_open_contract: 1,
-                                contract_id: id,
-                                subscribe: 1
-                            });
-                        }
-
-                        pushTransaction('Opened #' + id + ' on ' + conf.symbol + ' (' + conf.purchase + ')', 'ok');
-                        pushJournal('Opened #' + id + ' on ' + conf.symbol, 'ok');
-                        updateSummary();
-                    })
-                    .catch(function (err) {
-                        pushJournal('Trade failed: ' + (err && (err.message || err.code) ? (err.message || err.code) : 'Unknown'), 'err');
-                    });
+                return openSingleTrade(conf);
+            }).catch(function (err) {
+                pushJournal('Trade failed: ' + (err && (err.message || err.code) ? (err.message || err.code) : 'Unknown'), 'err');
             });
         }
+
+        pushJournal('Execution triggered: ' + reason, 'muted');
     }
 
     function ensureSymbolSubscription(symbol) {
@@ -1392,13 +1485,15 @@
         botState.subscribedSymbols[symbol] = true;
 
         wsSubTick(symbol, function (tick) {
+            botState.lastQuoteBySymbol[symbol] = tick.quote;
+
             if (!botState.running) return;
 
             var conf = readConfig();
             if (tick.symbol !== conf.symbol) return;
 
             if (shouldTrigger(conf, tick.quote)) {
-                executeTrade(conf);
+                executeTrade(conf, 'Strategy signal');
             }
         });
     }
@@ -1414,22 +1509,34 @@
                 if (!c.is_sold) return;
 
                 var pnl = +c.profit || 0;
-                delete botState.activeContracts[c.contract_id];
+                var exitSpot = c.exit_tick != null ? c.exit_tick : '-';
 
                 botState.metrics.profit += pnl;
                 if (pnl >= 0) botState.metrics.won += 1;
                 else botState.metrics.lost += 1;
 
-                pushTransaction(
-                    '#' + c.contract_id + ' closed: ' + (pnl >= 0 ? 'WIN ' : 'LOSS ') + money(Math.abs(pnl)),
-                    pnl >= 0 ? 'ok' : 'err'
-                );
+                botState.transactions = botState.transactions.map(function (t) {
+                    if (t.id === c.contract_id) {
+                        return {
+                            id: t.id,
+                            type: t.type,
+                            entry: t.entry,
+                            exit: exitSpot,
+                            buyPrice: t.buyPrice,
+                            profit: pnl
+                        };
+                    }
+                    return t;
+                });
+
+                renderTransactions();
 
                 pushJournal(
                     '#' + c.contract_id + ' closed: ' + (pnl >= 0 ? 'WIN ' : 'LOSS ') + money(Math.abs(pnl)),
                     pnl >= 0 ? 'ok' : 'err'
                 );
 
+                delete botState.activeContracts[c.contract_id];
                 updateSummary();
 
                 if (readConfig().restart === 'no') {
@@ -1453,7 +1560,10 @@
 
         ensureSymbolSubscription(conf.symbol);
         updateSummary();
-        pushJournal('Bot started on ' + conf.symbol + ' with ' + conf.contractType + ' / ' + conf.purchase, 'ok');
+        pushJournal('Bot started on ' + conf.symbol + '.', 'ok');
+
+        /* Immediate execution after Run */
+        executeTrade(conf, 'Manual Run');
     }
 
     function stopBot() {
@@ -1492,39 +1602,43 @@
                 botState.leftCollapsed = !botState.leftCollapsed;
                 body.classList.toggle('left-collapsed', botState.leftCollapsed);
                 var icon = sideToggle.querySelector('i');
-                if (icon) icon.className = botState.leftCollapsed ? 'fas fa-chevron-right' : 'fas fa-chevron-left';
+                if (icon) {
+                    icon.className = botState.leftCollapsed ? 'fas fa-chevron-right' : 'fas fa-chevron-left';
+                }
             };
         }
 
         var quickBtn = $('#bbsQuickBtn');
         if (quickBtn) {
             quickBtn.onclick = function () {
-                var t = $('#botTradeType');
-                var c = $('#botContractType');
-                var p = $('#botPurchase');
-                var s = $('#botStrategy');
-                var pred = $('#botPrediction');
-                var durU = $('#botDurationUnit');
+                var market = $('#botMarket');
+                var tradeType = $('#botTradeType');
+                var contract = $('#botContractType');
+                var purchase = $('#botPurchase');
+                var strategy = $('#botStrategy');
+                var prediction = $('#botPrediction');
+                var durUnit = $('#botDurationUnit');
                 var dur = $('#botDuration');
                 var stake = $('#botStake');
                 var bulk = $('#botBulkPurchase');
-                var n = $('#botNumTrades');
+                var num = $('#botNumTrades');
 
-                if (t) t.value = 'digits';
+                if (market) market.value = 'synthetic';
+                if (tradeType) tradeType.value = 'digits';
                 fillControls();
-                if (c) c.value = 'over_under';
+                if (contract) contract.value = 'over_under';
                 fillControls();
-                if (p) p.value = 'DIGITUNDER';
-                if (s) s.value = 'every_5_ticks';
-                if (pred) pred.value = '5';
-                if (durU) durU.value = 't';
+                if (purchase) purchase.value = 'DIGITUNDER';
+                if (strategy) strategy.value = 'manual_entry';
+                if (prediction) prediction.value = '5';
+                if (durUnit) durUnit.value = 't';
                 if (dur) dur.value = '1';
                 if (stake) stake.value = '100';
                 if (bulk) bulk.value = 'yes';
-                if (n) n.value = '3';
+                if (num) num.value = '3';
 
+                syncConfigFromDom();
                 fillControls();
-                updateSummary();
                 pushJournal('Quick strategy applied.', 'muted');
             };
         }
@@ -1539,13 +1653,20 @@
             };
         });
 
-        ['botMarketGroup', 'botTradeType', 'botContractType', 'botPurchase', 'botStrategy', 'botPrediction', 'botDurationUnit', 'botDuration', 'botStake', 'botCooldown', 'botBulkPurchase', 'botNumTrades', 'botMaxOpen', 'botRestart', 'botSymbol'].forEach(function (id) {
+        $all('.bbs-rtab').forEach(function (btn) {
+            btn.onclick = function () {
+                botState.activePanel = btn.dataset.panel;
+                renderTabs();
+            };
+        });
+
+        ['botMarket', 'botSymbol', 'botTradeType', 'botContractType', 'botPurchase', 'botStrategy', 'botPrediction', 'botCandle', 'botDurationUnit', 'botDuration', 'botStake', 'botCooldown', 'botBulkPurchase', 'botNumTrades', 'botMaxOpen', 'botRestart'].forEach(function (id) {
             var el = document.getElementById(id);
             if (!el) return;
 
             el.onchange = function () {
+                syncConfigFromDom();
                 fillControls();
-                updateSummary();
 
                 if (id === 'botSymbol' && botState.running) {
                     ensureSymbolSubscription(readConfig().symbol);
